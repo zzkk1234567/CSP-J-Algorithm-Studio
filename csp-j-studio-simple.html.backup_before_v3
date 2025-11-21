@@ -1,0 +1,713 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-J Algorithm Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+
+        .algo-card {
+            transition: transform 0.2s;
+        }
+
+        .algo-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #4b5563;
+        }
+
+        /* Code Highlight Styles */
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #d4d4d4;
+            /* VS Code Dark Default Text */
+            white-space: pre;
+        }
+
+                .code-line.active {
+            background-color: #264f78;
+            border-left-color: #e51400;
+        }
+
+        .code-container {
+            background-color: #1e1e1e;
+            /* VS Code Dark Background */
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 500px;
+        }
+
+        /* Syntax Highlighting Simulation */
+        .cpp-keyword {
+            color: #569cd6;
+            font-weight: bold;
+        }
+
+        .cpp-type {
+            color: #4ec9b0;
+        }
+
+        .cpp-comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+
+        .cpp-number {
+            color: #b5cea8;
+        }
+
+        .cpp-string {
+            color: #ce9178;
+        }
+    </style>
+</head>
+
+<body class="p-6">
+
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden min-h-[850px] flex flex-col">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-100 bg-white">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span>🚀</span> CSP-J 算法可视化工作室
+            </h1>
+            <p class="text-gray-500 mt-2">交互式算法学习与演示平台</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex p-4 gap-4 bg-gray-50 border-b border-gray-200">
+            <button onclick="app.switchTab('list')" id="tab-list"
+                class="tab-btn active px-6 py-2 rounded-full font-semibold text-gray-600 hover:bg-gray-200">
+                📚 算法列表
+            </button>
+            <button onclick="app.switchTab('viz')" id="tab-viz"
+                class="tab-btn px-6 py-2 rounded-full font-semibold text-gray-600 hover:bg-gray-200">
+                🎬 可视化演示
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 p-6 relative bg-gray-50">
+
+            <!-- Algorithm List View -->
+            <div id="view-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards will be injected here -->
+            </div>
+
+            <!-- Visualization View -->
+            <div id="view-viz" class="hidden h-full flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="viz-title" class="text-2xl font-bold text-gray-800">算法演示</h2>
+                    <button onclick="app.switchTab('list')"
+                        class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                        <span>←</span> 返回列表
+                    </button>
+                </div>
+
+                <!-- Split Layout: Animation (Left) + Code (Right) -->
+                <div class="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
+
+                    <!-- Left: Animation Area -->
+                    <div class="flex-1 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                        <!-- Controls -->
+                        <div
+                            class="flex flex-wrap gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100 items-center">
+                            <button onclick="viz.start()"
+                                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-bold transition shadow-md flex items-center gap-2">
+                                <span>▶</span> 运行
+                            </button>
+                            <button onclick="viz.reset()"
+                                class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-bold transition flex items-center gap-2">
+                                <span>↺</span> 重置
+                            </button>
+                            <div class="h-8 w-px bg-gray-300 mx-2"></div>
+                            <div id="viz-status" class="text-gray-700 font-mono text-sm flex-1 font-semibold">
+                                准备就绪...
+                            </div>
+                        </div>
+
+                        <!-- Canvas -->
+                        <div id="viz-canvas"
+                            class="flex-1 flex items-end justify-center gap-3 min-h-[400px] pb-12 relative border-t border-gray-100 pt-4">
+                            <!-- Bars/Elements will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Code Display -->
+                    <div class="w-full lg:w-1/3 flex flex-col">
+                        <div
+                            class="bg-gray-800 text-gray-200 px-4 py-2 rounded-t-xl font-mono text-sm font-bold flex justify-between items-center">
+                            <span>C++ Source Code</span>
+                            <span class="text-xs text-gray-400">main.cpp</span>
+                        </div>
+                        <div id="code-display"
+                            class="code-container p-4 flex-1 rounded-b-xl rounded-t-none shadow-inner font-mono text-sm overflow-y-auto">
+                            <!-- Code lines will be injected here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer / Version Info -->
+    <div class="max-w-7xl mx-auto mt-6 text-center text-gray-500 text-sm pb-8">
+        <p>
+            <span class="font-semibold">CSP-J Studio</span>
+            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded ml-2">v2.1.1</span>
+            <span class="mx-2">|</span>
+            Last Updated: 2025-11-21
+            <span class="mx-2">|</span>
+            <a href="https://github.com/zzkk1234567/CSP-J-Algorithm-Studio" target="_blank"
+                class="hover:text-blue-600 underline transition">
+                View on GitHub 🐙
+            </a>
+        </p>
+    </div>
+
+    <script>
+        // --- Visualization Engine ---
+        class VisualizerEngine {
+            constructor(canvasId, statusId, codeId) {
+                this.canvas = document.getElementById(canvasId);
+                this.status = document.getElementById(statusId);
+                this.codeDisplay = document.getElementById(codeId);
+                this.data = [];
+                this.delay = 800; // Slower for better visibility
+                this.isRunning = false;
+                this.abortController = null;
+            }
+
+            log(msg) {
+                this.status.innerHTML = msg;
+            }
+
+            async wait() {
+                return new Promise(resolve => {
+                    this.abortController = { resolve };
+                    setTimeout(resolve, this.delay);
+                });
+            }
+
+            stop() {
+                this.isRunning = false;
+                // No complex abort logic needed for this simple demo, just flag check
+            }
+
+            // Highlight specific line in code display (Fixed: no page jump)
+            highlightCode(lineIndex) {
+                const lines = this.codeDisplay.querySelectorAll('.code-line');
+                lines.forEach((line, idx) => {
+                    if (idx === lineIndex) {
+                        line.classList.add('active');
+                        
+                        // Manual scroll to prevent page viewport jump
+                        const container = this.codeDisplay;
+                        const lineTop = line.offsetTop;
+                        const lineHeight = line.offsetHeight;
+                        const containerHeight = container.clientHeight;
+                        const scrollTop = container.scrollTop;
+                        
+                        // Calculate if line is out of visible area
+                        const lineBottom = lineTop + lineHeight;
+                        const visibleTop = scrollTop;
+                        const visibleBottom = scrollTop + containerHeight;
+                        
+                        // Only scroll if line is not fully visible
+                        if (lineTop < visibleTop || lineBottom > visibleBottom) {
+                            // Scroll to center the line in container
+                            const targetScroll = lineTop - (containerHeight / 2) + (lineHeight / 2);
+                            container.scrollTop = targetScroll;
+                        }
+                    } else {
+                        line.classList.remove('active');
+                    }
+                });
+            }
+
+            renderCode(codeStr) {
+                // Simple syntax highlighting parser
+                const lines = codeStr.split('\n');
+                this.codeDisplay.innerHTML = lines.map((line, idx) => {
+                    // Basic coloring replacements
+                    let formatted = line
+                        .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        .replace(/\/\/.*/g, match => `<span class="cpp-comment">${match}</span>`)
+                        .replace(/\b(int|void|bool|double|float|char|long)\b/g, '<span class="cpp-type">$1</span>')
+                        .replace(/\b(if|else|for|while|return|break|continue|using|namespace|include)\b/g, '<span class="cpp-keyword">$1</span>')
+                        .replace(/\b(\d+)\b/g, '<span class="cpp-number">$1</span>');
+
+                    return `<div class="code-line" id="line-${idx}">${formatted}</div>`;
+                }).join('');
+            }
+
+            renderBars(arr, activeIndices = [], sortedIndices = []) {
+                this.canvas.innerHTML = '';
+                const max = Math.max(...arr, 1);
+
+                arr.forEach((val, idx) => {
+                    const bar = document.createElement('div');
+                    const height = (val / max) * 100;
+
+                    let colorClass = 'bg-blue-500';
+                    if (activeIndices.includes(idx)) colorClass = 'bg-red-500 scale-110 shadow-lg z-10'; // Highlight active
+                    else if (sortedIndices.includes(idx)) colorClass = 'bg-green-500 opacity-80'; // Sorted
+
+                    bar.className = `w-12 transition-all duration-500 rounded-t-lg relative ${colorClass} flex justify-center`;
+                    bar.style.height = `${height}%`;
+
+                    const label = document.createElement('div');
+                    label.className = 'bar-label';
+                    label.innerText = val;
+
+                    bar.appendChild(label);
+                    this.canvas.appendChild(bar);
+                });
+            }
+
+            renderBoxes(arr, activeIdx = -1, foundIdx = -1, range = { start: -1, end: -1 }) {
+                this.canvas.innerHTML = '';
+                this.canvas.className = "flex-1 flex items-center justify-center gap-3 min-h-[400px] pb-8 relative flex-wrap content-center";
+
+                arr.forEach((val, idx) => {
+                    const box = document.createElement('div');
+                    let bg = 'bg-white border-2 border-gray-300 text-gray-700';
+
+                    // Dim out of range elements for binary search
+                    if (range.start !== -1 && (idx < range.start || idx > range.end)) {
+                        bg = 'bg-gray-100 border-gray-200 text-gray-300';
+                    }
+
+                    if (idx === foundIdx) bg = 'bg-green-500 border-green-600 text-white shadow-lg scale-110 z-10';
+                    else if (idx === activeIdx) bg = 'bg-red-500 border-red-600 text-white shadow-lg scale-110 z-10';
+
+                    box.className = `${bg} w-14 h-14 flex items-center justify-center text-xl font-bold rounded-lg transition-all duration-500 relative`;
+                    box.innerText = val;
+
+                    const idxLabel = document.createElement('div');
+                    idxLabel.className = 'absolute -bottom-6 text-xs text-gray-400 font-mono';
+                    idxLabel.innerText = idx;
+                    box.appendChild(idxLabel);
+
+                    this.canvas.appendChild(box);
+                });
+            }
+        }
+
+        // --- Application Logic ---
+        const app = {
+            currentAlgo: null,
+
+            algorithms: [
+                {
+                    id: 'bubble',
+                    name: '冒泡排序 (Bubble Sort)',
+                    type: 'sort',
+                    desc: '通过重复交换相邻的逆序元素来排序。时间复杂度 O(n²)。',
+                    code: `void bubbleSort(int arr[], int n) {
+    // 外层循环控制排序轮数
+    for (int i = 0; i < n - 1; i++) {
+        // 内层循环进行相邻元素比较
+        for (int j = 0; j < n - i - 1; j++) {
+            // 如果前一个元素大于后一个
+            if (arr[j] > arr[j + 1]) {
+                // 交换两个元素
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+        // 第 i 轮结束后，最大的元素已归位
+    }
+}`
+                },
+                {
+                    id: 'selection',
+                    name: '选择排序 (Selection Sort)',
+                    type: 'sort',
+                    desc: '每次从未排序部分选择最小元素放到已排序部分末尾。时间复杂度 O(n²)。',
+                    code: `void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        // 假设当前位置 i 是最小值索引
+        int min_idx = i;
+        
+        // 在未排序部分寻找真正的最小值
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[min_idx]) {
+                min_idx = j;
+            }
+        }
+        
+        // 将找到的最小值交换到位置 i
+        swap(arr[min_idx], arr[i]);
+    }
+}`
+                },
+                {
+                    id: 'insertion',
+                    name: '插入排序 (Insertion Sort)',
+                    type: 'sort',
+                    desc: '构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。',
+                    code: `void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i]; // 待插入元素
+        int j = i - 1;
+        
+        // 将大于 key 的元素向后移动
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        // 插入 key 到正确位置
+        arr[j + 1] = key;
+    }
+}`
+                },
+                {
+                    id: 'linear',
+                    name: '线性查找 (Linear Search)',
+                    type: 'search',
+                    desc: '从头到尾依次查找目标元素。时间复杂度 O(n)。',
+                    code: `int linearSearch(int arr[], int n, int x) {
+    // 遍历数组每个元素
+    for (int i = 0; i < n; i++) {
+        // 检查当前元素是否等于目标值
+        if (arr[i] == x) {
+            return i; // 找到目标，返回索引
+        }
+    }
+    return -1; // 未找到
+}`
+                },
+                {
+                    id: 'binary',
+                    name: '二分查找 (Binary Search)',
+                    type: 'search',
+                    desc: '在有序数组中通过折半查找目标元素。时间复杂度 O(log n)。',
+                    code: `int binarySearch(int arr[], int l, int r, int x) {
+    while (l <= r) {
+        // 计算中间索引
+        int m = l + (r - l) / 2;
+        
+        // 检查中间元素是否是目标值
+        if (arr[m] == x) 
+            return m;
+            
+        // 如果目标值更大，忽略左半部分
+        if (arr[m] < x) 
+            l = m + 1;
+            
+        // 如果目标值更小，忽略右半部分
+        else 
+            r = m - 1;
+    }
+    return -1; // 未找到
+}`
+                }
+            ],
+
+            init() {
+                this.renderList();
+                window.viz = new VisualizerEngine('viz-canvas', 'viz-status', 'code-display');
+            },
+
+            renderList() {
+                const container = document.getElementById('view-list');
+                container.innerHTML = this.algorithms.map(algo => `
+                    <div onclick="app.selectAlgo('${algo.id}')" class="algo-card bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md cursor-pointer group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 rounded-lg ${algo.type === 'sort' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}">
+                                ${algo.type === 'sort' ? '📊' : '🔍'}
+                            </div>
+                            <span class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-500 uppercase">${algo.type}</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition">${algo.name}</h3>
+                        <p class="text-gray-500 text-sm">${algo.desc}</p>
+                    </div>
+                `).join('');
+            },
+
+            switchTab(tab) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+
+                document.getElementById('view-list').classList.add('hidden');
+                document.getElementById('view-viz').classList.add('hidden');
+                document.getElementById(`view-${tab}`).classList.remove('hidden');
+            },
+
+            selectAlgo(id) {
+                this.currentAlgo = this.algorithms.find(a => a.id === id);
+                document.getElementById('viz-title').innerText = this.currentAlgo.name;
+                this.switchTab('viz');
+
+                // Render Code
+                viz.renderCode(this.currentAlgo.code);
+                viz.highlightCode(-1); // Clear highlight
+
+                // Setup initial state based on algo type
+                if (this.currentAlgo.type === 'sort') {
+                    viz.data = [64, 34, 25, 12, 22, 11, 90];
+                    viz.renderBars(viz.data);
+                    viz.mode = 'sort';
+                } else {
+                    viz.data = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+                    viz.target = 40;
+                    viz.renderBoxes(viz.data);
+                    viz.mode = 'search';
+                }
+                viz.log(`已加载 ${this.currentAlgo.name}，点击运行开始演示`);
+
+                // Attach specific start function
+                viz.start = async () => {
+                    if (viz.isRunning) return;
+                    viz.isRunning = true;
+
+                    if (id === 'bubble') await this.runBubbleSort();
+                    else if (id === 'selection') await this.runSelectionSort();
+                    else if (id === 'insertion') await this.runInsertionSort();
+                    else if (id === 'linear') await this.runLinearSearch();
+                    else if (id === 'binary') await this.runBinarySearch();
+
+                    viz.isRunning = false;
+                };
+
+                viz.reset = () => {
+                    viz.isRunning = false;
+                    this.selectAlgo(id); // Reload
+                };
+            },
+
+            // --- Algorithms Implementation with Code Sync ---
+
+            async runBubbleSort() {
+                let arr = [...viz.data];
+                let n = arr.length;
+
+                viz.highlightCode(0); // void bubbleSort...
+                await viz.wait();
+
+                for (let i = 0; i < n - 1; i++) {
+                    viz.highlightCode(2); // for i
+                    await viz.wait();
+
+                    for (let j = 0; j < n - i - 1; j++) {
+                        if (!viz.isRunning) return;
+
+                        viz.highlightCode(4); // for j
+                        viz.log(`比较 arr[${j}] (${arr[j]}) 和 arr[${j + 1}] (${arr[j + 1]})`);
+                        viz.renderBars(arr, [j, j + 1], []);
+                        await viz.wait();
+
+                        viz.highlightCode(6); // if (arr[j] > arr[j+1])
+                        if (arr[j] > arr[j + 1]) {
+                            viz.log(`交换 ${arr[j]} 和 ${arr[j + 1]}`);
+                            viz.highlightCode(8); // swap
+                            let temp = arr[j];
+                            arr[j] = arr[j + 1];
+                            arr[j + 1] = temp;
+                            viz.renderBars(arr, [j, j + 1], []);
+                            await viz.wait();
+                        }
+                    }
+                    // Mark sorted
+                    viz.highlightCode(11); // end of i loop
+                }
+                viz.renderBars(arr, [], arr.map((_, i) => i)); // All green
+                viz.highlightCode(12); // end function
+                viz.log("✅ 排序完成");
+            },
+
+            async runSelectionSort() {
+                let arr = [...viz.data];
+                let n = arr.length;
+
+                viz.highlightCode(0);
+                await viz.wait();
+
+                for (let i = 0; i < n - 1; i++) {
+                    viz.highlightCode(1); // for i
+                    let min_idx = i;
+
+                    viz.highlightCode(3); // int min_idx = i
+                    viz.renderBars(arr, [i], Array.from({ length: i }, (_, k) => k));
+                    viz.log(`当前最小值索引 min_idx = ${i}`);
+                    await viz.wait();
+
+                    for (let j = i + 1; j < n; j++) {
+                        if (!viz.isRunning) return;
+
+                        viz.highlightCode(6); // for j
+                        viz.renderBars(arr, [j, min_idx], Array.from({ length: i }, (_, k) => k));
+                        await viz.wait();
+
+                        viz.highlightCode(7); // if (arr[j] < arr[min_idx])
+                        if (arr[j] < arr[min_idx]) {
+                            min_idx = j;
+                            viz.highlightCode(8); // min_idx = j
+                            viz.log(`发现更小值 ${arr[j]}，更新 min_idx = ${j}`);
+                            await viz.wait();
+                        }
+                    }
+
+                    viz.highlightCode(13); // swap
+                    if (min_idx !== i) {
+                        viz.log(`交换 arr[${i}] 和 arr[${min_idx}]`);
+                        [arr[i], arr[min_idx]] = [arr[min_idx], arr[i]];
+                        viz.renderBars(arr, [i, min_idx], []);
+                        await viz.wait();
+                    }
+                }
+                viz.renderBars(arr, [], arr.map((_, i) => i));
+                viz.log("✅ 排序完成");
+            },
+
+            async runInsertionSort() {
+                let arr = [...viz.data];
+                let n = arr.length;
+
+                viz.highlightCode(0);
+                await viz.wait();
+
+                for (let i = 1; i < n; i++) {
+                    viz.highlightCode(1); // for i
+                    let key = arr[i];
+                    let j = i - 1;
+
+                    viz.highlightCode(2); // int key = arr[i]
+                    viz.log(`将 ${key} 取出作为待插入元素`);
+                    viz.renderBars(arr, [i], Array.from({ length: i }, (_, k) => k)); // i is active
+                    await viz.wait();
+
+                    viz.highlightCode(6); // while
+                    while (j >= 0 && arr[j] > key) {
+                        if (!viz.isRunning) return;
+
+                        viz.highlightCode(7); // arr[j+1] = arr[j]
+                        viz.log(`${arr[j]} > ${key}，向后移动`);
+                        arr[j + 1] = arr[j];
+                        viz.renderBars(arr, [j, j + 1], Array.from({ length: i }, (_, k) => k));
+                        await viz.wait();
+
+                        j = j - 1;
+                        viz.highlightCode(8); // j = j - 1
+                    }
+
+                    viz.highlightCode(11); // arr[j+1] = key
+                    arr[j + 1] = key;
+                    viz.log(`将 ${key} 插入到位置 ${j + 1}`);
+                    viz.renderBars(arr, [j + 1], Array.from({ length: i + 1 }, (_, k) => k));
+                    await viz.wait();
+                }
+                viz.renderBars(arr, [], arr.map((_, i) => i));
+                viz.log("✅ 排序完成");
+            },
+
+            async runLinearSearch() {
+                let arr = viz.data;
+                let target = viz.target;
+
+                viz.highlightCode(0);
+                await viz.wait();
+
+                for (let i = 0; i < arr.length; i++) {
+                    viz.highlightCode(2); // for i
+                    if (!viz.isRunning) return;
+
+                    viz.highlightCode(4); // if (arr[i] == x)
+                    viz.log(`检查索引 ${i}: ${arr[i]} 是否等于 ${target}?`);
+                    viz.renderBoxes(arr, i);
+                    await viz.wait();
+
+                    if (arr[i] === target) {
+                        viz.highlightCode(5); // return i
+                        viz.log(`✅ 找到目标 ${target} 在索引 ${i}`);
+                        viz.renderBoxes(arr, -1, i);
+                        return;
+                    }
+                }
+                viz.highlightCode(8); // return -1
+                viz.log(`❌ 未找到目标 ${target}`);
+            },
+
+            async runBinarySearch() {
+                let arr = viz.data;
+                let target = viz.target;
+                let l = 0, r = arr.length - 1;
+
+                viz.highlightCode(0);
+                await viz.wait();
+
+                while (l <= r) {
+                    viz.highlightCode(1); // while
+                    if (!viz.isRunning) return;
+
+                    let m = Math.floor((l + r) / 2);
+                    viz.highlightCode(3); // int m = ...
+                    viz.log(`检查中间元素索引 ${m}: ${arr[m]}`);
+
+                    // Highlight range and mid
+                    viz.renderBoxes(arr, m, -1, { start: l, end: r });
+                    await viz.wait();
+
+                    viz.highlightCode(6); // if (arr[m] == x)
+                    if (arr[m] === target) {
+                        viz.highlightCode(7); // return m
+                        viz.log(`✅ 找到目标 ${target} 在索引 ${m}`);
+                        viz.renderBoxes(arr, -1, m);
+                        return;
+                    }
+
+                    viz.highlightCode(10); // if (arr[m] < x)
+                    if (arr[m] < target) {
+                        viz.highlightCode(11); // l = m + 1
+                        l = m + 1;
+                        viz.log(`目标大于 ${arr[m]}，搜索右半部分`);
+                    } else {
+                        viz.highlightCode(14); // else
+                        viz.highlightCode(15); // r = m - 1
+                        r = m - 1;
+                        viz.log(`目标小于 ${arr[m]}，搜索左半部分`);
+                    }
+                }
+                viz.highlightCode(17); // return -1
+                viz.log(`❌ 未找到目标 ${target}`);
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+
+</html>
