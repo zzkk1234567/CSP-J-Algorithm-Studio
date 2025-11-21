@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-J Algorithm Visualizer v2.0 (Optimized)</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="styles/enhanced-ui.css" rel="stylesheet">
+    <style>
+        .tab-button {
+            position: relative;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: rgba(79, 70, 229, 0.06);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .algo-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .algo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+            border-color: #4f46e5;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-easy {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Top navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="text-3xl">🏆</div>
+                    <div>
+                        <h1 id="nav-main-title" class="text-xl font-bold text-gray-800">CSP-J Algorithm Learning Tool</h1>
+                        <p id="nav-subtitle" class="text-xs text-gray-500">Optimized version v2.0</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <select id="language-selector" class="px-3 py-1.5 border rounded-lg text-sm">
+                        <option value="zh-CN">中文</option>
+                        <option value="en-US">English</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <!-- Intro -->
+        <section class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 md:p-5 flex items-start space-x-3">
+            <div class="text-2xl md:text-3xl pt-1">🎯</div>
+            <div>
+                <h2 id="intro-title" class="font-semibold text-gray-800 mb-1">Algorithm learning and visualization for CSP-J</h2>
+                <p id="intro-text" class="text-xs md:text-sm text-gray-600">
+                    Select an algorithm on the left to see the description, complexity and code example. Switch to the
+                    "Visualization" tab to watch the algorithm run with animations.
+                </p>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex border-b">
+                <button id="tab-algorithms" class="tab-button active flex items-center gap-2" onclick="switchTab('algorithms')">
+                    <span>📚</span>
+                    <span id="tab-label-algorithms">Algorithms</span>
+                </button>
+                <button id="tab-visualizer" class="tab-button flex items-center gap-2" onclick="switchTab('visualizer')">
+                    <span>🎬</span>
+                    <span id="tab-label-visualizer">Visualization</span>
+                </button>
+                <button id="tab-progress" class="tab-button flex items-center gap-2" onclick="switchTab('progress')">
+                    <span>📈</span>
+                    <span id="tab-label-progress">Progress</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Algorithms -->
+            <div id="content-algorithms" class="tab-content active p-4 md:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <!-- Algorithm list -->
+                    <div class="md:col-span-1 space-y-3">
+                        <div>
+                            <label id="search-label" class="block text-xs font-medium text-gray-600 mb-1">Search algorithms</label>
+                            <input id="search-input" type="text"
+                                   class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                   placeholder="Name or category, e.g. sort, search"
+                                   oninput="filterAlgorithmList()">
+                        </div>
+                        <div id="category-filters" class="flex space-x-2 text-xs">
+                            <button data-category-filter="all" class="px-2.5 py-1 rounded-full border text-gray-600 hover:bg-gray-50"
+                                    onclick="setCategoryFilter('all')">
+                                All
+                            </button>
+                            <button data-category-filter="sorting" class="px-2.5 py-1 rounded-full border text-gray-600 hover:bg-gray-50"
+                                    onclick="setCategoryFilter('sorting')">
+                                Sorting
+                            </button>
+                            <button data-category-filter="searching" class="px-2.5 py-1 rounded-full border text-gray-600 hover:bg-gray-50"
+                                    onclick="setCategoryFilter('searching')">
+                                Searching
+                            </button>
+                            <button data-category-filter="graph" class="px-2.5 py-1 rounded-full border text-gray-600 hover:bg-gray-50"
+                                    onclick="setCategoryFilter('graph')">
+                                Graph
+                            </button>
+                            <button data-category-filter="dp" class="px-2.5 py-1 rounded-full border text-gray-600 hover:bg-gray-50"
+                                    onclick="setCategoryFilter('dp')">
+                                Dynamic Programming
+                            </button>
+                        </div>
+                        <div id="algorithm-list" class="space-y-2 mt-2"></div>
+                    </div>
+
+                    <!-- Algorithm detail -->
+                    <div class="md:col-span-2">
+                        <div id="default-prompt" class="h-full flex items-center justify-center text-sm text-gray-500 text-center px-6">
+                            <span id="default-prompt-text">Select an algorithm on the left to see details.</span>
+                        </div>
+                        <div id="detail-content" class="hidden space-y-4">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div id="detail-icon" class="text-3xl"></div>
+                                    <div>
+                                        <h3 id="detail-name" class="text-xl font-bold text-gray-800"></h3>
+                                        <div class="space-x-2 mt-1 text-xs">
+                                            <span id="detail-difficulty" class="badge"></span>
+                                            <span id="detail-category"
+                                                  class="badge bg-indigo-100 text-indigo-700"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-lg shadow hover:bg-indigo-700"
+                                        onclick="startVisualization()">
+                                    <span id="start-visualization-label">�?Start visualization</span>
+                                </button>
+                            </div>
+
+                            <div>
+                                <h4 id="detail-description-title" class="font-semibold text-gray-800 mb-1 text-sm">Description</h4>
+                                <p id="detail-description" class="text-sm text-gray-700 leading-relaxed"></p>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <h5 id="detail-usecases-title" class="font-semibold text-gray-800 mb-2 text-xs">Typical use cases</h5>
+                                    <ul id="detail-applications" class="list-disc list-inside space-y-1 text-gray-700"></ul>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-3 lg:col-span-2">
+                                    <h5 id="detail-properties-title" class="font-semibold text-gray-800 mb-2 text-xs">Key properties</h5>
+                                    <div id="detail-features" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-900 text-gray-100 rounded-lg p-3">
+                                    <h5 id="detail-code-title" class="font-semibold mb-2 text-xs">C++ code example</h5>
+                                    <pre class="text-xs overflow-x-auto"><code id="code-content"></code></pre>
+                                </div>
+                                <div class="bg-white border rounded-lg p-3">
+                                    <h5 id="detail-complexity-title" class="font-semibold mb-2 text-xs">Complexity</h5>
+                                    <ul class="text-xs text-gray-700 space-y-1">
+                                        <li><span id="complexity-best-label" class="font-medium text-gray-600">Best time:</span> <span id="complexity-best" class="font-mono"></span></li>
+                                        <li><span id="complexity-average-label" class="font-medium text-gray-600">Average time:</span> <span id="complexity-average" class="font-mono"></span></li>
+                                        <li><span id="complexity-worst-label" class="font-medium text-gray-600">Worst time:</span> <span id="complexity-worst" class="font-mono"></span></li>
+                                        <li><span id="complexity-space-label" class="font-medium text-gray-600">Space:</span> <span id="complexity-space" class="font-mono"></span></li>
+                                    </ul>
+                                    <p id="complexity-explanation"
+                                       class="mt-2 text-xs text-gray-600 leading-relaxed"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Visualization -->
+            <div id="content-visualizer" class="tab-content p-4 md:p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="bg-white border rounded-lg p-4">
+                        <h3 id="visualizer-title" class="text-lg font-semibold text-gray-800 mb-2">Visualizer</h3>
+                        <p id="visualizer-hint" class="text-xs text-gray-500 mb-3">
+                            Choose an algorithm in the first tab and click "Start visualization".
+                        </p>
+                        <div id="visualizer-container" class="min-h-[260px] border rounded-lg"></div>
+                    </div>
+                    <div class="bg-gray-50 border rounded-lg p-4">
+                        <h3 id="visualizer-status-title" class="text-lg font-semibold text-gray-800 mb-2">Current status</h3>
+                        <p id="visualizer-info" class="text-sm text-gray-600">
+                            No visualization running yet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Progress (simple placeholder) -->
+            <div id="content-progress" class="tab-content p-4 md:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl p-4 text-white">
+                        <div class="text-2xl mb-1">📚</div>
+                        <div id="completed-algorithms" class="text-3xl font-bold">0</div>
+                        <div id="completed-algorithms-label" class="text-xs opacity-80 mt-1">Algorithms viewed</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl p-4 text-white">
+                        <div class="text-2xl mb-1">⏱️</div>
+                        <div id="study-time" class="text-3xl font-bold">0</div>
+                        <div id="study-time-label" class="text-xs opacity-80 mt-1">Estimated study time (min)</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-xl p-4 text-white">
+                        <div class="text-2xl mb-1">🏆</div>
+                        <div id="badges-count" class="text-3xl font-bold">0</div>
+                        <div id="badges-count-label" class="text-xs opacity-80 mt-1">Badges (demo)</div>
+                    </div>
+                </div>
+                <p id="progress-note" class="mt-4 text-xs text-gray-500">
+                    This page shows a simple local-only progress estimate based on how many algorithms you have opened.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dependencies -->
+    <script src="utils/ConfigManager.js"></script>
+    <script src="utils/I18n.js"></script>
+    <script src="utils/ErrorHandler.js"></script>
+    <script src="utils/VisualizerFactory.js"></script>
+    <script src="algorithm-visualizer.js"></script>
+
+    <script>
+        // Minimal algorithm database (ASCII only to avoid encoding issues)
+        const algorithmsDatabase = {
+            'bubble-sort': {
+                id: 'bubble-sort',
+                name: 'Bubble Sort',
+                category: 'sorting',
+                difficulty: 'easy',
+                icon: 'B',
+                shortDesc: 'Repeatedly swaps adjacent elements that are out of order.',
+                description: 'Bubble sort scans the array, compares adjacent elements, and swaps when out of order. Simple but inefficient for large inputs.',
+                applications: ['Teaching comparisons', 'Very small datasets', 'Nearly sorted input'],
+                features: {
+                    'Stability': 'Stable (keeps equal values in order).',
+                    'In-place': 'Yes, needs only constant extra memory.',
+                    'Idea': 'Loop until no adjacent pair is out of order.',
+                    'Limitation': 'O(n^2) time makes it impractical for production.'
+                },
+                complexity: { best: 'O(n)', average: 'O(n^2)', worst: 'O(n^2)', space: 'O(1)' },
+                code: `void bubbleSort(int a[], int n) {
+    for (int i = 0; i < n - 1; ++i) {
+        bool swapped = false;
+        for (int j = 0; j < n - 1 - i; ++j) {
+            if (a[j] > a[j + 1]) {
+                swap(a[j], a[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}`
+            },
+            'selection-sort': {
+                id: 'selection-sort',
+                name: 'Selection Sort',
+                category: 'sorting',
+                difficulty: 'easy',
+                icon: 'S',
+                shortDesc: 'Selects the smallest remaining element for each position.',
+                description: 'Selection sort divides the array into a sorted prefix and unsorted suffix, swapping the smallest item into place each pass.',
+                applications: ['Simple classroom demonstrations', 'Situations where swaps are expensive'],
+                features: {
+                    'Stability': 'Not stable in the classic form.',
+                    'Swaps': 'At most n swaps (one per pass).',
+                    'Idea': 'Repeatedly select the minimum element.',
+                    'Strength': 'Predictable behaviour and easy to reason about.'
+                },
+                complexity: { best: 'O(n^2)', average: 'O(n^2)', worst: 'O(n^2)', space: 'O(1)' },
+                code: `void selectionSort(int a[], int n) {
+    for (int i = 0; i < n - 1; ++i) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; ++j) {
+            if (a[j] < a[minIdx]) minIdx = j;
+        }
+        if (minIdx != i) swap(a[i], a[minIdx]);
+    }
+}`
+            },
+            'insertion-sort': {
+                id: 'insertion-sort',
+                name: 'Insertion Sort',
+                category: 'sorting',
+                difficulty: 'easy',
+                icon: 'I',
+                shortDesc: 'Builds the sorted prefix by inserting elements one by one.',
+                description: 'Insertion sort inserts each element at the correct position within the already sorted prefix. Excellent on nearly sorted arrays.',
+                applications: ['Small arrays', 'Nearly sorted data', 'Hybrid sort base case'],
+                features: {
+                    'Stability': 'Stable because equal elements stay in order.',
+                    'Adaptivity': 'Runs in linear time on sorted data.',
+                    'Usage': 'Often used for tiny partitions inside quick sort.',
+                    'Implementation': 'Shift larger elements to make room for the new value.'
+                },
+                complexity: { best: 'O(n)', average: 'O(n^2)', worst: 'O(n^2)', space: 'O(1)' },
+                code: `void insertionSort(int a[], int n) {
+    for (int i = 1; i < n; ++i) {
+        int key = a[i];
+        int j = i - 1;
+        while (j >= 0 && a[j] > key) {
+            a[j + 1] = a[j];
+            --j;
+        }
+        a[j + 1] = key;
+    }
+}`
+            },
+            'merge-sort': {
+                id: 'merge-sort',
+                name: 'Merge Sort',
+                category: 'sorting',
+                difficulty: 'medium',
+                icon: 'M',
+                shortDesc: 'Divide-and-conquer sorting that merges sorted halves.',
+                description: 'Merge sort splits the list, sorts each half recursively, and merges the results. Guarantees O(n log n) time.',
+                applications: ['Stable sorting', 'External sorting', 'Linked list sorting'],
+                features: {
+                    'Stability': 'Yes when merging with auxiliary arrays.',
+                    'Space': 'Needs additional buffer.',
+                    'Parallel': 'Divide step is easy to parallelize.',
+                    'Guarantee': 'Performance unaffected by input order.'
+                },
+                complexity: { best: 'O(n log n)', average: 'O(n log n)', worst: 'O(n log n)', space: 'O(n)' },
+                code: `void mergeSort(vector<int>& a, int l, int r) {
+    if (l >= r) return;
+    int m = l + (r - l) / 2;
+    mergeSort(a, l, m);
+    mergeSort(a, m + 1, r);
+    vector<int> tmp; tmp.reserve(r - l + 1);
+    int i = l, j = m + 1;
+    while (i <= m && j <= r) {
+        tmp.push_back(a[i] <= a[j] ? a[i++] : a[j++]);
+    }
+    while (i <= m) tmp.push_back(a[i++]);
+    while (j <= r) tmp.push_back(a[j++]);
+    copy(tmp.begin(), tmp.end(), a.begin() + l);
+}`
+            },
+            'quick-sort': {
+                id: 'quick-sort',
+                name: 'Quick Sort',
+                category: 'sorting',
+                difficulty: 'medium',
+                icon: 'Q',
+                shortDesc: 'Partitions around a pivot and sorts the partitions.',
+                description: 'Quick sort chooses a pivot and partitions elements so smaller items precede the pivot. Recursively sorts each side.',
+                applications: ['General-purpose sorting', 'In-memory arrays'],
+                features: {
+                    'Speed': 'Usually the fastest comparison sort.',
+                    'Space': 'In-place except for recursion stack.',
+                    'Risk': 'Bad pivot selection may degrade to O(n^2).',
+                    'Variants': 'Random pivot, median-of-three, three-way partition.'
+                },
+                complexity: { best: 'O(n log n)', average: 'O(n log n)', worst: 'O(n^2)', space: 'O(log n)' },
+                code: `int partition(int a[], int l, int r) {
+    int pivot = a[r];
+    int i = l - 1;
+    for (int j = l; j < r; ++j) {
+        if (a[j] <= pivot) {
+            ++i;
+            swap(a[i], a[j]);
+        }
+    }
+    swap(a[i + 1], a[r]);
+    return i + 1;
+}
+
+void quickSort(int a[], int l, int r) {
+    if (l >= r) return;
+    int p = partition(a, l, r);
+    quickSort(a, l, p - 1);
+    quickSort(a, p + 1, r);
+}`
+            },
+            'binary-search': {
+                id: 'binary-search',
+                name: 'Binary Search',
+                category: 'searching',
+                difficulty: 'easy',
+                icon: 'B',
+                shortDesc: 'Halves the search space on sorted data.',
+                description: 'Binary search compares the middle element with the target and discards half of the range each step.',
+                applications: ['Lookup tables', 'Answer space search', 'Finding insertion indices'],
+                features: {
+                    'Requirement': 'Array must be sorted.',
+                    'Performance': 'Logarithmic time even on millions of elements.',
+                    'Variants': 'Lower/upper bound, binary lifting.',
+                    'Implementation': 'Careful with integer overflow when computing mid.'
+                },
+                complexity: { best: 'O(1)', average: 'O(log n)', worst: 'O(log n)', space: 'O(1)' },
+                code: `int binarySearch(int a[], int n, int target) {
+    int l = 0, r = n - 1;
+    while (l <= r) {
+        int mid = l + (r - l) / 2;
+        if (a[mid] == target) return mid;
+        if (a[mid] < target) l = mid + 1;
+        else r = mid - 1;
+    }
+    return -1;
+}`
+            },
+            'dfs': {
+                id: 'dfs',
+                name: 'Depth-First Search',
+                category: 'graph',
+                difficulty: 'medium',
+                icon: 'D',
+                shortDesc: 'Explores one branch fully before backtracking.',
+                description: 'DFS explores as deep as possible along each branch before backtracking. Useful for connectivity and cycle detection.',
+                applications: ['Connected components', 'Cycle detection', 'Topological ordering'],
+                features: {
+                    'Structure': 'Recursive or iterative with an explicit stack.',
+                    'Space': 'Stack depth proportional to recursion depth.',
+                    'Versatile': 'Foundation for many graph algorithms.',
+                    'Limit': 'Does not guarantee shortest paths.'
+                },
+                complexity: { best: 'O(V + E)', average: 'O(V + E)', worst: 'O(V + E)', space: 'O(V)' },
+                code: `void dfs(int v, const vector<vector<int>>& g, vector<bool>& vis) {
+    vis[v] = true;
+    for (int u : g[v]) {
+        if (!vis[u]) dfs(u, g, vis);
+    }
+}`
+            },
+            'bfs': {
+                id: 'bfs',
+                name: 'Breadth-First Search',
+                category: 'graph',
+                difficulty: 'medium',
+                icon: 'F',
+                shortDesc: 'Visits nodes level by level using a queue.',
+                description: 'BFS traverses a graph layer by layer and naturally finds shortest paths in unweighted graphs.',
+                applications: ['Shortest path in unweighted graphs', 'Level order traversal', 'Connectivity checks'],
+                features: {
+                    'Data structure': 'Uses a queue to explore neighbors.',
+                    'Shortest paths': 'First visit gives shortest distance.',
+                    'Traversal order': 'Expands frontier level by level.',
+                    'Limit': 'Needs memory proportional to the frontier.'
+                },
+                complexity: { best: 'O(V + E)', average: 'O(V + E)', worst: 'O(V + E)', space: 'O(V)' },
+                code: `void bfs(int start, const vector<vector<int>>& g) {
+    vector<bool> vis(g.size(), false);
+    queue<int> q;
+    vis[start] = true;
+    q.push(start);
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        for (int u : g[v]) {
+            if (!vis[u]) {
+                vis[u] = true;
+                q.push(u);
+            }
+        }
+    }
+}`
+            },
+            'knapsack': {
+                id: 'knapsack',
+                name: '0-1 Knapsack',
+                category: 'dp',
+                difficulty: 'medium',
+                icon: 'K',
+                shortDesc: 'Dynamic programming for picking items within capacity.',
+                description: '0-1 Knapsack selects a subset of items maximizing value without exceeding capacity.',
+                applications: ['Resource allocation', 'Budget planning', 'Subset optimization'],
+                features: {
+                    'State': 'dp[i][w] is best value using first i items.',
+                    'Choice': 'Include current item or skip it.',
+                    'Optimization': '1-D compression by iterating weight backward.',
+                    'Limit': 'Runtime grows with capacity rather than items only.'
+                },
+                complexity: { best: 'O(nW)', average: 'O(nW)', worst: 'O(nW)', space: 'O(W)' },
+                code: `int knapsack(const vector<int>& w, const vector<int>& v, int cap) {
+    vector<int> dp(cap + 1, 0);
+    for (int i = 0; i < w.size(); ++i) {
+        for (int c = cap; c >= w[i]; --c) {
+            dp[c] = max(dp[c], dp[c - w[i]] + v[i]);
+        }
+    }
+    return dp[cap];
+}`
+            },
+            'lcs': {
+                id: 'lcs',
+                name: 'Longest Common Subsequence',
+                category: 'dp',
+                difficulty: 'hard',
+                icon: 'LCS',
+                shortDesc: 'DP that finds the longest subsequence common to two strings.',
+                description: 'LCS dynamic programming compares prefixes of two strings and builds the longest subsequence shared by both.',
+                applications: ['Diff tools', 'DNA sequence analysis', 'Spell checking'],
+                features: {
+                    'State': 'dp[i][j] is best length for prefixes i and j.',
+                    'Transition': 'Extend when characters match; otherwise take max of neighbors.',
+                    'Reconstruction': 'Trace dp table to build the subsequence.',
+                    'Complexity': 'Quadratic in string lengths.'
+                },
+                complexity: { best: 'O(mn)', average: 'O(mn)', worst: 'O(mn)', space: 'O(mn)' },
+                code: `int lcs(const string& a, const string& b) {
+    int m = a.size(), n = b.size();
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+        }
+    }
+    return dp[m][n];
+}`
+            }
+        };
+        let currentAlgorithmId = null;
+        let seenAlgorithms = new Set();
+        let visualizerInstance = null;
+
+        let storageAvailable = true;
+
+        function readStorage(key, fallback = null) {
+            if (!storageAvailable) return fallback;
+            try {
+                if (window.localStorage) {
+                    return window.localStorage.getItem(key);
+                }
+                return fallback;
+            } catch (error) {
+                storageAvailable = false;
+                console.warn('localStorage read failed:', error);
+                return fallback;
+            }
+        }
+
+        function writeStorage(key, value) {
+            if (!storageAvailable) return;
+            try {
+                if (window.localStorage) {
+                    window.localStorage.setItem(key, value);
+                }
+            } catch (error) {
+                storageAvailable = false;
+                console.warn('localStorage write failed:', error);
+            }
+        }
+
+        const zhOptimizedOverrides = {
+            'nav.title': 'CSP-J \u7b97\u6cd5\u53ef\u89c6\u5316\u5b66\u4e60\u7cfb\u7edf',
+            'category.sorting': '\u6392\u5e8f\u7b97\u6cd5',
+            'category.searching': '\u641c\u7d22\u7b97\u6cd5',
+            'category.graph': '\u56fe\u7b97\u6cd5',
+            'category.dp': '\u52a8\u6001\u89c4\u5212',
+            'category.all': '\u5168\u90e8\u7b97\u6cd5',
+            'settings.language.zh': '\u4e2d\u6587',
+            'difficulty.easy': '\u7b80\u5355',
+            'difficulty.medium': '\u4e2d\u7b49',
+            'difficulty.hard': '\u56f0\u96be',
+            'optimized.nav.subtitle': '\u4f18\u5316\u7248 v2.0',
+            'optimized.intro.title': 'CSP-J \u7b97\u6cd5\u5b66\u4e60\u4e0e\u53ef\u89c6\u5316',
+            'optimized.intro.body': '\u5728\u5de6\u4fa7\u9009\u62e9\u7b97\u6cd5\u53ef\u67e5\u770b\u63cf\u8ff0\u3001\u590d\u6742\u5ea6\u548c\u4ee3\u7801\uff0c\u5207\u6362\u5230\u201c\u53ef\u89c6\u5316\u201d\u6807\u7b7e\u4ee5\u67e5\u770b\u52a8\u753b\u6f14\u793a\u3002',
+            'optimized.tabs.algorithms': '\u7b97\u6cd5\u5217\u8868',
+            'optimized.tabs.visualizer': '\u53ef\u89c6\u5316',
+            'optimized.tabs.progress': '\u5b66\u4e60\u8fdb\u5ea6',
+            'optimized.search.label': '\u641c\u7d22\u7b97\u6cd5',
+            'optimized.search.placeholder': '\u8f93\u5165\u540d\u79f0\u6216\u5173\u952e\u5b57\uff0c\u4f8b\u5982 sort\u3001graph',
+            'optimized.defaultPrompt': '\u4ece\u5de6\u4fa7\u9009\u62e9\u7b97\u6cd5\uff0c\u53f3\u4fa7\u4f1a\u663e\u793a\u8be6\u7ec6\u4fe1\u606f\u3002',
+            'optimized.detail.start': '\u25b6 \u5f00\u59cb\u53ef\u89c6\u5316',
+            'optimized.detail.description': '\u7b97\u6cd5\u8bf4\u660e',
+            'optimized.detail.useCases': '\u5178\u578b\u5e94\u7528\u573a\u666f',
+            'optimized.detail.properties': '\u5173\u952e\u7279\u6027',
+            'optimized.detail.code': 'C++ \u4ee3\u7801\u793a\u4f8b',
+            'optimized.detail.complexity': '\u590d\u6742\u5ea6',
+            'optimized.detail.best': '\u6700\u4f73\u65f6\u95f4\uff1a',
+            'optimized.detail.average': '\u5e73\u5747\u65f6\u95f4\uff1a',
+            'optimized.detail.worst': '\u6700\u574f\u65f6\u95f4\uff1a',
+            'optimized.detail.space': '\u7a7a\u95f4\u5360\u7528\uff1a',
+            'optimized.visualizer.title': '\u53ef\u89c6\u5316\u6f14\u793a',
+            'optimized.visualizer.hint': '\u5728\u201c\u7b97\u6cd5\u201d\u6807\u7b7e\u9009\u62e9\u7b97\u6cd5\u540e\u70b9\u51fb\u201c\u5f00\u59cb\u53ef\u89c6\u5316\u201d\u5373\u53ef\u67e5\u770b\u52a8\u753b\u6f14\u793a\u3002',
+            'optimized.visualizer.statusTitle': '\u5f53\u524d\u72b6\u6001',
+            'optimized.visualizer.statusEmpty': '\u6682\u672a\u8fd0\u884c\u4efb\u4f55\u53ef\u89c6\u5316\u3002',
+            'optimized.visualizer.noConfig': '\u8be5\u7b97\u6cd5\u6682\u65e0\u53ef\u89c6\u5316\u914d\u7f6e\u3002',
+            'optimized.visualizer.running': '\u6b63\u5728\u5c55\u793a\uff1a{algorithm}',
+            'optimized.list.empty': '\u6ca1\u6709\u7b26\u5408\u5f53\u524d\u7b5b\u9009\u6761\u4ef6\u7684\u7b97\u6cd5\u3002',
+            'optimized.alert.selectAlgorithm': '\u8bf7\u5148\u9009\u62e9\u4e00\u4e2a\u7b97\u6cd5\u3002',
+            'optimized.progress.viewed': '\u5df2\u6d4f\u89c8\u7b97\u6cd5\u6570',
+            'optimized.progress.time': '\u9884\u4f30\u5b66\u4e60\u65f6\u95f4\uff08\u5206\u949f\uff09',
+            'optimized.progress.badges': '\u5fbd\u7ae0\uff08\u793a\u4f8b\uff09',
+            'optimized.progress.note': '\u8fdb\u5ea6\u4ec5\u4fdd\u5b58\u5728\u6d4f\u89c8\u5668\u672c\u5730\u3002'
+        };
+
+        function getTranslator() {
+            if (window.i18n && typeof window.i18n.t === 'function') {
+                return window.i18n.t.bind(window.i18n);
+            }
+            return key => key;
+        }
+
+        function hasTranslation(key) {
+            const translator = getTranslator();
+            const value = translator(key);
+            return Boolean(value && value !== key);
+        }
+
+        function setTextContent(id, key, fallback = '') {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const t = getTranslator();
+            if (hasTranslation(key)) {
+                el.textContent = t(key);
+            } else {
+                el.textContent = fallback || key;
+            }
+        }
+
+        function updateCategoryFilterButtons(active) {
+            document.querySelectorAll('[data-category-filter]').forEach(button => {
+                const isActive = button.dataset.categoryFilter === active;
+                button.classList.toggle('bg-indigo-50', isActive);
+                button.classList.toggle('border-indigo-500', isActive);
+                button.classList.toggle('text-indigo-700', isActive);
+                button.classList.toggle('text-gray-600', !isActive);
+            });
+        }
+
+        function getActiveCategory() {
+            return readStorage('cspj-category-filter', 'all');
+        }
+
+        function applyTranslations() {\r\n            const t = getTranslator();
+            setTextContent('nav-main-title', 'nav.title', 'CSP-J Algorithm Learning Tool');
+            setTextContent('nav-subtitle', 'optimized.nav.subtitle', 'Optimized version v2.0');
+            setTextContent('intro-title', 'optimized.intro.title');
+            const introText = document.getElementById('intro-text');
+            if (introText) introText.textContent = hasTranslation('optimized.intro.body') ? t('optimized.intro.body') : introText.textContent;
+            setTextContent('tab-label-algorithms', 'optimized.tabs.algorithms', 'Algorithms');
+            setTextContent('tab-label-visualizer', 'optimized.tabs.visualizer', 'Visualization');
+            setTextContent('tab-label-progress', 'optimized.tabs.progress', 'Progress');
+            setTextContent('search-label', 'optimized.search.label', 'Search algorithms');
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.placeholder = hasTranslation('optimized.search.placeholder')
+                    ? t('optimized.search.placeholder')
+                    : 'Name or category, e.g. sort, search';
+            }
+            document.querySelectorAll('[data-category-filter]').forEach(button => {
+                const category = button.dataset.categoryFilter;
+                let key = category === 'all' ? 'category.all' : `category.${category}`;
+                if (hasTranslation(key)) {
+                    button.textContent = t(key);
+                } else {
+                    button.textContent = category;
+                }
+            });
+            setTextContent('default-prompt-text', 'optimized.defaultPrompt', 'Select an algorithm on the left to see details.');
+            setTextContent('start-visualization-label', 'optimized.detail.start', '�?Start visualization');
+            setTextContent('detail-description-title', 'optimized.detail.description', 'Description');
+            setTextContent('detail-usecases-title', 'optimized.detail.useCases', 'Typical use cases');
+            setTextContent('detail-properties-title', 'optimized.detail.properties', 'Key properties');
+            setTextContent('detail-code-title', 'optimized.detail.code', 'C++ code example');
+            setTextContent('detail-complexity-title', 'optimized.detail.complexity', 'Complexity');
+            setTextContent('complexity-best-label', 'optimized.detail.best', 'Best time:');
+            setTextContent('complexity-average-label', 'optimized.detail.average', 'Average time:');
+            setTextContent('complexity-worst-label', 'optimized.detail.worst', 'Worst time:');
+            setTextContent('complexity-space-label', 'optimized.detail.space', 'Space:');
+            setTextContent('visualizer-title', 'optimized.visualizer.title', 'Visualizer');
+            setTextContent('visualizer-hint', 'optimized.visualizer.hint', 'Choose an algorithm and start the visualization.');
+            setTextContent('visualizer-status-title', 'optimized.visualizer.statusTitle', 'Current status');
+            setTextContent('completed-algorithms-label', 'optimized.progress.viewed', 'Algorithms viewed');
+            setTextContent('study-time-label', 'optimized.progress.time', 'Estimated study time (min)');
+            setTextContent('badges-count-label', 'optimized.progress.badges', 'Badges (demo)');
+            setTextContent('progress-note', 'optimized.progress.note', 'Progress is stored locally in this browser only.');
+            const zhOption = document.querySelector('#language-selector option[value="zh-CN"]');
+            if (zhOption) zhOption.textContent = hasTranslation('settings.language.zh') ? t('settings.language.zh') : '中文';
+            const enOption = document.querySelector('#language-selector option[value="en-US"]');
+            if (enOption) enOption.textContent = hasTranslation('settings.language.en') ? t('settings.language.en') : 'English';
+            updateVisualizerInfoText();
+        }
+
+        function initializeLanguageSupport() {
+            const selector = document.getElementById('language-selector');
+            if (window.i18n) {
+                document.documentElement.lang = window.i18n.getLocale();
+                applyLocaleOverrides(window.i18n.getLocale());
+                if (selector) {
+                    selector.value = window.i18n.getLocale();
+                    selector.addEventListener('change', event => {
+                        const locale = event.target.value;
+                        if (window.configManager) {
+                            window.configManager.set('language', locale);
+                        }
+                        window.i18n.setLocale(locale);
+                        applyLocaleOverrides(locale);
+                    });
+                }
+                document.addEventListener('locale-changed', event => {
+                    const locale = event.detail.locale;
+                    if (selector) selector.value = locale;
+                    document.documentElement.lang = locale;
+                    applyLocaleOverrides(locale);
+                    applyTranslations();
+                });
+                applyTranslations();
+            } else {
+                console.warn('I18n not initialized; using default text.');
+                if (selector) {
+                    selector.addEventListener('change', () => applyTranslations());
+                }
+                applyTranslations();
+            }
+        }
+
+        function switchTab(name) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(el => {
+                el.classList.remove('active');
+            });
+            const content = document.getElementById('content-' + name);
+            const tab = document.getElementById('tab-' + name);
+            if (content && tab) {
+                content.classList.add('active');
+                tab.classList.add('active');
+                writeStorage('cspj-current-tab', name);
+            }
+        }
+
+        function formatCategoryName(category) {
+            const key = category === 'all' ? 'category.all' : `category.${category}`;
+            if (hasTranslation(key)) {
+                return getTranslator()(key);
+            }
+            return category;
+        }
+
+        function applyLocaleOverrides(locale) {
+            if (!window.i18n) return;
+            if (locale === 'zh-CN') {
+                Object.assign(window.i18n.messages, zhOptimizedOverrides);
+            }
+        }
+
+        function createAlgorithmCard(algo) {
+            const difficultyClass = {
+                easy: 'badge-easy',
+                medium: 'badge-medium',
+                hard: 'badge-hard'
+            }[algo.difficulty] || 'badge-easy';
+            const t = getTranslator();
+            const difficultyText = {
+                easy: hasTranslation('difficulty.easy') ? t('difficulty.easy') : 'Easy',
+                medium: hasTranslation('difficulty.medium') ? t('difficulty.medium') : 'Medium',
+                hard: hasTranslation('difficulty.hard') ? t('difficulty.hard') : 'Hard'
+            }[algo.difficulty] || 'Easy';
+
+            return `
+                <div class="algo-card rounded-lg bg-white px-3 py-2 flex items-center gap-3"
+                     onclick="showAlgorithmDetail('${algo.id}')"
+                     data-id="${algo.id}">
+                    <div class="text-xl font-bold text-indigo-600">${algo.icon}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold text-gray-800 truncate">${algo.name}</div>
+                        <div class="text-xs text-gray-500 truncate">${algo.shortDesc}</div>
+                    </div>
+                    <span class="badge ${difficultyClass}">${difficultyText}</span>
+                </div>
+            `;
+        }
+
+        function highlightSelectedAlgorithm() {
+            document.querySelectorAll('#algorithm-list .algo-card').forEach(card => {
+                if (currentAlgorithmId && card.dataset.id === currentAlgorithmId) {
+                    card.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-1');
+                } else {
+                    card.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-1');
+                }
+            });
+        }
+
+        function renderAlgorithmList() {
+            const list = document.getElementById('algorithm-list');
+            if (!list) return;
+
+            const keyword = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+            const category = getActiveCategory();
+            updateCategoryFilterButtons(category);
+
+            const items = Object.values(algorithmsDatabase)
+                .filter(algo => {
+                    if (category !== 'all' && algo.category !== category) return false;
+                    if (!keyword) return true;
+                    const text = `${algo.name} ${algo.shortDesc} ${algo.category}`.toLowerCase();
+                    return text.includes(keyword);
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            if (!items.length) {
+                const emptyText = hasTranslation('optimized.list.empty')
+                    ? getTranslator()('optimized.list.empty')
+                    : 'No algorithms match the current filter.';
+                list.innerHTML = `<p class="text-xs text-gray-500">${emptyText}</p>`;
+                return;
+            }
+
+            list.innerHTML = items.map(createAlgorithmCard).join('');
+            highlightSelectedAlgorithm();
+        }
+
+        function filterAlgorithmList() {
+            renderAlgorithmList();
+        }
+
+        function setCategoryFilter(category) {
+            writeStorage('cspj-category-filter', category);
+            updateCategoryFilterButtons(category);
+            renderAlgorithmList();
+        }
+
+        function showAlgorithmDetail(id) {
+            const algo = algorithmsDatabase[id];
+            if (!algo) return;
+
+            currentAlgorithmId = id;
+            seenAlgorithms.add(id);
+
+            const defaultPrompt = document.getElementById('default-prompt');
+            const detailContent = document.getElementById('detail-content');
+            if (defaultPrompt && detailContent) {
+                defaultPrompt.classList.add('hidden');
+                detailContent.classList.remove('hidden');
+            }
+
+            highlightSelectedAlgorithm();
+
+            document.getElementById('detail-icon').textContent = algo.icon;
+            document.getElementById('detail-name').textContent = algo.name;
+
+            const t = getTranslator();
+            const difficultyMap = {
+                easy: { text: hasTranslation('difficulty.easy') ? t('difficulty.easy') : 'Easy', cls: 'badge badge-easy' },
+                medium: { text: hasTranslation('difficulty.medium') ? t('difficulty.medium') : 'Medium', cls: 'badge badge-medium' },
+                hard: { text: hasTranslation('difficulty.hard') ? t('difficulty.hard') : 'Hard', cls: 'badge badge-hard' }
+            };
+            const diff = difficultyMap[algo.difficulty] || difficultyMap.easy;
+            const diffEl = document.getElementById('detail-difficulty');
+            diffEl.className = diff.cls;
+            diffEl.textContent = diff.text;
+
+            document.getElementById('detail-category').textContent = formatCategoryName(algo.category);
+
+            document.getElementById('detail-description').textContent = algo.description;
+            document.getElementById('detail-applications').innerHTML =
+                algo.applications.map(a => `<li>${a}</li>`).join('');
+
+            const featuresHtml = Object.entries(algo.features).map(([k, v]) => `
+                <div class="bg-white border rounded px-2 py-1.5">
+                    <div class="text-xs text-gray-500 mb-0.5">${k}</div>
+                    <div class="text-xs text-gray-800">${v}</div>
+                </div>
+            `).join('');
+            document.getElementById('detail-features').innerHTML = featuresHtml;
+
+            document.getElementById('code-content').textContent = algo.code;
+
+            document.getElementById('complexity-best').textContent = algo.complexity.best;
+            document.getElementById('complexity-average').textContent = algo.complexity.average;
+            document.getElementById('complexity-worst').textContent = algo.complexity.worst;
+            document.getElementById('complexity-space').textContent = algo.complexity.space;
+            document.getElementById('complexity-explanation').textContent = algo.complexity.explanation;
+
+            updateProgressDisplay();
+        }
+
+        function determineSortingVariant(id) {
+            return id === 'bubble-sort' ? 'bubble' : 'quick';
+        }
+
+        function startVisualization() {
+            if (!currentAlgorithmId) {
+                const message = hasTranslation('optimized.alert.selectAlgorithm')
+                    ? getTranslator()('optimized.alert.selectAlgorithm')
+                    : 'Please select an algorithm first.';
+                alert(message);
+                return;
+            }
+
+            switchTab('visualizer');
+
+            try {
+                const containerId = 'visualizer-container';
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                if (visualizerInstance && typeof visualizerInstance.destroy === 'function') {
+                    visualizerInstance.destroy();
+                }
+                container.innerHTML = '';
+
+                const algo = algorithmsDatabase[currentAlgorithmId];
+                let category = algo.category;
+
+                if (category === 'sorting') {
+                    const variant = determineSortingVariant(currentAlgorithmId);
+                    visualizerInstance = new SortingVisualizer(containerId, variant, { speed: 500 });
+                } else if (category === 'searching') {
+                    visualizerInstance = new SearchVisualizer(containerId, 'binary', { speed: 500 });
+                } else if (category === 'graph') {
+                    visualizerInstance = new GraphVisualizer(containerId, 'dfs', { speed: 500 });
+                } else {
+                    visualizerInstance = null;
+                }
+
+                if (!visualizerInstance) {
+                    console.warn('No visualizer configured for algorithm:', currentAlgorithmId);
+                    setVisualizerState('missing');
+                    return;
+                }
+
+                if (typeof visualizerInstance.init === 'function') {
+                    visualizerInstance.init();
+                }
+
+                setVisualizerState('running', algo.name);
+            } catch (error) {
+                console.error('Failed to start visualization:', error);
+                if (window.ErrorHandler && typeof window.ErrorHandler.handle === 'function') {
+                    window.ErrorHandler.handle(error, 'startVisualization');
+                } else {
+                    alert('Failed to start visualization: ' + error.message);
+                }
+            }
+        }
+
+        function setVisualizerState(state, algorithmName = '') {
+            const info = document.getElementById('visualizer-info');
+            if (!info) return;
+            info.dataset.state = state;
+            info.dataset.algorithm = algorithmName;
+            updateVisualizerInfoText();
+        }
+
+        function updateVisualizerInfoText() {
+            const info = document.getElementById('visualizer-info');
+            if (!info) return;
+            const state = info.dataset.state || 'idle';
+            const algorithmName = info.dataset.algorithm || '';
+            const t = getTranslator();
+            if (state === 'running') {
+                if (hasTranslation('optimized.visualizer.running')) {
+                    info.textContent = t('optimized.visualizer.running', { algorithm: algorithmName });
+                } else {
+                    info.textContent = 'Showing a demo visualization for: ' + algorithmName + '.';
+                }
+            } else if (state === 'missing') {
+                info.textContent = hasTranslation('optimized.visualizer.noConfig')
+                    ? t('optimized.visualizer.noConfig')
+                    : 'No visualizer is configured for this algorithm.';
+            } else {
+                info.textContent = hasTranslation('optimized.visualizer.statusEmpty')
+                    ? t('optimized.visualizer.statusEmpty')
+                    : 'No visualization running yet.';
+            }
+        }
+
+        function updateProgressDisplay() {
+            const completed = seenAlgorithms.size;
+            document.getElementById('completed-algorithms').textContent = completed;
+            document.getElementById('study-time').textContent = completed * 5;
+            document.getElementById('badges-count').textContent = Math.floor(completed / 2);
+        }
+
+
+        function bootLanguageSupport() {
+            if (window.__cspjLangReady) return;
+            window.__cspjLangReady = true;
+            initializeLanguageSupport();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootLanguageSupport);
+        } else {
+            bootLanguageSupport();
+        }
+
+        function startOptimizedPage() {
+            try {
+                console.log('AlgorithmVisualizer type:', typeof AlgorithmVisualizer);
+                console.log('SortingVisualizer type:', typeof SortingVisualizer);
+
+                const info = document.getElementById('visualizer-info');
+                if (info) {
+                    info.dataset.state = 'idle';
+                    info.dataset.algorithm = '';
+                }
+
+                const tab = readStorage('cspj-current-tab', 'algorithms');
+                switchTab(tab);
+                renderAlgorithmList();
+                updateProgressDisplay();
+                updateVisualizerInfoText();
+            } catch (e) {
+                console.error('Error while initialising optimized page:', e);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', startOptimizedPage);
+        } else {
+            startOptimizedPage();
+        }
+    </script>
+    <script>
+        (function () {
+            const textTargets = [
+                { id: 'nav-main-title', key: 'nav.title', fallback: 'CSP-J Algorithm Learning Tool' },
+                { id: 'nav-subtitle', key: 'optimized.nav.subtitle', fallback: 'Optimized version v2.0' },
+                { id: 'intro-title', key: 'optimized.intro.title', fallback: 'Algorithm learning and visualization for CSP-J' },
+                { id: 'tab-label-algorithms', key: 'optimized.tabs.algorithms', fallback: 'Algorithms' },
+                { id: 'tab-label-visualizer', key: 'optimized.tabs.visualizer', fallback: 'Visualization' },
+                { id: 'tab-label-progress', key: 'optimized.tabs.progress', fallback: 'Progress' },
+                { id: 'search-label', key: 'optimized.search.label', fallback: 'Search algorithms' },
+                { id: 'default-prompt-text', key: 'optimized.defaultPrompt', fallback: 'Select an algorithm on the left to see details.' },
+                { id: 'start-visualization-label', key: 'optimized.detail.start', fallback: '▶ Start visualization' },
+                { id: 'detail-description-title', key: 'optimized.detail.description', fallback: 'Description' },
+                { id: 'detail-usecases-title', key: 'optimized.detail.useCases', fallback: 'Typical use cases' },
+                { id: 'detail-properties-title', key: 'optimized.detail.properties', fallback: 'Key properties' },
+                { id: 'detail-code-title', key: 'optimized.detail.code', fallback: 'C++ code example' },
+                { id: 'detail-complexity-title', key: 'optimized.detail.complexity', fallback: 'Complexity' },
+                { id: 'complexity-best-label', key: 'optimized.detail.best', fallback: 'Best time:' },
+                { id: 'complexity-average-label', key: 'optimized.detail.average', fallback: 'Average time:' },
+                { id: 'complexity-worst-label', key: 'optimized.detail.worst', fallback: 'Worst time:' },
+                { id: 'complexity-space-label', key: 'optimized.detail.space', fallback: 'Space:' },
+                { id: 'visualizer-title', key: 'optimized.visualizer.title', fallback: 'Visualizer' },
+                { id: 'visualizer-hint', key: 'optimized.visualizer.hint', fallback: 'Choose an algorithm and start the visualization.' },
+                { id: 'visualizer-status-title', key: 'optimized.visualizer.statusTitle', fallback: 'Current status' },
+                { id: 'completed-algorithms-label', key: 'optimized.progress.viewed', fallback: 'Algorithms viewed' },
+                { id: 'study-time-label', key: 'optimized.progress.time', fallback: 'Estimated study time (min)' },
+                { id: 'badges-count-label', key: 'optimized.progress.badges', fallback: 'Badges (demo)' },
+                { id: 'progress-note', key: 'optimized.progress.note', fallback: 'This page shows a simple local-only progress estimate based on how many algorithms you have opened.' }
+            ];
+
+            const categoryTargets = [
+                { selector: '[data-category-filter="all"]', key: 'category.all', fallback: 'All' },
+                { selector: '[data-category-filter="sorting"]', key: 'category.sorting', fallback: 'Sorting' },
+                { selector: '[data-category-filter="searching"]', key: 'category.searching', fallback: 'Searching' },
+                { selector: '[data-category-filter="graph"]', key: 'category.graph', fallback: 'Graph' },
+                { selector: '[data-category-filter="dp"]', key: 'category.dp', fallback: 'Dynamic Programming' }
+            ];
+
+            const placeholders = [
+                { id: 'search-input', key: 'optimized.search.placeholder', fallback: 'Name or category, e.g. sort, search' }
+            ];
+
+            function translateKey(key, fallback) {
+                if (window.i18n && typeof window.i18n.t === 'function') {
+                    const value = window.i18n.t(key);
+                    if (value && value !== key) {
+                        return value;
+                    }
+                }
+                return fallback;
+            }
+
+            function updateUiTexts() {
+                textTargets.forEach(({ id, key, fallback }) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = translateKey(key, fallback);
+                    }
+                });
+
+                placeholders.forEach(({ id, key, fallback }) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.placeholder = translateKey(key, fallback);
+                    }
+                });
+
+                categoryTargets.forEach(({ selector, key, fallback }) => {
+                    document.querySelectorAll(selector).forEach(button => {
+                        button.textContent = translateKey(key, fallback);
+                    });
+                });
+            }
+
+            function persistLocale(locale) {
+                let handled = false;
+                if (window.configManager && typeof window.configManager.set === 'function') {
+                    try {
+                        window.configManager.set('language', locale);
+                        handled = true;
+                    } catch (error) {
+                        console.warn('Failed to persist language via ConfigManager:', error);
+                    }
+                }
+                if (!handled) {
+                    try {
+                        localStorage.setItem('cspj-language', locale);
+                    } catch (error) {
+                        console.warn('Failed to persist language:', error);
+                    }
+                }
+            }
+
+            function readPersistedLocale() {
+                if (window.configManager && typeof window.configManager.get === 'function') {
+                    try {
+                        const saved = window.configManager.get('language');
+                        if (saved) return saved;
+                    } catch (error) {
+                        console.warn('Failed to read language via ConfigManager:', error);
+                    }
+                }
+                try {
+                    const saved = localStorage.getItem('cspj-language');
+                    if (saved) return saved;
+                } catch (error) {
+                    console.warn('Failed to read stored language:', error);
+                }
+                if (window.i18n && typeof window.i18n.getLocale === 'function') {
+                    return window.i18n.getLocale();
+                }
+                return 'zh-CN';
+            }
+
+            function updateDocumentLocale(locale) {
+                document.documentElement.lang = locale;
+                const selector = document.getElementById('language-selector');
+                if (selector) {
+                    selector.value = locale;
+                }
+            }
+
+            function applyLocale(locale) {
+                if (window.i18n && typeof window.i18n.setLocale === 'function') {
+                    window.i18n.setLocale(locale);
+                }
+                updateDocumentLocale(locale);
+                updateUiTexts();
+            }
+
+            function initLocaleFeature() {
+                const selector = document.getElementById('language-selector');
+                if (!selector) return;
+
+                const initialLocale = readPersistedLocale();
+                applyLocale(initialLocale);
+
+                selector.addEventListener('change', event => {
+                    const locale = event.target.value;
+                    persistLocale(locale);
+                    applyLocale(locale);
+                });
+            }
+
+            document.addEventListener('locale-changed', event => {
+                const locale = event.detail && event.detail.locale;
+                if (locale) {
+                    updateDocumentLocale(locale);
+                }
+                updateUiTexts();
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLocaleFeature);
+            } else {
+                initLocaleFeature();
+            }
+        })();
+    </script>
+</body>
+</html>
+

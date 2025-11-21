@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-J Algorithm Studio - 自包含版本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-button:not(.active) {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .algo-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .algo-item:hover {
+            background: #f3f4f6;
+        }
+
+        .algo-item.active {
+            background: #eef2ff;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto px-4 py-6">
+        <div class="card p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">🎯 CSP-J Algorithm Studio</h1>
+            <p class="text-gray-600">算法可视化学习平台 - 自包含版本</p>
+        </div>
+
+        <div class="flex gap-3 mb-6">
+            <button class="tab-button active" onclick="switchTab('algorithms')">📚 算法列表</button>
+            <button class="tab-button" onclick="switchTab('visualizer')">🎨 可视化</button>
+        </div>
+
+        <div id="tab-algorithms" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-4">选择算法</h2>
+                    <div id="algorithm-list" class="space-y-2"></div>
+                </div>
+                <div class="lg:col-span-2 card p-6">
+                    <div id="algo-placeholder" class="text-center py-16 text-gray-400">
+                        <p class="text-5xl mb-4">🔍</p>
+                        <p>请选择一个算法查看详情</p>
+                    </div>
+                    <div id="algo-detail" class="hidden">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 id="detail-name" class="text-2xl font-bold"></h2>
+                                <p id="detail-summary" class="text-gray-600"></p>
+                            </div>
+                            <button onclick="startVisualization()"
+                                class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition">
+                                ▶ 开始可视化
+                            </button>
+                        </div>
+                        <p id="detail-description" class="mb-4"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-visualizer" class="tab-content">
+            <div class="card p-6">
+                <h2 class="text-2xl font-bold mb-4">算法可视化</h2>
+                <div id="viz-placeholder" class="text-center py-20 text-gray-400">
+                    <p class="text-4xl mb-4">🎬</p>
+                    <p>选择算法并点击"开始可视化"</p>
+                </div>
+                <div id="viz-container" class="hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单排序可视化
+        function createSimpleVisualizer(algorithm, data) {
+            const container = document.getElementById('viz-container');
+            container.innerHTML = `
+            <div class="bg-white p-6 rounded">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="startSort()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">▶ 播放</button>
+                    <button onclick="resetSort()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">🔄 重置</button>
+                </div>
+                <div id="viz-area" class="flex items-end justify-center gap-1 h-64"></div>
+                <div id="status" class="mt-4 p-3 bg-blue-50 rounded text-gray-700"></div>
+            </div>
+        `;
+
+            const vizArea = document.getElementById('viz-area');
+            let currentData = [...data];
+            let sorted = false;
+
+            function render() {
+                const max = Math.max(...currentData);
+                vizArea.innerHTML = currentData.map((val, i) => {
+                    const height = (val / max) * 200;
+                    return `<div style="width:40px;height:${height}px;background:#3b82f6;position:relative;">
+                    <span style="position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);font-size:12px;">${val}</span>
+                </div>`;
+                }).join('');
+            }
+
+            window.resetSort = () => {
+                currentData = [...data];
+                sorted = false;
+                render();
+                document.getElementById('status').textContent = '准备就绪';
+            };
+
+            window.startSort = async () => {
+                if (sorted) {
+                    document.getElementById('status').textContent = '已排序完成';
+                    return;
+                }
+
+            }
+        } else if (algorithm === '选择排序') {
+            for (let i = 0; i < n - 1; i++) {
+                let minIdx = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (currentData[j] < currentData[minIdx]) {
+                        minIdx = j;
+                    }
+                }
+                if (minIdx !== i) {
+                    document.getElementById('status').textContent = `交换 ${curr entData[i]
+                } 和 ${ currentData[minIdx] } `;
+                        [currentData[i], currentData[minIdx]] = [currentData[minIdx], currentData[i]];
+                        render();
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+            } else if (algorithm === '插入排序') {
+                for (let i = 1; i < n; i++) {
+                    let key = currentData[i];
+                    let j = i - 1;
+                    while (j >= 0 && currentData[j] > key) {
+                        currentData[j + 1] = currentData[j];
+                        j--;
+                        render();
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                    currentData[j + 1] = key;
+                    render();
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+            
+            sorted = true;
+            document.getElementById('status').textContent = '✅ 排序完成！';
+        };
+        
+        resetSort();
+    }
+    
+    // 简单搜索可视化
+    function createSearchVisualizer(algorithm, data, target) {
+        const container = document.getElementById('viz-container');
+        container.innerHTML = `
+                    < div class="bg-white p-6 rounded" >
+                <div class="mb-4">
+                    <label class="font-bold">目标值: </label>
+                    <span class="text-2xl text-red-600">${target}</span>
+                </div>
+                <button onclick="startSearch()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mb-4">▶ 开始搜索</button>
+                <div id="search-area" class="flex justify-center gap-2"></div>
+                <div id="status" class="mt-4 p-3 bg-blue-50 rounded text-gray-700"></div>
+            </div >
+                    `;
+        
+        const searchArea = document.getElementById('search-area');
+        
+        function render(highlightIdx = -1, foundIdx = -1) {
+            searchArea.innerHTML = data.map((val, i) => {
+                let color = '#e5e7eb';
+                if (i === foundIdx) color = '#22c55e';
+                else if (i === highlightIdx) color = '#ef4444';
+                return `< div style = "width:50px;height:50px;border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-weight:bold;position:relative;" >
+                    ${ val }
+                <span style="position:absolute;bottom:-20px;font-size:10px;color:#666;">${i}</span>
+                </div > `;
+            }).join('');
+        }
+        
+        window.startSearch = async () => {
+            if (algorithm === '线性搜索') {
+                document.getElementById('status').textContent = '开始线性搜索...';
+                for (let i = 0; i < data.length; i++) {
+                    document.getElementById('status').textContent = `检查索引 ${ i }: 值 = ${ data[i] } `;
+                    render(i);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    if (data[i] === target) {
+                        render(-1, i);
+                        document.getElementById('status').textContent = `✅ 找到！在索引 ${ i } `;
+                        return;
+                    }
+                }
+                document.getElementById('status').textContent = '❌ 未找到';
+            } else if (algorithm === '二分搜索') {
+                let left = 0, right = data.length - 1;
+                document.getElementById('status').textContent = '开始二分搜索...';
+                
+                while (left <= right) {
+                    const mid = Math.floor((left + right) / 2);
+                    document.getElementById('status').textContent = `检查中点 ${ mid }: 值 = ${ data[mid] } `;
+                    render(mid);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                   if (data[mid] === target) {
+                        render(-1, mid);
+                        document.getElementById('status').textContent = `✅ 找到！在索引 ${ mid } `;
+                        return;
+                    } else if (data[mid] < target) {
+                        left = mid + 1;
+                    } else {
+                        right = mid - 1;
+                    }
+                }
+                document.getElementById('status').textContent = '❌ 未找到';
+            }
+        };
+        
+        render();
+    }
+    
+    // 主应用逻辑
+    const algorithms = [
+        { id: 'bubble', name: '冒泡排序', category: 'sorting', summary: '相邻元素比较交换', description: '重复遍历数组，比较相邻元素并交换' },
+        { id: 'selection', name: '选择排序', category: 'sorting', summary: '选择最小元素', description: '每次选择未排序部分的最小元素放到已排序部分末尾' },
+        { id: 'insertion', name: '插入排序', category: 'sorting', summary: '逐个插入', description: '将元素逐个插入到已插入部分的正确位置' },
+        { id: 'linear', name: '线性搜索', category: 'searching', summary: '顺序查找', description: '从头到尾逐个检查元素' },
+        { id: 'binary', name: '二分搜索', category: 'searching', summary: '折半查找', description: '在有序数组中通过折半缩小搜索范围' }
+    ];
+    
+    let currentAlgorithm = null;
+    
+    const list = document.getElementById('algorithm-list');
+    algorithms.forEach((algo, i) => {
+        const item = document.createElement('div');
+        item.className = 'algo-item';
+        item.innerHTML = `< div class="font-semibold" > ${ algo.name }</div > <div class="text-sm text-gray-500">${algo.summary}</div>`;
+        item.onclick = () => {
+            currentAlgorithm = algo;
+            document.getElementById('algo-placeholder').classList.add('hidden');
+            document.getElementById('algo-detail').classList.remove('hidden');
+            document.getElementById('detail-name').textContent = algo.name;
+            document.getElementById('detail-summary').textContent = algo.summary;
+            document.getElementById('detail-description').textContent = algo.description;
+            document.querySelectorAll('.algo-item').forEach((el, j) => {
+                el.classList.toggle('active', i === j);
+            });
+        };
+        list.appendChild(item);
+    });
+    
+    function switchTab(name) {
+        document.querySelectorAll('.tab-button').forEach((b, i) => {
+            b.classList.toggle('active', i === (name === 'algorithms' ? 0 : 1));
+        });
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.toggle('active', c.id === `tab - ${ name }`);
+        });
+    }
+    
+    function startVisualization() {
+        if (!currentAlgorithm) {
+            alert('请先选择一个算法！');
+            return;
+        }
+        
+        switchTab('visualizer');
+        
+        const vizPlaceholder = document.getElementById('viz-placeholder');
+        const vizContainer = document.getElementById('viz-container');
+        vizPlaceholder.classList.add('hidden');
+        vizContainer.classList.remove('hidden');
+        
+        if (currentAlgorithm.category === 'sorting') {
+            createSimpleVisualizer(currentAlgorithm.name, [64, 34, 25, 12, 22, 11, 90]);
+        } else if (currentAlgorithm.category === 'searching') {
+            createSearchVisualizer(currentAlgorithm.name, [3, 7, 14, 19, 25, 31, 38, 42, 55], 25);
+        }
+    }
+    </script>
+</body>
+
+</html>

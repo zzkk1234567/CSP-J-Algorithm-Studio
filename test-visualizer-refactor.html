@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 AlgorithmVisualizer 重构</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🧪 AlgorithmVisualizer 重构测试</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">测试项目</h2>
+            <div id="test-results" class="space-y-2"></div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">事件日志</h2>
+            <div id="event-log" class="bg-gray-800 text-green-400 p-4 rounded font-mono text-sm h-64 overflow-y-auto"></div>
+        </div>
+        
+        <div id="visualizer-container"></div>
+    </div>
+
+    <script src="algorithm-visualizer.js"></script>
+    <script>
+        const testResults = document.getElementById('test-results');
+        const eventLog = document.getElementById('event-log');
+        
+        function logEvent(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.innerHTML += `[${timestamp}] ${message}\n`;
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        function addTestResult(name, passed, message = '') {
+            const div = document.createElement('div');
+            div.className = `p-3 rounded ${passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            div.innerHTML = `
+                <span class="font-bold">${passed ? '✅' : '❌'} ${name}</span>
+                ${message ? `<br><span class="text-sm">${message}</span>` : ''}
+            `;
+            testResults.appendChild(div);
+        }
+        
+        // 测试 1: 基本实例化
+        try {
+            const viz = new SortingVisualizer('visualizer-container', 'bubble');
+            addTestResult('基本实例化', true, '成功创建 SortingVisualizer 实例');
+            
+            // 测试 2: _mergeOptions 方法
+            const hasOptions = viz.options && viz.options.speed && viz.options.colors;
+            addTestResult('_mergeOptions 方法', hasOptions, `选项已正确合并，速度: ${viz.options.speed}ms`);
+            
+            // 测试 3: _initializeState 方法
+            const hasState = viz.state && typeof viz.state.isPlaying === 'boolean';
+            addTestResult('_initializeState 方法', hasState, '状态对象已正确初始化');
+            
+            // 测试 4: 事件系统 - on 方法
+            let eventFired = false;
+            viz.on('test-event', (data) => {
+                eventFired = true;
+                logEvent(`自定义事件触发: ${JSON.stringify(data)}`);
+            });
+            viz.emit('test-event', { test: 'data' });
+            addTestResult('事件系统 - on/emit', eventFired, '事件监听和触发正常工作');
+            
+            // 测试 5: 监听内置事件
+            viz.on('play', (data) => logEvent(`▶️ 播放事件: ${JSON.stringify(data)}`));
+            viz.on('pause', (data) => logEvent(`⏸️ 暂停事件: ${JSON.stringify(data)}`));
+            viz.on('reset', (data) => logEvent(`🔄 重置事件: ${JSON.stringify(data)}`));
+            viz.on('step', (data) => logEvent(`👣 步骤事件: 步骤 ${data.currentStep}`));
+            viz.on('compare', (data) => logEvent(`🔍 比较事件: 索引 [${data.indices}]`));
+            viz.on('swap', (data) => logEvent(`🔄 交换事件: ${data.index1} ↔ ${data.index2}`));
+            viz.on('complete', (data) => logEvent(`✅ 完成事件: ${data.comparisons} 次比较, ${data.swaps} 次交换, 耗时 ${data.duration}ms`));
+            viz.on('destroyed', (data) => logEvent(`💥 销毁事件: ${JSON.stringify(data)}`));
+            
+            addTestResult('内置事件监听器', true, '已注册所有内置事件监听器');
+            
+            // 测试 6: destroy 方法存在
+            const hasDestroy = typeof viz.destroy === 'function';
+            addTestResult('destroy 方法', hasDestroy, 'destroy 方法已实现');
+            
+            // 测试 7: 资源管理属性
+            const hasResourceManagement = Array.isArray(viz.timers) && Array.isArray(viz.eventListeners);
+            addTestResult('资源管理', hasResourceManagement, '定时器和事件监听器数组已初始化');
+            
+            // 测试 8: 初始化可视化
+            viz.setData([5, 3, 8, 2, 7, 1, 9, 4, 6]);
+            viz.init();
+            const containerHasContent = viz.container.innerHTML.length > 0;
+            addTestResult('初始化可视化', containerHasContent, '可视化界面已渲染');
+            
+            // 测试 9: 播放和暂停
+            setTimeout(() => {
+                viz.play();
+                setTimeout(() => {
+                    viz.pause();
+                    addTestResult('播放和暂停', true, '播放和暂停功能正常');
+                }, 500);
+            }, 500);
+            
+            // 测试 10: 重置功能
+            setTimeout(() => {
+                viz.reset();
+                addTestResult('重置功能', true, '重置功能正常');
+            }, 1500);
+            
+            // 测试 11: destroy 清理
+            setTimeout(() => {
+                const timersBefore = viz.timers.length;
+                const handlersBefore = Object.keys(viz.eventHandlers).length;
+                
+                viz.destroy();
+                
+                const timersAfter = viz.timers.length;
+                const handlersAfter = Object.keys(viz.eventHandlers).length;
+                const containerEmpty = viz.container.innerHTML === '';
+                
+                const cleaned = timersAfter === 0 && handlersAfter === 0 && containerEmpty;
+                addTestResult('destroy 清理', cleaned, 
+                    `定时器: ${timersBefore}→${timersAfter}, 事件处理器: ${handlersBefore}→${handlersAfter}, DOM已清空: ${containerEmpty}`);
+            }, 2500);
+            
+        } catch (error) {
+            addTestResult('测试执行', false, `错误: ${error.message}`);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

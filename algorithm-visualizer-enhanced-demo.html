@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 CSP-J 算法可视化系统 - 增强版</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .algorithm-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        #viz-content {
+            min-height: 300px;
+        }
+        
+        kbd {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <!-- 标题区 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">
+                🎯 CSP-J 算法可视化系统 - 增强版
+            </h1>
+            <p class="text-center text-gray-600">
+                完整的算法演示、交互控制、步骤解释和复杂度分析
+            </p>
+            <div class="text-center mt-4">
+                <span class="text-sm text-gray-500">💡 提示：使用键盘快捷键可以更快地控制演示</span>
+            </div>
+        </div>
+
+        <!-- 算法选择区 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- 排序算法 -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('sorting')">
+                <h3 class="text-xl font-bold mb-4">🔄 排序算法</h3>
+                <ul class="space-y-2 text-sm">
+                    <li>• 冒泡排序 (Bubble Sort)</li>
+                    <li>• 选择排序 (Selection Sort)</li>
+                    <li>• 插入排序 (Insertion Sort)</li>
+                    <li>• 快速排序 (Quick Sort)</li>
+                    <li>• 归并排序 (Merge Sort)</li>
+                </ul>
+            </div>
+
+            <!-- 搜索算法 -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('searching')">
+                <h3 class="text-xl font-bold mb-4">🔍 搜索算法</h3>
+                <ul class="space-y-2 text-sm">
+                    <li>• 线性查找 (Linear Search)</li>
+                    <li>• 二分查找 (Binary Search)</li>
+                    <li>• 插值查找 (Interpolation)</li>
+                    <li>• 跳跃搜索 (Jump Search)</li>
+                    <li>• 指数搜索 (Exponential)</li>
+                </ul>
+            </div>
+
+            <!-- 图算法 -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('graph')">
+                <h3 class="text-xl font-bold mb-4">🌐 图算法</h3>
+                <ul class="space-y-2 text-sm">
+                    <li>• 深度优先搜索 (DFS)</li>
+                    <li>• 广度优先搜索 (BFS)</li>
+                    <li>• Dijkstra 最短路径</li>
+                    <li>• Kruskal 最小生成树</li>
+                    <li>• 拓扑排序</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 算法详细选择 -->
+        <div id="algorithm-selector" class="glass-effect rounded-lg p-6 mb-6 hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mr-2">选择算法：</label>
+                    <select id="specific-algorithm" class="p-2 border rounded-md" onchange="initAlgorithm()">
+                        <option value="">请选择具体算法</option>
+                    </select>
+                </div>
+                <button onclick="showAlgorithmInfo()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    📖 算法原理
+                </button>
+            </div>
+        </div>
+
+        <!-- 可视化主区域 -->
+        <div id="visualization-container" class="hidden">
+            <div class="glass-effect rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">🎯 算法可视化演示</h3>
+                <div id="viz-content"></div>
+            </div>
+        </div>
+
+        <!-- 算法原理说明 -->
+        <div id="algorithm-info-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="glass-effect rounded-lg p-8 max-w-3xl max-h-[80vh] overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold" id="algorithm-title">算法原理</h2>
+                    <button onclick="closeAlgorithmInfo()" class="text-2xl hover:text-red-500">✖️</button>
+                </div>
+                <div id="algorithm-details"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入算法可视化系统 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="algorithm-visualizer-enhanced.js"></script>
+    <script src="enhanced-ui-improvements.js"></script>
+    
+    <script>
+        let currentVisualizer = null;
+        let currentCategory = '';
+
+        // 算法信息数据库
+        const algorithmInfo = {
+            'bubble': {
+                name: '冒泡排序',
+                principle: '通过重复遍历要排序的列表，比较相邻元素并交换它们的位置（如果顺序错误），使得每次遍历后最大的元素"冒泡"到列表末尾。',
+                complexity: {
+                    time: { best: 'O(n)', average: 'O(n²)', worst: 'O(n²)' },
+                    space: 'O(1)'
+                },
+                advantages: ['实现简单', '稳定排序', '原地排序'],
+                disadvantages: ['效率较低', '不适合大规模数据'],
+                code: `void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(arr[j], arr[j+1]);
+            }
+        }
+    }
+}`
+            },
+            'selection': {
+                name: '选择排序',
+                principle: '在未排序序列中找到最小（或最大）元素，存放到排序序列的起始位置，然后再从剩余未排序元素中继续寻找最小（或最大）元素。',
+                complexity: {
+                    time: { best: 'O(n²)', average: 'O(n²)', worst: 'O(n²)' },
+                    space: 'O(1)'
+                },
+                advantages: ['实现简单', '原地排序', '交换次数少'],
+                disadvantages: ['不稳定排序', '效率较低'],
+                code: `void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        int minIdx = i;
+        for (int j = i+1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}`
+            },
+            'insertion': {
+                name: '插入排序',
+                principle: '通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。',
+                complexity: {
+                    time: { best: 'O(n)', average: 'O(n²)', worst: 'O(n²)' },
+                    space: 'O(1)'
+                },
+                advantages: ['稳定排序', '原地排序', '对几乎有序的数据效率高'],
+                disadvantages: ['对大规模数据效率低'],
+                code: `void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j+1] = arr[j];
+            j--;
+        }
+        arr[j+1] = key;
+    }
+}`
+            },
+            'quick': {
+                name: '快速排序',
+                principle: '选择一个基准元素，将数组分为两部分，小于基准的放左边，大于基准的放右边，然后递归地对左右两部分进行快速排序。',
+                complexity: {
+                    time: { best: 'O(n log n)', average: 'O(n log n)', worst: 'O(n²)' },
+                    space: 'O(log n)'
+                },
+                advantages: ['平均效率高', '原地排序'],
+                disadvantages: ['不稳定排序', '最坏情况效率低', '递归可能导致栈溢出'],
+                code: `void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}`
+            },
+            'merge': {
+                name: '归并排序',
+                principle: '采用分治法，将数组分成两半，分别排序后再合并。合并时比较两个有序数组的元素，按顺序放入结果数组。',
+                complexity: {
+                    time: { best: 'O(n log n)', average: 'O(n log n)', worst: 'O(n log n)' },
+                    space: 'O(n)'
+                },
+                advantages: ['稳定排序', '效率稳定', '适合链表排序'],
+                disadvantages: ['需要额外空间', '对小规模数据效率不如插入排序'],
+                code: `void mergeSort(int arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}`
+            },
+            'linear': {
+                name: '线性查找',
+                principle: '从数组的第一个元素开始，逐个检查每个元素，直到找到目标值或遍历完整个数组。',
+                complexity: {
+                    time: { best: 'O(1)', average: 'O(n)', worst: 'O(n)' },
+                    space: 'O(1)'
+                },
+                advantages: ['实现简单', '不需要数组有序', '适合小规模数据'],
+                disadvantages: ['效率低', '不适合大规模数据'],
+                code: `int linearSearch(int arr[], int n, int target) {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == target) {
+            return i;
+        }
+    }
+    return -1;
+}`
+            },
+            'binary': {
+                name: '二分查找',
+                principle: '在有序数组中，每次比较中间元素与目标值，根据比较结果缩小搜索范围到左半部分或右半部分。',
+                complexity: {
+                    time: { best: 'O(1)', average: 'O(log n)', worst: 'O(log n)' },
+                    space: 'O(1)'
+                },
+                advantages: ['效率高', '适合大规模数据'],
+                disadvantages: ['需要数组有序', '不适合频繁插入删除的场景'],
+                code: `int binarySearch(int arr[], int n, int target) {
+    int left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}`
+            }
+        };
+
+        // 算法分类
+        const algorithmCategories = {
+            'sorting': {
+                name: '排序算法',
+                algorithms: [
+                    { value: 'bubble', text: '冒泡排序' },
+                    { value: 'selection', text: '选择排序' },
+                    { value: 'insertion', text: '插入排序' },
+                    { value: 'quick', text: '快速排序' },
+                    { value: 'merge', text: '归并排序' }
+                ]
+            },
+            'searching': {
+                name: '搜索算法',
+                algorithms: [
+                    { value: 'linear', text: '线性查找' },
+                    { value: 'binary', text: '二分查找' }
+                ]
+            },
+            'graph': {
+                name: '图算法',
+                algorithms: [
+                    { value: 'dfs', text: '深度优先搜索' },
+                    { value: 'bfs', text: '广度优先搜索' },
+                    { value: 'dijkstra', text: 'Dijkstra最短路径' }
+                ]
+            }
+        };
+
+        // 选择算法类别
+        function selectAlgorithm(category) {
+            currentCategory = category;
+            const selector = document.getElementById('algorithm-selector');
+            const select = document.getElementById('specific-algorithm');
+            
+            // 清空选择框
+            select.innerHTML = '<option value="">请选择具体算法</option>';
+            
+            // 添加该类别的算法
+            const algorithms = algorithmCategories[category].algorithms;
+            algorithms.forEach(algo => {
+                const option = document.createElement('option');
+                option.value = algo.value;
+                option.textContent = algo.text;
+                select.appendChild(option);
+            });
+            
+            selector.classList.remove('hidden');
+            document.getElementById('visualization-container').classList.add('hidden');
+        }
+
+        // 初始化算法
+        function initAlgorithm() {
+            const algorithm = document.getElementById('specific-algorithm').value;
+            if (!algorithm) return;
+            
+            const container = document.getElementById('visualization-container');
+            container.classList.remove('hidden');
+            
+            // 清理之前的可视化
+            if (currentVisualizer) {
+                currentVisualizer = null;
+            }
+            
+            // 根据类别创建相应的可视化器
+            if (currentCategory === 'sorting') {
+                // 优先使用增强版排序可视化器
+                const VisualizerClass = window.EnhancedSortingVisualizer || SortingVisualizer;
+                currentVisualizer = new VisualizerClass('visualization-container', algorithm);
+                currentVisualizer.setData([64, 34, 25, 12, 22, 11, 90, 88, 55, 42]);
+            } else if (currentCategory === 'searching') {
+                // 优先使用增强版搜索可视化器
+                const VisualizerClass = window.EnhancedSearchVisualizer || SearchVisualizer;
+                currentVisualizer = new VisualizerClass('visualization-container', algorithm);
+                currentVisualizer.setData([3, 7, 14, 19, 25, 31, 38, 42, 55, 67, 73, 89, 95]);
+                currentVisualizer.setTarget(42);
+            } else if (currentCategory === 'graph') {
+                // 优先使用增强版图可视化器
+                const VisualizerClass = window.EnhancedGraphVisualizer || GraphVisualizer;
+                currentVisualizer = new VisualizerClass('visualization-container', algorithm);
+                // 创建一个示例图
+                const nodes = [
+                    { id: 'A', label: 'A', x: 100, y: 100 },
+                    { id: 'B', label: 'B', x: 200, y: 100 },
+                    { id: 'C', label: 'C', x: 300, y: 100 },
+                    { id: 'D', label: 'D', x: 150, y: 200 },
+                    { id: 'E', label: 'E', x: 250, y: 200 }
+                ];
+                const edges = [
+                    { from: 'A', to: 'B', directed: false },
+                    { from: 'B', to: 'C', directed: false },
+                    { from: 'A', to: 'D', directed: false },
+                    { from: 'B', to: 'E', directed: false },
+                    { from: 'D', to: 'E', directed: false },
+                    { from: 'C', to: 'E', directed: false }
+                ];
+                currentVisualizer.setGraph(nodes, edges);
+            }
+            
+            if (currentVisualizer) {
+                currentVisualizer.init();
+                currentVisualizer.initVisualization();
+                
+                // 将可视化器绑定到全局变量以便控制按钮可以访问
+                window.visualizer = currentVisualizer;
+            }
+        }
+
+        // 显示算法原理
+        function showAlgorithmInfo() {
+            const algorithm = document.getElementById('specific-algorithm').value;
+            if (!algorithm || !algorithmInfo[algorithm]) return;
+            
+            const info = algorithmInfo[algorithm];
+            const modal = document.getElementById('algorithm-info-modal');
+            const title = document.getElementById('algorithm-title');
+            const details = document.getElementById('algorithm-details');
+            
+            title.textContent = info.name;
+            details.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">📖 基本原理</h3>
+                        <p class="text-gray-700">${info.principle}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">⏱️ 时间复杂度</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-green-100 p-3 rounded">
+                                <p class="text-sm text-green-700">最佳情况</p>
+                                <p class="font-mono font-bold">${info.complexity.time.best}</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded">
+                                <p class="text-sm text-yellow-700">平均情况</p>
+                                <p class="font-mono font-bold">${info.complexity.time.average}</p>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded">
+                                <p class="text-sm text-red-700">最坏情况</p>
+                                <p class="font-mono font-bold">${info.complexity.time.worst}</p>
+                            </div>
+                        </div>
+                        <p class="mt-2"><strong>空间复杂度：</strong><span class="font-mono">${info.complexity.space}</span></p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-bold text-lg mb-2">✅ 优点</h3>
+                            <ul class="list-disc pl-5 space-y-1">
+                                ${info.advantages.map(adv => `<li class="text-green-700">${adv}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-2">❌ 缺点</h3>
+                            <ul class="list-disc pl-5 space-y-1">
+                                ${info.disadvantages.map(dis => `<li class="text-red-700">${dis}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">💻 C++代码实现</h3>
+                        <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code>${info.code}</code></pre>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // 关闭算法原理弹窗
+        function closeAlgorithmInfo() {
+            document.getElementById('algorithm-info-modal').classList.add('hidden');
+        }
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 增强版算法可视化系统已就绪！');
+            console.log('💡 提示：使用键盘快捷键可以更好地控制演示');
+        });
+    </script>
+</body>
+</html>

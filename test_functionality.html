@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSP-J Function Test</title>
+    <script>
+        // Simple test to check if main functions are callable
+        window.onload = function() {
+            console.log('Testing CSP-J functions...');
+            
+            // Open the main file in a new window
+            const mainWindow = window.open('csp-j-learning-tool.html', '_blank');
+            
+            // Test functions after a delay
+            setTimeout(() => {
+                if (mainWindow && mainWindow.generateKnowledgeNav) {
+                    console.log('✓ generateKnowledgeNav function exists');
+                } else {
+                    console.log('✗ generateKnowledgeNav function not found');
+                }
+                
+                if (mainWindow && mainWindow.loadCodeTemplate) {
+                    console.log('✓ loadCodeTemplate function exists');
+                } else {
+                    console.log('✗ loadCodeTemplate function not found');
+                }
+                
+                if (mainWindow && mainWindow.showAlgorithmViz) {
+                    console.log('✓ showAlgorithmViz function exists');
+                } else {
+                    console.log('✗ showAlgorithmViz function not found');
+                }
+                
+                if (mainWindow && mainWindow.startTest) {
+                    console.log('✓ startTest function exists');
+                } else {
+                    console.log('✗ startTest function not found');
+                }
+                
+                console.log('Test completed. Check the main window for functionality.');
+            }, 2000);
+        };
+    </script>
+</head>
+<body>
+    <h1>CSP-J Learning Tool Test</h1>
+    <p>Check the browser console for test results.</p>
+    <p>Main application should open in a new window.</p>
+</body>
+</html>

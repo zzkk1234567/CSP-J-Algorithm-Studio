@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-J Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>CSP-J Learning Tool Test</h1>
+    <div id="test-results"></div>
+    
+    <button onclick="testMainFile()">Test Main HTML File</button>
+    
+    <script>
+        function addResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        function testMainFile() {
+            addResult('Opening main file...');
+            
+            // Open main file
+            const mainWindow = window.open('csp-j-learning-tool.html', '_blank');
+            
+            setTimeout(() => {
+                try {
+                    if (mainWindow && !mainWindow.closed) {
+                        addResult('✓ Main file opened successfully');
+                        
+                        // Test if JavaScript is loaded
+                        if (mainWindow.gameState) {
+                            addResult('✓ Game state object found');
+                        } else {
+                            addResult('✗ Game state object not found', false);
+                        }
+                        
+                        if (mainWindow.knowledgeData) {
+                            addResult('✓ Knowledge data object found');
+                        } else {
+                            addResult('✗ Knowledge data object not found', false);
+                        }
+                        
+                        // Test functions
+                        if (typeof mainWindow.generateKnowledgeNav === 'function') {
+                            addResult('✓ generateKnowledgeNav function exists');
+                        } else {
+                            addResult('✗ generateKnowledgeNav function missing', false);
+                        }
+                        
+                        if (typeof mainWindow.loadCodeTemplate === 'function') {
+                            addResult('✓ loadCodeTemplate function exists');
+                        } else {
+                            addResult('✗ loadCodeTemplate function missing', false);
+                        }
+                        
+                        if (typeof mainWindow.startTest === 'function') {
+                            addResult('✓ startTest function exists');
+                        } else {
+                            addResult('✗ startTest function missing', false);
+                        }
+                        
+                    } else {
+                        addResult('✗ Could not open main file', false);
+                    }
+                } catch (error) {
+                    addResult('✗ Error testing: ' + error.message, false);
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

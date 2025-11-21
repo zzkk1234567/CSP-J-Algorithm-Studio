@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Quick Test</title>
+    <script src="algorithm-visualizer.js"></script>
+</head>
+
+<body>
+    <div id="test-container"></div>
+    <button onclick="testViz()">Test</button>
+
+    <script>
+        function testViz() {
+            const container = document.getElementById('test-container');
+            container.innerHTML = '<div id="viz-root"></div>';
+
+            try {
+                console.log('SortingVisualizer:', typeof SortingVisualizer);
+                console.log('SearchVisualizer:', typeof SearchVisualizer);
+
+                const viz = new SortingVisualizer('viz-root', 'bubble');
+                viz.init();
+                viz.setData([5, 3, 8, 1]);
+                console.log('Success!');
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<p style="color:red;">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>

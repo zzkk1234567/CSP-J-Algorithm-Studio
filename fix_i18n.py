@@ -1,0 +1,22 @@
+from pathlib import Path
+path = Path('utils/I18n.js')
+text = path.read_text(encoding='utf-8')
+marker = '// 浼樺寲椤甸潰鏂囨'
+start = text.find(marker)
+if start == -1:
+    raise SystemExit('marker not found')
+while start > 0 and text[start-1] == ' ':
+    start -= 1
+end_marker = "'optimized.detail.emptyUseCases':"
+end = text.find(end_marker, start)
+if end == -1:
+    raise SystemExit('end line not found')
+end = text.find("\n", end)
+if end == -1:
+    end = len(text)
+else:
+    end += 1
+old_block = text[start:end]
+new_block = """                // 浼樺寲椤甸潰鏂囨\n                'optimized.nav.subtitle': '\u4f18\u5316\u7248 v2.0',\n                'optimized.intro.title': 'CSP-J \u7b97\u6cd5\u5b66\u4e60\u4e0e\u53ef\u89c6\u5316',\n                'optimized.intro.body': '\u5728\u5de6\u4fa7\u9009\u62e9\u7b97\u6cd5\u5373\u53ef\u67e5\u770b\u63cf\u8ff0\u3001\u590d\u6742\u5ea6\u548c\u793a\u4f8b\u4ee3\u7801\uff0c\u5207\u6362\u5230\u201c\u53ef\u89c6\u5316\u201d\u9009\u9879\u5373\u80fd\u67e5\u770b\u52a8\u753b\u6f14\u793a\u3002',\n                'optimized.tabs.algorithms': '\u7b97\u6cd5\u5217\u8868',\n                'optimized.tabs.visualizer': '\u53ef\u89c6\u5316',\n                'optimized.tabs.progress': '\u5b66\u4e60\u8fdb\u5ea6',\n                'optimized.search.label': '\u641c\u7d22\u7b97\u6cd5',\n                'optimized.search.placeholder': '\u8f93\u5165\u540d\u79f0\u6216\u5173\u952e\u5b57\uff0c\u5982 sort\u3001graph',\n                'optimized.defaultPrompt': '\u4ece\u5de6\u4fa7\u9009\u62e9\u4efb\u4f55\u7b97\u6cd5\uff0c\u53f3\u4fa7\u5c06\u663e\u793a\u8be6\u7ec6\u4fe1\u606f\u3002',\n                'optimized.detail.start': '\u25b6 \u542f\u52a8\u53ef\u89c6\u5316',\n                'optimized.detail.description': '\u7b97\u6cd5\u63cf\u8ff0',\n                'optimized.detail.useCases': '\u5178\u578b\u5e94\u7528\u573a\u666f',\n                'optimized.detail.properties': '\u5173\u952e\u7279\u6027',\n                'optimized.detail.code': 'C++ \u4ee3\u7801\u793a\u4f8b',\n                'optimized.detail.complexity': '\u590d\u6742\u5ea6',\n                'optimized.detail.best': '\u6700\u4f73\u65f6\u95f4\uff1a',\n                'optimized.detail.average': '\u5e73\u5747\u65f6\u95f4\uff1a',\n                'optimized.detail.worst': '\u6700\u574f\u65f6\u95f4\uff1a',\n                'optimized.detail.space': '\u7a7a\u95f4\u5360\u7528\uff1a',\n                'optimized.visualizer.title': '\u53ef\u89c6\u5316\u6f14\u793a',\n                'optimized.visualizer.hint': '\u5728\u201c\u7b97\u6cd5\u201d\u9875\u9009\u62e9\u7b97\u6cd5\u540e\u70b9\u51fb\u201c\u542f\u52a8\u53ef\u89c6\u5316\u201d\u5373\u53ef\u67e5\u770b\u52a8\u753b\u3002',\n                'optimized.visualizer.statusTitle': '\u5f53\u524d\u72b6\u6001',\n                'optimized.visualizer.statusEmpty': '\u6682\u65e0\u4efb\u4f55\u53ef\u89c6\u5316\u3002',\n                'optimized.visualizer.noConfig': '\u8be5\u7b97\u6cd5\u6682\u672a\u914d\u7f6e\u53ef\u89c6\u5316\u6f14\u793a\u3002',\n                'optimized.visualizer.running': '\u6b63\u5728\u5c55\u793a\uff1a{algorithm}',\n                'optimized.list.empty': '\u6ca1\u6709\u7b26\u5408\u7b5b\u9009\u6761\u4ef6\u7684\u7b97\u6cd5\u3002',\n                'optimized.alert.selectAlgorithm': '\u8bf7\u5148\u9009\u62e9\u4e00\u4e2a\u7b97\u6cd5\u3002',\n                'optimized.progress.viewed': '\u5df2\u6d4f\u89c8\u7b97\u6cd5\u6570',\n                'optimized.progress.time': '\u9884\u8ba1\u5b66\u4e60\u65f6\u95f4\uff08\u5206\u949f\uff09',\n                'optimized.progress.badges': '\u5fbd\u7ae0\uff08\u793a\u4f8b\uff09',\n                'optimized.progress.note': '\u8fdb\u5ea6\u4ec5\u4fdd\u5b58\u5728\u672c\u5730\u6d4f\u89c8\u5668\uff0c\u4e0d\u4f1a\u540c\u6b65\u5230\u670d\u52a1\u5668\u3002',\n                'difficulty.easy': '\u7b80\u5355',\n                'difficulty.medium': '\u4e2d\u7b49',\n                'difficulty.hard': '\u56f0\u96be',\n                'optimized.sidebar.title': '\u7b97\u6cd5\u7b5b\u9009',\n                'optimized.sidebar.subtitle': '\u57fa\u4e8e\u7c7b\u522b\u6216\u5173\u952e\u8bcd\u8fdb\u884c\u7b5b\u9009',\n                'optimized.sidebar.counter': '\u53ef\u7528\u7b97\u6cd5\uff1a{count}\u4e2a',\n                'optimized.detail.tags': '\u7b97\u6cd5\u6807\u7b7e',\n                'optimized.detail.emptyUseCases': '\u6682\u65f6\u6ca1\u6709\u53ef\u5c55\u793a\u7684\u5e94\u7528\u793a\u4f8b\u3002',\n"""
+text = text[:start] + new_block + text[end:]
+path.write_text(text, encoding='utf-8')

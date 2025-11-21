@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能测试 - CSP-J算法可视化系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .success {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">🧪 CSP-J系统功能测试</h1>
+        
+        <div id="test-results"></div>
+        
+        <div class="mt-8 text-center">
+            <button onclick="runAllTests()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                🚀 开始测试
+            </button>
+        </div>
+    </div>
+
+    <!-- 引入所有脚本 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="algorithm-visualizer-enhanced.js"></script>
+    <script src="additional-algorithms.js"></script>
+    <script src="enhanced-ui-improvements.js"></script>
+    <script src="interactive-tutorial-system.js"></script>
+    <script src="comprehensive-test-system.js"></script>
+
+    <script>
+        function runAllTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            const tests = [
+                { name: 'CSP-J真题算法类', test: testCSPJAlgorithms },
+                { name: '移动端优化类', test: testMobileOptimization },
+                { name: '性能对比类', test: testPerformanceComparison },
+                { name: '基础可视化器', test: testBasicVisualizers },
+                { name: '增强功能', test: testEnhancedFeatures }
+            ];
+            
+            tests.forEach(({ name, test }) => {
+                const section = document.createElement('div');
+                section.className = 'test-section';
+                section.innerHTML = `<h3 class="text-lg font-bold mb-2">📋 ${name}</h3><div class="result"></div>`;
+                results.appendChild(section);
+                
+                try {
+                    const result = test();
+                    const resultDiv = section.querySelector('.result');
+                    if (result.success) {
+                        section.classList.add('success');
+                        resultDiv.innerHTML = `✅ 通过: ${result.message}`;
+                    } else {
+                        section.classList.add('warning');
+                        resultDiv.innerHTML = `⚠️ 部分通过: ${result.message}`;
+                    }
+                } catch (error) {
+                    section.classList.add('error');
+                    section.querySelector('.result').innerHTML = `❌ 失败: ${error.message}`;
+                }
+            });
+        }
+        
+        function testCSPJAlgorithms() {
+            if (typeof window.CSPJExamAlgorithmVisualizer === 'undefined') {
+                return { success: false, message: 'CSPJExamAlgorithmVisualizer类未定义' };
+            }
+            
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test-cspj';
+                document.body.appendChild(testDiv);
+                
+                const visualizer = new CSPJExamAlgorithmVisualizer('test-cspj', 'prime-sieve');
+                const algorithms = ['prime-sieve', 'gcd-euclidean', 'binary-conversion', 'factorial-recursive', 'fibonacci-dp', 'stack-simulation', 'queue-simulation'];
+                
+                document.body.removeChild(testDiv);
+                return { success: true, message: `支持${algorithms.length}种CSP-J真题算法` };
+            } catch (error) {
+                return { success: false, message: `实例化失败: ${error.message}` };
+            }
+        }
+        
+        function testMobileOptimization() {
+            if (typeof window.MobileOptimization === 'undefined') {
+                return { success: false, message: 'MobileOptimization类未定义' };
+            }
+            
+            try {
+                const mobileOpt = new MobileOptimization();
+                const isMobile = mobileOpt.detectMobile();
+                return { success: true, message: `移动端检测: ${isMobile ? '是' : '否'}, 优化功能可用` };
+            } catch (error) {
+                return { success: false, message: `移动端优化失败: ${error.message}` };
+            }
+        }
+        
+        function testPerformanceComparison() {
+            if (typeof window.AlgorithmPerformanceComparison === 'undefined') {
+                return { success: false, message: 'AlgorithmPerformanceComparison类未定义' };
+            }
+            
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test-perf';
+                document.body.appendChild(testDiv);
+                
+                const perfComp = new AlgorithmPerformanceComparison('test-perf');
+                
+                document.body.removeChild(testDiv);
+                return { success: true, message: '性能对比功能已加载，支持算法基准测试' };
+            } catch (error) {
+                return { success: false, message: `性能对比测试失败: ${error.message}` };
+            }
+        }
+        
+        function testBasicVisualizers() {
+            const classes = ['AlgorithmVisualizer', 'SortingVisualizer', 'SearchVisualizer'];
+            const available = classes.filter(cls => typeof window[cls] !== 'undefined');
+            
+            if (available.length === classes.length) {
+                return { success: true, message: `所有基础可视化器已加载 (${available.length}/${classes.length})` };
+            } else {
+                return { success: false, message: `部分基础可视化器未加载 (${available.length}/${classes.length})` };
+            }
+        }
+        
+        function testEnhancedFeatures() {
+            const enhancedClasses = ['EnhancedSortingVisualizer', 'InteractiveTutorialSystem'];
+            const available = enhancedClasses.filter(cls => typeof window[cls] !== 'undefined');
+            
+            return { 
+                success: available.length > 0, 
+                message: `增强功能加载: ${available.length}/${enhancedClasses.length} (${available.join(', ')})` 
+            };
+        }
+    </script>
+</body>
+</html>

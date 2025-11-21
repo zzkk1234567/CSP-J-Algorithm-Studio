@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ CSP-J Studio 功能测试检查表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .test-item:hover {
+            background: #e9ecef;
+        }
+
+        .test-item.completed {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .test-item.failed {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .test-content {
+            flex: 1;
+        }
+
+        .test-content strong {
+            color: #333;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .test-content small {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-btn {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-pass {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-pass:hover {
+            background: #218838;
+        }
+
+        .btn-fail {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-fail:hover {
+            background: #c82333;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .summary {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box.total {
+            background: #e7f1ff;
+            color: #004085;
+        }
+
+        .stat-box.passed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stat-box.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-box .label {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .link-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .export-btn {
+            background: #28a745;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ CSP-J Studio Complete 功能测试检查表</h1>
+            <p><strong>文件名称</strong>: csp-j-studio-complete.html</p>
+            <p><strong>文件位置</strong>: D:/CSPJ/csp-j-studio-complete.html</p>
+            <p><strong>测试日期</strong>: <span id="test-date"></span></p>
+
+            <div class="quick-links" style="margin-top: 15px;">
+                <a href="csp-j-studio-complete.html" class="link-btn" target="_blank">🚀 打开主文件</a>
+                <a href="quick-verify.html" class="link-btn" target="_blank">🧪 自动验证</a>
+                <button class="link-btn export-btn" onclick="exportResults()">💾 导出结果</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 进度总览</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%;">0%</div>
+            </div>
+            <p style="color: #666; text-align: center; font-size: 14px;">
+                <span id="progress-text">尚未开始测试</span>
+            </p>
+        </div>
+
+        <!-- 测试1: 基本加载 -->
+        <div class="test-section">
+            <h2>1️⃣ 基本页面加载</h2>
+
+            <div class="test-item" data-test="1-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>页面成功打开</strong>
+                    <small>在浏览器中打开 file:///D:/CSPJ/csp-j-studio-complete.html</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="1-2">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>标题显示正确</strong>
+                    <small>应显示："🎯 CSP-J 算法可视化系统 - 完整版"</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="1-3">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>所有卡片显示</strong>
+                    <small>应看到：排序算法、搜索算法、图算法、动态规划、CSP-J真题、性能对比、移动端优化</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="1-4">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>样式正常渲染</strong>
+                    <small>背景应为紫色渐变，卡片应有玻璃态效果</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试2: 排序算法 -->
+        <div class="test-section">
+            <h2>2️⃣ 排序算法可视化</h2>
+
+            <div class="test-item" data-test="2-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>点击排序算法卡片</strong>
+                    <small>点击"🔄 排序算法"卡片，应显示算法选择器</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="2-2">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>选择冒泡排序</strong>
+                    <small>从下拉框选择"冒泡排序"</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="2-3">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>可视化显示</strong>
+                    <small>应看到柱状图或数据可视化界面</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="2-4">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>控制按钮可用</strong>
+                    <small>测试播放、暂停、重置等按钮</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试3: 搜索算法 -->
+        <div class="test-section">
+            <h2>3️⃣ 搜索算法可视化</h2>
+
+            <div class="test-item" data-test="3-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>点击搜索算法卡片</strong>
+                    <small>点击"🔍 搜索算法"卡片</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="3-2">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>选择二分查找</strong>
+                    <small>从下拉框选择"二分查找"</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="3-3">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>搜索可视化正常</strong>
+                    <small>应看到数组和查找过程的可视化</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试4: 图算法 -->
+        <div class="test-section">
+            <h2>4️⃣ 图算法可视化</h2>
+
+            <div class="test-item" data-test="4-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>图算法可视化</strong>
+                    <small>选择DFS或BFS，确认图可视化正常显示</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试5: 互动功能 -->
+        <div class="test-section">
+            <h2>5️⃣ 互动功能</h2>
+
+            <div class="test-item" data-test="5-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>算法原理按钮</strong>
+                    <small>点击"📖 算法原理"按钮，应显示详细信息弹窗</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="5-2">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>互动教程按钮</strong>
+                    <small>点击"🎓 互动教程"按钮，应启动教程系统</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试6: 键盘快捷键 -->
+        <div class="test-section">
+            <h2>6️⃣ 键盘快捷键</h2>
+
+            <div class="test-item" data-test="6-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>空格键控制</strong>
+                    <small>启动可视化后，按空格键应能播放/暂停</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="6-2">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>方向键控制</strong>
+                    <small>按→下一步，按←上一步</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试7: CSP-J真题 -->
+        <div class="test-section">
+            <h2>7️⃣ CSP-J真题算法</h2>
+
+            <div class="test-item" data-test="7-1">
+                <input type="checkbox" class="checkbox" onchange="updateItem(this)">
+                <div class="test-content">
+                    <strong>CSP-J算法可视化</strong>
+                    <small>选择任一CSP-J真题算法（如"埃拉托斯特尼筛法"），确认可视化正常</small>
+                </div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-pass" onclick="markPass(this)">✓</button>
+                    <button class="status-btn btn-fail" onclick="markFail(this)">✗</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试总结 -->
+        <div class="summary">
+            <h3>📊 测试总结</h3>
+            <div class="stats">
+                <div class="stat-box total">
+                    <span class="number" id="total-tests">0</span>
+                    <span class="label">总测试项</span>
+                </div>
+                <div class="stat-box passed">
+                    <span class="number" id="passed-tests">0</span>
+                    <span class="label">已通过</span>
+                </div>
+                <div class="stat-box failed">
+                    <span class="number" id="failed-tests">0</span>
+                    <span class="label">失败</span>
+                </div>
+            </div>
+
+            <div id="final-result" style="margin-top: 20px; padding: 15px; border-radius: 8px; display: none;">
+                <!-- 动态生成结果 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化
+        document.getElementById('test-date').textContent = new Date().toLocaleString('zh-CN');
+        const totalTests = document.querySelectorAll('.test-item').length;
+        document.getElementById('total-tests').textContent = totalTests;
+
+        function updateProgress() {
+            const items = document.querySelectorAll('.test-item');
+            const completed = document.querySelectorAll('.test-item.completed, .test-item.failed').length;
+            const passed = document.querySelectorAll('.test-item.completed').length;
+            const failed = document.querySelectorAll('.test-item.failed').length;
+
+            const percentage = Math.round((completed / totalTests) * 100);
+
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-fill').textContent = percentage + '%';
+            document.getElementById('passed-tests').textContent = passed;
+            document.getElementById('failed-tests').textContent = failed;
+
+            if (completed > 0) {
+                document.getElementById('progress-text').textContent =
+                    `已完成 ${completed}/${totalTests} 项测试 (${passed} 通过, ${failed} 失败)`;
+            }
+
+            if (completed === totalTests) {
+                showFinalResult(passed, failed);
+            }
+        }
+
+        function markPass(btn) {
+            const item = btn.closest('.test-item');
+            const checkbox = item.querySelector('.checkbox');
+            item.classList.remove('failed');
+            item.classList.add('completed');
+            checkbox.checked = true;
+            updateProgress();
+        }
+
+        function markFail(btn) {
+            const item = btn.closest('.test-item');
+            const checkbox = item.querySelector('.checkbox');
+            item.classList.remove('completed');
+            item.classList.add('failed');
+            checkbox.checked = true;
+            updateProgress();
+        }
+
+        function updateItem(checkbox) {
+            const item = checkbox.closest('.test-item');
+            if (!checkbox.checked) {
+                item.classList.remove('completed', 'failed');
+                updateProgress();
+            }
+        }
+
+        function showFinalResult(passed, failed) {
+            const resultDiv = document.getElementById('final-result');
+            const passRate = Math.round((passed / totalTests) * 100);
+
+            if (passRate === 100) {
+                resultDiv.style.background = '#d4edda';
+                resultDiv.style.color = '#155724';
+                resultDiv.innerHTML = `
+                    <strong style="font-size: 20px;">✅ 所有测试通过！</strong>
+                    <p style="margin-top: 10px;">csp-j-studio-complete.html 功能完全正常，可以放心使用。</p>
+                `;
+            } else if (passRate >= 80) {
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.color = '#856404';
+                resultDiv.innerHTML = `
+                    <strong style="font-size: 20px;">⚠️ 大部分功能正常</strong>
+                    <p style="margin-top: 10px;">通过率: ${passRate}% - 有 ${failed} 项测试失败，建议检查相关功能。</p>
+                `;
+            } else {
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.innerHTML = `
+                    <strong style="font-size: 20px;">❌ 存在较多问题</strong>
+                    <p style="margin-top: 10px;">通过率: ${passRate}% - 有 ${failed} 项测试失败，请检查文件和依赖。</p>
+                `;
+            }
+
+            resultDiv.style.display = 'block';
+        }
+
+        function exportResults() {
+            const results = [];
+            const items = document.querySelectorAll('.test-item');
+
+            items.forEach((item, index) => {
+                const text = item.querySelector('.test-content strong').textContent;
+                const status = item.classList.contains('completed') ? '✅ 通过' :
+                    item.classList.contains('failed') ? '❌ 失败' : '⏳ 未测试';
+                results.push(`${index + 1}. ${text}: ${status}`);
+            });
+
+            const passed = document.querySelectorAll('.test-item.completed').length;
+            const failed = document.querySelectorAll('.test-item.failed').length;
+            const passRate = Math.round((passed / totalTests) * 100);
+
+            const report = `
+CSP-J Studio Complete - 功能测试报告
+=====================================
+测试日期: ${new Date().toLocaleString('zh-CN')}
+文件: csp-j-studio-complete.html
+
+测试结果统计:
+- 总测试项: ${totalTests}
+- 通过: ${passed}
+- 失败: ${failed}
+- 通过率: ${passRate}%
+
+详细测试结果:
+${results.join('\n')}
+
+=====================================
+`;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'CSP-J-Studio-Test-Report-' + Date.now() + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ 测试报告已导出！');
+        }
+
+        // 初始化进度
+        updateProgress();
+    </script>
+</body>
+
+</html>

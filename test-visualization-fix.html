@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法可视化测试 - 修复版</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">🧪 算法可视化测试 - 修复版</h1>
+        
+        <!-- 算法选择 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">选择算法进行测试</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="testAlgorithm('bubble-sort')" class="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                    🔵 冒泡排序
+                </button>
+                <button onclick="testAlgorithm('quick-sort')" class="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                    ⚡ 快速排序
+                </button>
+                <button onclick="testAlgorithm('binary-search')" class="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition">
+                    🔍 二分查找
+                </button>
+                <button onclick="testAlgorithm('linear-search')" class="px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
+                    🔎 线性搜索
+                </button>
+            </div>
+        </div>
+
+        <!-- 测试日志 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">测试日志</h2>
+            <div id="test-log" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm h-48 overflow-y-auto"></div>
+        </div>
+
+        <!-- 可视化容器 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">可视化演示</h2>
+            <div id="visualizer-container" class="min-h-[400px]"></div>
+        </div>
+    </div>
+
+    <!-- 加载脚本 -->
+    <script src="utils/ErrorHandler.js"></script>
+    <script src="algorithm-visualizer.js"></script>
+    
+    <script>
+        let currentVisualizer = null;
+        let testLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '📝';
+            const logMessage = `[${timestamp}] ${prefix} ${message}`;
+            testLog.push(logMessage);
+            
+            const logElement = document.getElementById('test-log');
+            logElement.innerHTML = testLog.slice(-20).join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(logMessage);
+        }
+
+        function testAlgorithm(algorithmId) {
+            log(`开始测试算法: ${algorithmId}`);
+            
+            try {
+                // 清理旧的可视化器
+                if (currentVisualizer && typeof currentVisualizer.destroy === 'function') {
+                    log('清理旧的可视化器实例');
+                    currentVisualizer.destroy();
+                }
+                
+                // 清空容器
+                const container = document.getElementById('visualizer-container');
+                container.innerHTML = '<div id="viz-test-container"></div>';
+                
+                log('容器已清空，等待DOM更新...');
+                
+                // 等待DOM更新
+                setTimeout(() => {
+                    try {
+                        let visualizer;
+                        
+                        // 根据算法类型创建可视化器
+                        if (algorithmId.includes('sort')) {
+                            const algoType = algorithmId.replace('-sort', '');
+                            log(`创建排序可视化器: ${algoType}`);
+                            
+                            if (typeof SortingVisualizer === 'undefined') {
+                                throw new Error('SortingVisualizer类未定义');
+                            }
+                            
+                            visualizer = new SortingVisualizer('viz-test-container', algoType);
+                            log('排序可视化器实例已创建', 'success');
+                            
+                        } else if (algorithmId.includes('search')) {
+                            const algoType = algorithmId.replace('-search', '');
+                            log(`创建搜索可视化器: ${algoType}`);
+                            
+                            if (typeof SearchVisualizer === 'undefined') {
+                                throw new Error('SearchVisualizer类未定义');
+                            }
+                            
+                            visualizer = new SearchVisualizer('viz-test-container', algoType);
+                            visualizer.setTarget(7);
+                            log('搜索可视化器实例已创建', 'success');
+                        }
+                        
+                        // 初始化可视化器
+                        log('初始化可视化器UI...');
+                        visualizer.init();
+                        log('UI初始化完成', 'success');
+                        
+                        // 设置数据
+                        if (algorithmId.includes('sort')) {
+                            log('设置排序数据: [5, 3, 8, 2, 7, 1, 9, 4, 6]');
+                            visualizer.setData([5, 3, 8, 2, 7, 1, 9, 4, 6]);
+                        } else if (algorithmId.includes('search')) {
+                            log('设置搜索数据: [1, 2, 3, 4, 5, 6, 7, 8, 9]');
+                            visualizer.setData([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                        }
+                        
+                        // 重置以生成动画队列
+                        log('重置可视化器，生成动画队列...');
+                        visualizer.reset();
+                        
+                        const queueLength = visualizer.animationQueue ? visualizer.animationQueue.length : 0;
+                        log(`动画队列已生成，包含 ${queueLength} 个步骤`, 'success');
+                        
+                        if (queueLength === 0) {
+                            log('警告：动画队列为空！', 'error');
+                        }
+                        
+                        // 保存到全局变量
+                        currentVisualizer = visualizer;
+                        window.visualizer = visualizer;
+                        
+                        log('可视化器已准备就绪，可以点击播放按钮开始演示', 'success');
+                        log('-----------------------------------');
+                        
+                    } catch (error) {
+                        log(`创建可视化器失败: ${error.message}`, 'error');
+                        console.error('详细错误:', error);
+                    }
+                }, 100);
+                
+            } catch (error) {
+                log(`测试失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+        }
+
+        // 页面加载完成后的初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成');
+            log('检查必需的类...');
+            
+            const classes = ['SortingVisualizer', 'SearchVisualizer', 'GraphVisualizer'];
+            classes.forEach(className => {
+                const exists = typeof window[className] !== 'undefined';
+                log(`${className}: ${exists ? '✅ 已加载' : '❌ 未加载'}`, exists ? 'success' : 'error');
+            });
+            
+            log('-----------------------------------');
+            log('请选择一个算法开始测试');
+        });
+    </script>
+</body>
+</html>

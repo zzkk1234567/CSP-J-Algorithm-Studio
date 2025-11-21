@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I18n 国际化测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .test-section h2 {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #45a049;
+        }
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #0b7dda;
+        }
+        .translation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .translation-item {
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .translation-key {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .translation-value {
+            color: #333;
+            font-size: 16px;
+        }
+        .current-locale {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            flex: 1;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 I18n 国际化系统测试</h1>
+        
+        <div class="controls">
+            <h3>语言切换控制</h3>
+            <p>当前语言: <span class="current-locale" id="current-locale">zh-CN</span></p>
+            <button class="btn-primary" onclick="switchToZh()">切换到中文</button>
+            <button class="btn-secondary" onclick="switchToEn()">Switch to English</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 基础翻译测试</h2>
+            <div class="translation-grid" id="basic-translations"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 控制按钮翻译</h2>
+            <div class="translation-grid" id="control-translations"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📈 统计信息翻译</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label" data-i18n="stats.comparisons">比较次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">18</div>
+                    <div class="stat-label" data-i18n="stats.swaps">交换次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">156</div>
+                    <div class="stat-label" data-i18n="stats.accesses">访问次数</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 参数替换测试</h2>
+            <div id="param-tests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>✅ 测试结果</h2>
+            <div id="test-results"></div>
+        </div>
+    </div>
+
+    <!-- 加载依赖 -->
+    <script src="utils/ConfigManager.js"></script>
+    <script src="utils/I18n.js"></script>
+    <script src="utils/i18n-integration.js"></script>
+
+    <script>
+        // 测试脚本
+        let testResults = [];
+
+        function runTests() {
+            testResults = [];
+            
+            // 测试1: I18n类是否正确加载
+            test('I18n class loaded', () => {
+                return window.i18n !== undefined;
+            });
+
+            // 测试2: 基础翻译功能
+            test('Basic translation (zh-CN)', () => {
+                window.i18n.setLocale('zh-CN');
+                return window.i18n.t('control.play') === '播放';
+            });
+
+            test('Basic translation (en-US)', () => {
+                window.i18n.setLocale('en-US');
+                return window.i18n.t('control.play') === 'Play';
+            });
+
+            // 测试3: 参数替换
+            test('Parameter replacement', () => {
+                window.i18n.setLocale('zh-CN');
+                const result = window.i18n.t('step.comparing', {a: 5, b: 10});
+                return result === '比较元素 5 和 10';
+            });
+
+            // 测试4: 缺失键处理
+            test('Missing key handling', () => {
+                const result = window.i18n.t('non.existent.key');
+                return result === 'non.existent.key';
+            });
+
+            // 测试5: 语言切换
+            test('Locale switching', () => {
+                window.i18n.setLocale('zh-CN');
+                const zh = window.i18n.t('control.pause');
+                window.i18n.setLocale('en-US');
+                const en = window.i18n.t('control.pause');
+                return zh === '暂停' && en === 'Pause';
+            });
+
+            // 测试6: 获取支持的语言
+            test('Get supported locales', () => {
+                const locales = window.i18n.getSupportedLocales();
+                return locales.length === 2 && 
+                       locales[0].code === 'zh-CN' && 
+                       locales[1].code === 'en-US';
+            });
+
+            displayTestResults();
+        }
+
+        function test(name, fn) {
+            try {
+                const result = fn();
+                testResults.push({
+                    name: name,
+                    passed: result,
+                    error: null
+                });
+            } catch (error) {
+                testResults.push({
+                    name: name,
+                    passed: false,
+                    error: error.message
+                });
+            }
+        }
+
+        function displayTestResults() {
+            const container = document.getElementById('test-results');
+            const passed = testResults.filter(t => t.passed).length;
+            const total = testResults.length;
+            
+            let html = `<p><strong>测试通过: ${passed}/${total}</strong></p><ul>`;
+            
+            testResults.forEach(result => {
+                const icon = result.passed ? '✅' : '❌';
+                const className = result.passed ? 'success' : 'error';
+                html += `<li class="${className}">${icon} ${result.name}`;
+                if (result.error) {
+                    html += ` - Error: ${result.error}`;
+                }
+                html += '</li>';
+            });
+            
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function switchToZh() {
+            window.i18n.setLocale('zh-CN');
+            updateCurrentLocale();
+            updateAllTranslations();
+        }
+
+        function switchToEn() {
+            window.i18n.setLocale('en-US');
+            updateCurrentLocale();
+            updateAllTranslations();
+        }
+
+        function updateCurrentLocale() {
+            document.getElementById('current-locale').textContent = window.i18n.getLocale();
+        }
+
+        function updateAllTranslations() {
+            // 更新基础翻译
+            displayBasicTranslations();
+            displayControlTranslations();
+            displayParamTests();
+            
+            // 更新data-i18n属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = window.i18n.t(key);
+            });
+        }
+
+        function displayBasicTranslations() {
+            const keys = [
+                'common.loading',
+                'common.error',
+                'common.success',
+                'nav.title',
+                'settings.title',
+                'algorithm.bubble',
+                'algorithm.quick',
+                'algorithm.binary-search'
+            ];
+
+            const container = document.getElementById('basic-translations');
+            container.innerHTML = keys.map(key => `
+                <div class="translation-item">
+                    <div class="translation-key">${key}</div>
+                    <div class="translation-value">${window.i18n.t(key)}</div>
+                </div>
+            `).join('');
+        }
+
+        function displayControlTranslations() {
+            const keys = [
+                'control.play',
+                'control.pause',
+                'control.stop',
+                'control.next',
+                'control.prev',
+                'control.reset'
+            ];
+
+            const container = document.getElementById('control-translations');
+            container.innerHTML = keys.map(key => `
+                <div class="translation-item">
+                    <div class="translation-key">${key}</div>
+                    <div class="translation-value">${window.i18n.t(key)}</div>
+                </div>
+            `).join('');
+        }
+
+        function displayParamTests() {
+            const tests = [
+                {
+                    key: 'step.comparing',
+                    params: {a: 5, b: 10},
+                    description: 'Comparing elements'
+                },
+                {
+                    key: 'step.swapping',
+                    params: {a: 3, b: 7},
+                    description: 'Swapping elements'
+                },
+                {
+                    key: 'step.visiting',
+                    params: {node: 'A'},
+                    description: 'Visiting node'
+                },
+                {
+                    key: 'tutorial.step',
+                    params: {current: 3, total: 10},
+                    description: 'Tutorial step'
+                }
+            ];
+
+            const container = document.getElementById('param-tests');
+            container.innerHTML = tests.map(test => `
+                <div class="translation-item">
+                    <div class="translation-key">${test.key} - ${test.description}</div>
+                    <div class="translation-value">${window.i18n.t(test.key, test.params)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Starting I18n tests...');
+            
+            // 运行测试
+            runTests();
+            
+            // 显示翻译
+            updateAllTranslations();
+            
+            // 监听语言变更事件
+            document.addEventListener('locale-changed', (e) => {
+                console.log('Language changed to:', e.detail.locale);
+                updateAllTranslations();
+            });
+            
+            console.log('✅ I18n tests completed');
+        });
+    </script>
+</body>
+</html>

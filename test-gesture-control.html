@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手势控制测试</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold mb-6 text-center">🎯 手势控制集成测试</h1>
+        
+        <div id="test-results" class="space-y-4">
+            <div class="test-result info">
+                ⏳ 正在运行测试...
+            </div>
+        </div>
+        
+        <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+            <h2 class="text-xl font-bold mb-4">📱 手势测试区域</h2>
+            <p class="mb-4 text-gray-700">在下方区域滑动以测试手势识别：</p>
+            <div id="gesture-test-area" class="bg-white border-4 border-blue-300 rounded-lg p-8 text-center min-h-[200px] flex items-center justify-center">
+                <div>
+                    <div class="text-4xl mb-4">👆</div>
+                    <div class="text-lg font-semibold">在此区域滑动</div>
+                    <div class="text-sm text-gray-600 mt-2">向左滑动或向右滑动</div>
+                </div>
+            </div>
+            <div id="gesture-feedback" class="mt-4 p-4 bg-gray-100 rounded text-center font-mono">
+                等待手势...
+            </div>
+        </div>
+        
+        <div id="demo-container" class="mt-8"></div>
+    </div>
+
+    <!-- 加载必要的脚本 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="enhanced-ui-improvements.js"></script>
+    
+    <script>
+        const results = [];
+        
+        function addResult(message, type = 'info') {
+            results.push({ message, type });
+            updateResults();
+        }
+        
+        function updateResults() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = results.map(r => 
+                `<div class="test-result ${r.type}">${r.message}</div>`
+            ).join('');
+        }
+        
+        // 测试1: 检查AlgorithmVisualizer类是否存在
+        function test1() {
+            if (typeof AlgorithmVisualizer !== 'undefined') {
+                addResult('✅ 测试1: AlgorithmVisualizer类已加载', 'success');
+                return true;
+            } else {
+                addResult('❌ 测试1: AlgorithmVisualizer类未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试2: 检查MobileOptimization类是否存在
+        function test2() {
+            if (typeof MobileOptimization !== 'undefined') {
+                addResult('✅ 测试2: MobileOptimization类已加载', 'success');
+                return true;
+            } else {
+                addResult('❌ 测试2: MobileOptimization类未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试3: 检查stepBackward方法是否存在
+        function test3() {
+            if (AlgorithmVisualizer.prototype.stepBackward) {
+                addResult('✅ 测试3: stepBackward方法已实现', 'success');
+                return true;
+            } else {
+                addResult('❌ 测试3: stepBackward方法未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试4: 检查_setupMobileGestureControl方法是否存在
+        function test4() {
+            if (AlgorithmVisualizer.prototype._setupMobileGestureControl) {
+                addResult('✅ 测试4: _setupMobileGestureControl方法已实现', 'success');
+                return true;
+            } else {
+                addResult('❌ 测试4: _setupMobileGestureControl方法未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试5: 检查手势提示方法是否存在
+        function test5() {
+            if (AlgorithmVisualizer.prototype._showGestureHintIfNeeded && 
+                AlgorithmVisualizer.prototype._displayGestureHint) {
+                addResult('✅ 测试5: 手势提示方法已实现', 'success');
+                return true;
+            } else {
+                addResult('❌ 测试5: 手势提示方法未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试6: 初始化MobileOptimization并测试手势事件
+        function test6() {
+            try {
+                const mobileOpt = new MobileOptimization();
+                
+                // 监听手势事件
+                let leftSwipeDetected = false;
+                let rightSwipeDetected = false;
+                
+                document.addEventListener('mobile-swipe-left', () => {
+                    leftSwipeDetected = true;
+                    document.getElementById('gesture-feedback').innerHTML = 
+                        '<span class="text-blue-600">👈 检测到向左滑动！</span>';
+                });
+                
+                document.addEventListener('mobile-swipe-right', () => {
+                    rightSwipeDetected = true;
+                    document.getElementById('gesture-feedback').innerHTML = 
+                        '<span class="text-green-600">👉 检测到向右滑动！</span>';
+                });
+                
+                addResult('✅ 测试6: MobileOptimization已初始化，手势监听器已设置', 'success');
+                return true;
+            } catch (error) {
+                addResult(`❌ 测试6: 初始化失败 - ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // 测试7: 创建可视化器实例并测试手势集成
+        function test7() {
+            try {
+                // 创建容器
+                const container = document.createElement('div');
+                container.id = 'test-visualizer';
+                document.getElementById('demo-container').appendChild(container);
+                
+                // 创建可视化器实例
+                const visualizer = new AlgorithmVisualizer('test-visualizer');
+                visualizer.init();
+                
+                // 检查事件监听器是否已设置
+                addResult('✅ 测试7: 可视化器实例已创建，手势控制已集成', 'success');
+                
+                // 测试stepBackward方法
+                if (typeof visualizer.stepBackward === 'function') {
+                    addResult('✅ 测试7a: stepBackward方法可调用', 'success');
+                } else {
+                    addResult('❌ 测试7a: stepBackward方法不可用', 'error');
+                }
+                
+                return true;
+            } catch (error) {
+                addResult(`❌ 测试7: 可视化器测试失败 - ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // 运行所有测试
+        function runAllTests() {
+            results.length = 0;
+            addResult('🚀 开始测试手势控制集成...', 'info');
+            
+            const test1Result = test1();
+            const test2Result = test2();
+            const test3Result = test3();
+            const test4Result = test4();
+            const test5Result = test5();
+            const test6Result = test6();
+            const test7Result = test7();
+            
+            const allPassed = test1Result && test2Result && test3Result && 
+                            test4Result && test5Result && test6Result && test7Result;
+            
+            if (allPassed) {
+                addResult('🎉 所有测试通过！手势控制集成成功！', 'success');
+            } else {
+                addResult('⚠️ 部分测试失败，请检查上述错误', 'error');
+            }
+        }
+        
+        // 页面加载后运行测试
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-J Algorithm Studio</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="styles/enhanced-ui.css" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        body {
+            font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f4f6fb;
+            color: #0f172a;
+        }
+
+        .tab-button {
+            position: relative;
+            padding: 0.9rem 1.8rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .tab-button:hover {
+            color: #312e81;
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .tab-button.active {
+            background: #312e81;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(49, 46, 129, 0.25);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-pill {
+            border-radius: 9999px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #4338ca;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .filter-pill.active {
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+        }
+
+        .algo-card {
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 1rem;
+            padding: 1rem;
+            background: #fff;
+            transition: all 0.25s ease;
+            width: 100%;
+            text-align: left;
+        }
+
+        .algo-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(79, 70, 229, 0.5);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+        }
+
+        .algo-card.active {
+            border-color: #4f46e5;
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.2);
+        }
+
+        .icon-pill {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-easy {
+            background: rgba(34, 197, 94, 0.15);
+            color: #15803d;
+        }
+
+        .badge-medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+        }
+
+        .badge-hard {
+            background: rgba(248, 113, 113, 0.15);
+            color: #b91c1c;
+        }
+
+        .info-tile {
+            border-radius: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #eef2ff, #fdf2f8);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(14px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+        }
+
+        .section-heading {
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: #1e1b4b;
+            margin-bottom: 0.6rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-3">
+                <div class="icon-pill bg-gradient-to-br from-indigo-500 to-violet-500 w-12 h-12 text-base">
+                    CSP
+                </div>
+                <div>
+                    <p id="app-title" class="text-lg font-semibold text-slate-900">CSP-J Algorithm Studio</p>
+                    <p id="app-subtitle" class="text-sm text-slate-500">Optimized learning toolkit</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <label for="language-selector" class="text-sm text-slate-500">Language</label>
+                <select id="language-selector"
+                    class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <option value="zh-CN">中文</option>
+                    <option value="en-US">English</option>
+                </select>
+                <button type="button" onclick="openSettings()"
+                    class="px-4 py-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition">
+                    Settings
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="max-w-6xl mx-auto px-4 mt-8 mb-6">
+        <div class="flex flex-col gap-4 glass-card p-6">
+            <div class="flex flex-col gap-2">
+                <p id="hero-kicker" class="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-500">CSP-J</p>
+                <h1 id="hero-title" class="text-3xl font-black text-slate-900">Interactive Algorithm Learning</h1>
+                <p id="hero-description" class="text-slate-500 leading-relaxed">
+                    Explore curated CSP-J algorithms, compare key properties, and run lightweight visualizations without
+                    leaving the page.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-3 text-sm text-slate-500">
+                <span id="hero-pill-client" class="px-3 py-1 rounded-full bg-slate-100">100% client-side</span>
+                <span id="hero-pill-offline" class="px-3 py-1 rounded-full bg-slate-100">Works offline</span>
+                <span id="hero-pill-ui" class="px-3 py-1 rounded-full bg-slate-100">Tailwind-powered UI</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex flex-wrap gap-3 mb-8">
+            <button id="tab-algorithms" class="tab-button active" onclick="switchTab('algorithms')">
+                <span id="tab-algorithms-label">Algorithms</span>
+            </button>
+            <button id="tab-visualizer" class="tab-button" onclick="switchTab('visualizer')">
+                <span id="tab-visualizer-label">Visualizer</span>
+            </button>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 pb-16">
+        <section id="content-algorithms" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <aside class="lg:col-span-4 glass-card p-5 space-y-5 sticky top-24">
+                    <div>
+                        <p id="sidebar-title" class="text-base font-semibold text-slate-900">Pick an algorithm</p>
+                        <p id="sidebar-subtitle" class="text-sm text-slate-500">Filter by category or keyword</p>
+                        <p id="sidebar-counter"
+                            class="text-xs font-medium text-indigo-500 mt-1 uppercase tracking-widest"></p>
+                    </div>
+                    <div>
+                        <label id="search-label" for="algorithm-search"
+                            class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                            Search algorithms
+                        </label>
+                        <div class="mt-2 relative">
+                            <input id="algorithm-search" type="search"
+                                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                placeholder="Name or keyword">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">Ctrl +
+                                F</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="category-filters"></div>
+                    <div id="algorithm-list" class="space-y-3 max-h-[640px] overflow-y-auto pr-1"></div>
+                </aside>
+
+                <section class="lg:col-span-8 glass-card p-6">
+                    <div id="default-prompt" class="text-center py-16 px-6 text-slate-500">
+                        <p class="text-5xl font-black text-indigo-200 mb-4">A</p>
+                        <h3 id="default-prompt-title" class="text-2xl font-semibold text-slate-900 mb-2">
+                            Select an algorithm to begin
+                        </h3>
+                        <p id="default-prompt-description">Use the filters on the left to find a sorting, searching,
+                            graph, or DP technique.</p>
+                    </div>
+
+                    <div id="detail-content" class="hidden space-y-8">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-4">
+                                    <div id="detail-icon"
+                                        class="icon-pill bg-gradient-to-br from-indigo-500 to-cyan-500">AL</div>
+                                    <div>
+                                        <h2 id="visualizer-title" class="text-2xl font-bold text-slate-900">
+                                            Visualization</h2>
+                                        <p id="visualizer-hint" class="text-sm text-slate-500">Pick an algorithm first,
+                                            then start the
+                                            visualization.</p>
+                                    </div>
+                                    <span class="text-xs uppercase tracking-[0.3em] text-indigo-500 font-semibold">Live
+                                        preview</span>
+                                </div>
+                                <div id="visualizer-container"
+                                    class="min-h-[420px] border border-dashed border-indigo-200 rounded-2xl flex items-center justify-center text-slate-400">
+                                    <p>No visualization has started yet.</p>
+                                </div>
+                            </div>
+                </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-8 mt-10 bg-white">
+        <div
+            class="max-w-6xl mx-auto px-4 text-sm text-slate-500 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <p>© 2024 CSP-J Study Suite</p>
+            <p id="footer-version">Optimized build v2.0</p>
+        </div>
+    </footer>
+
+    <script type="application/json" id="algorithms-database">
+[
+    {
+        "id": "bubble-sort",
+        "icon": "BS",
+        "category": "sorting",
+        "difficulty": "easy",
+        "tags": [
+            "stable",
+            "comparison",
+            "teaching",
+            "in-place"
+        ],
+        "complexity": {
+            "best": "O(n)",
+            "average": "O(n^2)",
+            "worst": "O(n^2)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Bubble Sort",
+                "summary": "Repeatedly swaps adjacent items that are out of order.",
+                "description": "Bubble sort scans the array multiple times, pushing larger items toward the end. It is stable and easy to visualize but inefficient on large inputs.",
+                "useCases": [
+                    "Introducing comparison-based sorting concepts.",
+                    "Checking whether an array is already sorted."
+                ]
+            },
+            "zh-CN": {
+                "name": "冒泡排序",
+                "summary": "不断比较并交换相邻元素以完成排序。",
+                "description": "冒泡排序会多次遍历数组，将较大的元素不断向右端移动。算法稳定易于演示，但在大规模数据上效率较低。",
+                "useCases": [
+                    "用于讲解基于比较的排序概念。",
+                    "检测序列是否已基本有序。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "insertion-sort",
+        "icon": "IS",
+        "category": "sorting",
+        "difficulty": "easy",
+        "tags": [
+            "stable",
+            "adaptive",
+            "in-place",
+            "teaching"
+        ],
+        "complexity": {
+            "best": "O(n)",
+            "average": "O(n^2)",
+            "worst": "O(n^2)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Insertion Sort",
+                "summary": "Builds the sorted portion by inserting each item into place.",
+                "description": "Insertion sort maintains a growing sorted prefix and inserts each new item where it belongs. It is adaptive and shines on nearly sorted data.",
+                "useCases": [
+                    "Sorting very small arrays.",
+                    "Optimizing hybrid algorithms such as TimSort."
+                ]
+            },
+            "zh-CN": {
+                "name": "插入排序",
+                "summary": "通过将元素插入到有序区间来完成排序。",
+                "description": "插入排序保持一个不断扩张的有序前缀，并将新元素插入到正确位置。它具有自适应性，在近乎有序的数据上表现良好。",
+                "useCases": [
+                    "适合处理规模很小的数组。",
+                    "常用来优化如 TimSort 的混合算法。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "selection-sort",
+        "icon": "SS",
+        "category": "sorting",
+        "difficulty": "easy",
+        "tags": [
+            "simple",
+            "in-place",
+            "comparison"
+        ],
+        "complexity": {
+            "best": "O(n^2)",
+            "average": "O(n^2)",
+            "worst": "O(n^2)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Selection Sort",
+                "summary": "Repeatedly selects the minimum remaining element.",
+                "description": "Selection sort scans the unsorted portion to find the smallest element and swaps it into place. It minimizes swaps but still needs quadratic time.",
+                "useCases": [
+                    "When swap cost is expensive compared to comparisons.",
+                    "Teaching selection-based problem solving."
+                ]
+            },
+            "zh-CN": {
+                "name": "选择排序",
+                "summary": "反复选择剩余元素中的最小值并放到前端。",
+                "description": "选择排序遍历未排序部分以找到最小元素，并将其交换到前端。尽管交换次数少，但总体仍需平方级时间。",
+                "useCases": [
+                    "适合交换开销远大于比较开销的场景。",
+                    "用于讲解选择策略相关的题目。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "merge-sort",
+        "icon": "MS",
+        "category": "sorting",
+        "difficulty": "medium",
+        "tags": [
+            "stable",
+            "divide-conquer",
+            "comparison"
+        ],
+        "complexity": {
+            "best": "O(n log n)",
+            "average": "O(n log n)",
+            "worst": "O(n log n)",
+            "space": "O(n)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Merge Sort",
+                "summary": "Divides the array and merges sorted halves.",
+                "description": "Merge sort splits the input, sorts both halves recursively, and merges them back. It guarantees O(n log n) performance and remains stable.",
+                "useCases": [
+                    "Sorting linked lists or external data.",
+                    "Building stable hybrid sorting routines."
+                ]
+            },
+            "zh-CN": {
+                "name": "归并排序",
+                "summary": "拆分数组再合并已排序的子序列。",
+                "description": "归并排序把序列拆分成两半并递归排序，最终合并结果。它稳定且始终保持 O(n log n) 的复杂度。",
+                "useCases": [
+                    "处理链表或外存数据时的排序。",
+                    "构建需要稳定性的混合排序算法。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "quick-sort",
+        "icon": "QS",
+        "category": "sorting",
+        "difficulty": "medium",
+        "tags": [
+            "divide-conquer",
+            "comparison",
+            "cache-friendly"
+        ],
+        "complexity": {
+            "best": "O(n log n)",
+            "average": "O(n log n)",
+            "worst": "O(n^2)",
+            "space": "O(log n)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Quick Sort",
+                "summary": "Partitions the array around a pivot and recurses.",
+                "description": "Quick sort chooses a pivot, partitions elements, and recurses on each side. Good pivots make it very fast and cache friendly.",
+                "useCases": [
+                    "General-purpose in-memory sorting.",
+                    "Low-level libraries and contest tasks."
+                ]
+            },
+            "zh-CN": {
+                "name": "快速排序",
+                "summary": "围绕枢轴划分数组并递归排序。",
+                "description": "快速排序选取枢轴，把元素划分到左右区间并递归处理。枢轴选择合理时速度极快且对缓存友好。",
+                "useCases": [
+                    "通用的内存排序任务。",
+                    "底层库和竞赛题中常用。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "heap-sort",
+        "icon": "HS",
+        "category": "sorting",
+        "difficulty": "medium",
+        "tags": [
+            "in-place",
+            "comparison",
+            "memory-free"
+        ],
+        "complexity": {
+            "best": "O(n log n)",
+            "average": "O(n log n)",
+            "worst": "O(n log n)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Heap Sort",
+                "summary": "Uses a binary heap to repeatedly extract maxima.",
+                "description": "Heap sort builds a max heap and repeatedly extracts the largest element. It runs in O(n log n) with constant extra space.",
+                "useCases": [
+                    "Sorting when additional memory is limited.",
+                    "Streaming or tracking the top-k elements."
+                ]
+            },
+            "zh-CN": {
+                "name": "堆排序",
+                "summary": "使用二叉堆反复取出最大值完成排序。",
+                "description": "堆排序先构建最大堆，再一直弹出最大元素。它保持 O(n log n) 的复杂度，并且额外空间需求极低。",
+                "useCases": [
+                    "适合内存有限的排序任务。",
+                    "用于流式数据的前 k 大维护。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "counting-sort",
+        "icon": "CS",
+        "category": "sorting",
+        "difficulty": "medium",
+        "tags": [
+            "linear-time",
+            "non-comparison"
+        ],
+        "complexity": {
+            "best": "O(n + k)",
+            "average": "O(n + k)",
+            "worst": "O(n + k)",
+            "space": "O(k)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Counting Sort",
+                "summary": "Counts occurrences of each key to build the output.",
+                "description": "Counting sort tallies every key, accumulates counts, and places elements directly. It is linear when the key range k is manageable.",
+                "useCases": [
+                    "Sorting exam scores or IDs with a bounded range.",
+                    "Serving as a subroutine of radix sort."
+                ]
+            },
+            "zh-CN": {
+                "name": "计数排序",
+                "summary": "统计每个键值的出现次数并直接生成输出。",
+                "description": "计数排序遍历输入统计键值，累加计数后直接放置元素。当键值范围较旱时可在线性时间内完成。",
+                "useCases": [
+                    "处理范围受限的成绩或编号。",
+                    "作为基数排序中的子过程。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "radix-sort",
+        "icon": "RS",
+        "category": "sorting",
+        "difficulty": "medium",
+        "tags": [
+            "linear-time",
+            "non-comparison",
+            "stable"
+        ],
+        "complexity": {
+            "best": "O(d * (n + k))",
+            "average": "O(d * (n + k))",
+            "worst": "O(d * (n + k))",
+            "space": "O(n + k)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Radix Sort",
+                "summary": "Processes digits from least to most significant.",
+                "description": "Radix sort performs stable bucket passes for each digit (LSD or MSD). It avoids comparisons and achieves O(d * (n + k)).",
+                "useCases": [
+                    "Sorting integers or strings with fixed length.",
+                    "Efficient preprocessing before hashing or compression."
+                ]
+            },
+            "zh-CN": {
+                "name": "基数排序",
+                "summary": "按照数位从低到高依次处理数据。",
+                "description": "基数排序针对每一位执行稳定的分桶操作，可按 LSD 或 MSD 顺序处理，复杂度为 O(d*(n+k))。",
+                "useCases": [
+                    "排序定长的整数或字符串。",
+                    "在哈希或压缩前进行高效预处理。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "linear-search",
+        "icon": "LS",
+        "category": "searching",
+        "difficulty": "easy",
+        "tags": [
+            "sequential",
+            "teaching"
+        ],
+        "complexity": {
+            "best": "O(1)",
+            "average": "O(n)",
+            "worst": "O(n)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Linear Search",
+                "summary": "Checks every element until the target is found.",
+                "description": "Linear search scans the collection sequentially. It needs no preprocessing and works on unsorted data but stays slow on large inputs.",
+                "useCases": [
+                    "Validating user input inside small arrays.",
+                    "Traversing linked structures with no random access."
+                ]
+            },
+            "zh-CN": {
+                "name": "线性查找",
+                "summary": "逐个检查元素直至找到目标。",
+                "description": "线性查找按顺序遍历集合，不需要预处理并可直接用于无序数据，但在大规模输入下较慢。",
+                "useCases": [
+                    "在小型数组中验证用户输入。",
+                    "遍历缺乏随机访问能力的链式结构。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "binary-search",
+        "icon": "BSR",
+        "category": "searching",
+        "difficulty": "easy",
+        "tags": [
+            "needs-sorted",
+            "logarithmic",
+            "comparison"
+        ],
+        "complexity": {
+            "best": "O(1)",
+            "average": "O(log n)",
+            "worst": "O(log n)",
+            "space": "O(1)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Binary Search",
+                "summary": "Divides the sorted range in half each step.",
+                "description": "Binary search operates on sorted arrays, repeatedly narrowing the range by comparing with the middle element.",
+                "useCases": [
+                    "Lookups inside dictionaries or prefix sums.",
+                    "Checking feasibility in decision problems."
+                ]
+            },
+            "zh-CN": {
+                "name": "二分查找",
+                "summary": "每次把有序区间折半定位目标。",
+                "description": "二分查找在有序数组上运行，通过比较中点元素不断缩小范围，迅速找到目标。",
+                "useCases": [
+                    "处理字典或前缀和的查询。",
+                    "在判定型问题中检查可行性。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "breadth-first-search",
+        "icon": "BFS",
+        "category": "graph",
+        "difficulty": "easy",
+        "tags": [
+            "graph",
+            "queue-based",
+            "shortest-path"
+        ],
+        "complexity": {
+            "best": "O(V + E)",
+            "average": "O(V + E)",
+            "worst": "O(V + E)",
+            "space": "O(V)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Breadth-First Search",
+                "summary": "Explores the graph level by level.",
+                "description": "BFS uses a queue to visit vertices in increasing distance order, making it ideal for shortest paths on unweighted graphs.",
+                "useCases": [
+                    "Computing unweighted shortest distances.",
+                    "Detecting connected components or bipartite graphs."
+                ]
+            },
+            "zh-CN": {
+                "name": "广度优先搜索",
+                "summary": "按层遍历图中的节点。",
+                "description": "BFS 使用队列按距离层次访问节点，特别适合求解无权图的最短路径。",
+                "useCases": [
+                    "计算无权图的最短距离。",
+                    "识别连通分量或判断二分图。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "depth-first-search",
+        "icon": "DFS",
+        "category": "graph",
+        "difficulty": "medium",
+        "tags": [
+            "graph",
+            "recursive"
+        ],
+        "complexity": {
+            "best": "O(V + E)",
+            "average": "O(V + E)",
+            "worst": "O(V + E)",
+            "space": "O(V)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Depth-First Search",
+                "summary": "Recursively follows each branch before backtracking.",
+                "description": "DFS dives along a path as far as possible, then backtracks. It powers topological sort, cycle detection, and many graph routines.",
+                "useCases": [
+                    "Cycle detection and topological ordering.",
+                    "Exploring maze-like grids or trees."
+                ]
+            },
+            "zh-CN": {
+                "name": "深度优先搜索",
+                "summary": "沿分支深入遍历后再回溯。",
+                "description": "DFS 沿着一条路径尽可能深入，无法前进时再回溯，是拓扑排序与环检测的基础。",
+                "useCases": [
+                    "用于环检测或拓扑排序。",
+                    "探索迷宫式的网格或树结构。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "dijkstra",
+        "icon": "DIJ",
+        "category": "graph",
+        "difficulty": "medium",
+        "tags": [
+            "graph",
+            "greedy",
+            "shortest-path"
+        ],
+        "complexity": {
+            "best": "O(E log V)",
+            "average": "O(E log V)",
+            "worst": "O(E log V)",
+            "space": "O(V)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Dijkstra's Algorithm",
+                "summary": "Uses a priority queue to expand the closest node.",
+                "description": "Dijkstra relaxes edges in order of tentative distance with a min-heap. It solves single-source shortest paths on graphs with non-negative weights.",
+                "useCases": [
+                    "Routing across road or network graphs.",
+                    "Optimizing logistics and resource assignments."
+                ]
+            },
+            "zh-CN": {
+                "name": "迪杰斯特拉算法",
+                "summary": "借助优先队列扩展当前距离最小的节点。",
+                "description": "迪杰斯特拉算法利用最小堆按暂定距离顺序松弛边，可求解非负权图的单源最短路径。",
+                "useCases": [
+                    "道路或网络图中的路径规划。",
+                    "物流与资源分配的优化。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "prim",
+        "icon": "PRM",
+        "category": "graph",
+        "difficulty": "medium",
+        "tags": [
+            "graph",
+            "greedy",
+            "spanning-tree"
+        ],
+        "complexity": {
+            "best": "O(E log V)",
+            "average": "O(E log V)",
+            "worst": "O(E log V)",
+            "space": "O(V)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Prim's Algorithm",
+                "summary": "Grows the minimum spanning tree one edge at a time.",
+                "description": "Prim's algorithm keeps a cut between visited and unvisited vertices and always adds the lightest crossing edge.",
+                "useCases": [
+                    "Designing cost-efficient communication networks.",
+                    "Generating minimum spanning trees for clustering."
+                ]
+            },
+            "zh-CN": {
+                "name": "普里姆算法",
+                "summary": "逐条边扩展最小生成树。",
+                "description": "普里姆算法在已选与未选顶点间维护割集，永远选择权值最小的跨越边扩展生成树。",
+                "useCases": [
+                    "设计低成本的通信或供电网络。",
+                    "在聚类中构造最小生成树。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "knapsack-01",
+        "icon": "KS",
+        "category": "dp",
+        "difficulty": "medium",
+        "tags": [
+            "dynamic-programming",
+            "optimization"
+        ],
+        "complexity": {
+            "best": "O(nW)",
+            "average": "O(nW)",
+            "worst": "O(nW)",
+            "space": "O(nW)"
+        },
+        "text": {
+            "en-US": {
+                "name": "0/1 Knapsack",
+                "summary": "Dynamic programming on weight and value states.",
+                "description": "The 0/1 knapsack DP iterates over item weights and tracks the best value for each capacity, showcasing transition design.",
+                "useCases": [
+                    "Resource allocation with binary decisions.",
+                    "Teaching foundational dynamic programming patterns."
+                ]
+            },
+            "zh-CN": {
+                "name": "0/1 背包",
+                "summary": "通过重量和价值状态的动态规划求解。",
+                "description": "0/1 背包以容量为维度迭代物品，记录每个容量的最优价值，是经典的状态转移示例。",
+                "useCases": [
+                    "处理二选一的资源分配问题。",
+                    "讲解动态规划的基础模式。"
+                ]
+            }
+        }
+    },
+    {
+        "id": "longest-common-subsequence",
+        "icon": "LCS",
+        "category": "dp",
+        "difficulty": "medium",
+        "tags": [
+            "dynamic-programming",
+            "sequence"
+        ],
+        "complexity": {
+            "best": "O(nm)",
+            "average": "O(nm)",
+            "worst": "O(nm)",
+            "space": "O(nm)"
+        },
+        "text": {
+            "en-US": {
+                "name": "Longest Common Subsequence",
+                "summary": "DP matrix that extends matches diagonally.",
+                "description": "LCS fills a 2D DP table comparing prefixes of two strings, demonstrating overlapping subproblems and optimal substructure.",
+                "useCases": [
+                    "Diff tools and version control comparisons.",
+                    "Bioinformatics sequence alignment."
+                ]
+            },
+            "zh-CN": {
+                "name": "最长公共子序列",
+                "summary": "在 DP 矩阵中沿对角线延伸匹配。",
+                "description": "最长公共子序列通过二维 DP 表比较两个字符串的前缀，是重叠子问题与最优子结构的典型示例。",
+                "useCases": [
+                    "文本 diff 工具与版本控制比较。",
+                    "生物信息学中的序列比对。"
+                ]
+            }
+        }
+    }
+]
+    </script>
+    <script src="utils/I18n.js"></script>
+    <script src="utils/ErrorHandler.js"></script>
+    <script src="algorithm-visualizer.js"></script>
+    <script src="enhanced-graph-algorithms.js"></script>
+    <script>
+        // Alias GraphVisualizer to EnhancedGraphVisualizer so the next script can extend it
+        if (typeof EnhancedGraphVisualizer !== 'undefined') {
+            window.GraphVisualizer = window.EnhancedGraphVisualizer;
+        }
+    </script>
+    <script src="algorithm-visualizer-enhanced.js"></script>
+    <script src="additional-algorithms.js"></script>
+    <script>
+        // Alias enhanced visualizers to standard names for compatibility
+        if (typeof EnhancedSortingVisualizer !== 'undefined') {
+            window.SortingVisualizer = EnhancedSortingVisualizer;
+        }
+        if (typeof EnhancedSearchVisualizer !== 'undefined') {
+            window.SearchVisualizer = EnhancedSearchVisualizer;
+        }
+    </script>
+
+    <script>
+        const datasetElement = document.getElementById('algorithms-database');
+        const algorithmsDatabase = datasetElement ? JSON.parse(datasetElement.textContent) : [];
+        if (datasetElement) {
+            datasetElement.remove();
+        }
+
+        const algorithmsMap = algorithmsDatabase.reduce((acc, item) => {
+            acc[item.id] = item;
+            return acc;
+        }, {});
+
+        const categoryFilters = [
+            { id: 'all', key: 'category.all' },
+            { id: 'sorting', key: 'category.sorting' },
+            { id: 'searching', key: 'category.searching' },
+            { id: 'graph', key: 'category.graph' },
+            { id: 'dp', key: 'category.dp' }
+        ];
+
+        const categoryGradients = {
+            sorting: 'from-indigo-500 to-sky-500',
+            searching: 'from-emerald-500 to-lime-400',
+            graph: 'from-fuchsia-500 to-rose-400',
+            dp: 'from-amber-500 to-orange-400',
+            default: 'from-slate-500 to-slate-600'
+        };
+
+        const difficultyBadges = {
+            easy: 'badge badge-easy',
+            medium: 'badge badge-medium',
+            hard: 'badge badge-hard'
+        };
+
+        const tagTranslations = {
+            stable: { 'en-US': 'Stable', 'zh-CN': '稳定' },
+            comparison: { 'en-US': 'Comparison', 'zh-CN': '比较' },
+            teaching: { 'en-US': 'Teaching', 'zh-CN': '教学' },
+            'in-place': { 'en-US': 'In-place', 'zh-CN': '原地' },
+            adaptive: { 'en-US': 'Adaptive', 'zh-CN': '自适应' },
+            simple: { 'en-US': 'Simple', 'zh-CN': '简单' },
+            'divide-conquer': { 'en-US': 'Divide & Conquer', 'zh-CN': '分治' },
+            'cache-friendly': { 'en-US': 'Cache friendly', 'zh-CN': '缓存友好' },
+            'memory-free': { 'en-US': 'Low memory', 'zh-CN': '内存需求小' },
+            'linear-time': { 'en-US': 'Linear time', 'zh-CN': '线性时间' },
+            'non-comparison': { 'en-US': 'Non-comparison', 'zh-CN': '非比较' },
+            sequential: { 'en-US': 'Sequential', 'zh-CN': '顺序遍历' },
+            'needs-sorted': { 'en-US': 'Needs sorted input', 'zh-CN': '需要有序输入' },
+            logarithmic: { 'en-US': 'Logarithmic time', 'zh-CN': '对数时间' },
+            graph: { 'en-US': 'Graph', 'zh-CN': '图论' },
+            'queue-based': { 'en-US': 'Queue based', 'zh-CN': '队列驱动' },
+            recursive: { 'en-US': 'Recursive', 'zh-CN': '递归' },
+            'shortest-path': { 'en-US': 'Shortest path', 'zh-CN': '最短路' },
+            'spanning-tree': { 'en-US': 'Spanning tree', 'zh-CN': '生成树' },
+            greedy: { 'en-US': 'Greedy', 'zh-CN': '贪心' },
+            'dynamic-programming': { 'en-US': 'Dynamic programming', 'zh-CN': '动态规划' },
+            optimization: { 'en-US': 'Optimization', 'zh-CN': '优化' },
+            sequence: { 'en-US': 'Sequence', 'zh-CN': '序列' }
+        };
+
+        const translationBindings = [
+            { selector: '#app-title', key: 'nav.title' },
+            { selector: '#app-subtitle', key: 'optimized.nav.subtitle' },
+            { selector: '#hero-kicker', key: 'optimized.hero.kicker' },
+            { selector: '#hero-title', key: 'optimized.hero.title' },
+            { selector: '#hero-description', key: 'optimized.hero.description' },
+            { selector: '#hero-pill-client', key: 'optimized.hero.pillClient' },
+            { selector: '#hero-pill-offline', key: 'optimized.hero.pillOffline' },
+            { selector: '#hero-pill-ui', key: 'optimized.hero.pillUI' },
+            { selector: '#tab-algorithms-label', key: 'optimized.tabs.algorithms' },
+            { selector: '#tab-visualizer-label', key: 'optimized.tabs.visualizer' },
+            { selector: '#sidebar-title', key: 'optimized.sidebar.title' },
+            { selector: '#sidebar-subtitle', key: 'optimized.sidebar.subtitle' },
+            { selector: '#search-label', key: 'optimized.search.label' },
+            { selector: '#default-prompt-title', key: 'optimized.defaultPrompt' },
+            { selector: '#default-prompt-description', key: 'optimized.defaultPromptDescription' },
+            { selector: '#detail-description-label', key: 'optimized.detail.description' },
+            { selector: '#detail-usecases-label', key: 'optimized.detail.useCases' },
+            { selector: '#detail-tags-label', key: 'optimized.detail.tags' },
+            { selector: '#detail-complexity-label', key: 'optimized.detail.complexity' },
+            { selector: '#visualizer-title', key: 'optimized.visualizer.title' },
+            { selector: '#visualizer-hint', key: 'optimized.visualizer.hint' },
+            { selector: '#start-visualization-btn', key: 'optimized.detail.start' },
+            { selector: '#footer-version', key: 'optimized.nav.subtitle' }
+        ];
+
+        const localLocaleOverrides = {
+            'zh-CN': {
+                'nav.title': 'CSP-J 算法可视化学习系统',
+                'optimized.nav.subtitle': '优化版 v2.0',
+                'optimized.hero.kicker': 'CSP-J',
+                'optimized.hero.title': '交互式算法学习',
+                'optimized.hero.description': '探索 CSP-J 精选算法，比较关键特性，并在同一页面运行轻量级可视化。',
+                'optimized.hero.pillClient': '纯前端运行',
+                'optimized.hero.pillOffline': '离线可用',
+                'optimized.hero.pillUI': '美观界面',
+                'optimized.tabs.algorithms': '算法列表',
+                'optimized.tabs.visualizer': '可视化',
+                'optimized.sidebar.title': '算法筛选',
+                'optimized.sidebar.subtitle': '基于类别或关键字进行筛选',
+                'optimized.sidebar.counter': '可用算法：{count}个',
+                'optimized.search.label': '搜索算法',
+                'optimized.search.placeholder': '输入名称或关键字，如 sort、graph',
+                'optimized.defaultPrompt': '从左侧选择任何算法，右侧将显示详细信息。',
+                'optimized.defaultPromptDescription': '使用左侧筛选找到排序、搜索、图或动态规划算法。',
+                'optimized.detail.start': '▶ 启动可视化',
+                'optimized.detail.description': '算法描述',
+                'optimized.detail.useCases': '典型应用场景',
+                'optimized.detail.tags': '算法标签',
+                'optimized.detail.complexity': '复杂度',
+                'optimized.detail.emptyUseCases': '暂时没有可展示的应用示例。',
+                'optimized.visualizer.title': '可视化演示',
+                'optimized.visualizer.hint': '在“算法”页选择算法后点击“启动可视化”即可查看动画。',
+                'optimized.visualizer.noConfig': '该算法暂未配置可视化演示。',
+                'optimized.list.empty': '没有符合筛选条件的算法。',
+                'optimized.alert.selectAlgorithm': '请先选择一个算法。',
+                'optimized.visualizer.statusTitle': '当前状态',
+                'optimized.visualizer.statusEmpty': '暂未运行任何可视化。',
+                'optimized.visualizer.running': '正在展示：{algorithm}',
+                'optimized.progress.viewed': '已浏览算法数',
+                'optimized.progress.time': '预估学习时间（分钟）',
+                'optimized.progress.badges': '徽章（示例）',
+                'optimized.progress.note': '进度仅保存在本地浏览器，不会同步到服务器。',
+                'category.sorting': '排序算法',
+                'category.searching': '搜索算法',
+                'category.graph': '图算法',
+                'category.dp': '动态规划',
+                'category.all': '全部算法',
+                'difficulty.easy': '简单',
+                'difficulty.medium': '中等',
+                'difficulty.hard': '困难'
+            },
+            'en-US': {
+                'optimized.hero.kicker': 'CSP-J',
+                'optimized.hero.title': 'Interactive Algorithm Learning',
+                'optimized.hero.description': 'Explore curated CSP-J algorithms, compare key properties, and run lightweight visualizations without leaving the page.',
+                'optimized.hero.pillClient': '100% client-side',
+                'optimized.hero.pillOffline': 'Works offline',
+                'optimized.hero.pillUI': 'Tailwind-powered UI',
+                'optimized.defaultPromptDescription': 'Use the filters on the left to find a sorting, searching, graph, or DP technique.'
+            }
+        };
+
+        let activeCategory = 'all';
+        let searchTerm = '';
+        let currentAlgorithmId = null;
+        let currentVisualizer = null;
+        let activeLocale = (window.i18n && typeof window.i18n.getLocale === 'function')
+            ? window.i18n.getLocale()
+            : 'en-US';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLanguageSelector();
+            bindSearchInput();
+            handleLocaleUpdate(activeLocale);
+        });
+
+        document.addEventListener('locale-changed', (event) => {
+            const locale = event.detail?.locale || activeLocale;
+            handleLocaleUpdate(locale);
+        });
+
+        function t(key, params = {}) {
+            const locale = getLocale();
+            const overrides = localLocaleOverrides[locale];
+            let usedOverride = false;
+            let message = undefined;
+
+            if (overrides && overrides[key]) {
+                message = overrides[key];
+                usedOverride = true;
+            } else if (window.i18n) {
+                message = window.i18n.t(key, params);
+            }
+
+            if (!message) {
+                return key;
+            }
+
+            if (usedOverride && params && typeof params === 'object') {
+                Object.keys(params).forEach((param) => {
+                    const placeholder = new RegExp(`{${param}}`, 'g');
+                    message = message.replace(placeholder, params[param]);
+                });
+            }
+
+            return message;
+        }
+
+        function initLanguageSelector() {
+            const selector = document.getElementById('language-selector');
+            if (!selector) return;
+            selector.value = activeLocale;
+            selector.addEventListener('change', (event) => {
+                if (window.i18n) {
+                    window.i18n.setLocale(event.target.value);
+                }
+                handleLocaleUpdate(event.target.value);
+            });
+        }
+
+        function bindSearchInput() {
+            const searchInput = document.getElementById('algorithm-search');
+            if (!searchInput) return;
+            searchInput.addEventListener('input', (event) => {
+                searchTerm = event.target.value.trim().toLowerCase();
+                renderAlgorithmList();
+            });
+        }
+
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            if (!container) return;
+            container.innerHTML = '';
+            categoryFilters.forEach((filter) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `filter-pill ${activeCategory === filter.id ? 'active' : ''}`;
+                btn.textContent = filter.id === 'all' ? t(filter.key) : `# ${t(filter.key)}`;
+                btn.dataset.category = filter.id;
+                btn.addEventListener('click', () => {
+                    activeCategory = filter.id;
+                    renderCategoryFilters();
+                    renderAlgorithmList();
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        function getLocale() {
+            return activeLocale;
+        }
+
+        function getVisibleAlgorithms() {
+            return algorithmsDatabase.filter((algo) => {
+                const matchesCategory = activeCategory === 'all' || algo.category === activeCategory;
+                if (!matchesCategory) return false;
+
+                if (!searchTerm) return true;
+                const copy = getAlgorithmCopy(algo);
+                const haystack = [
+                    copy.name,
+                    copy.summary,
+                    copy.description,
+                    algo.category,
+                    algo.difficulty,
+                    algo.tags.join(' ')
+                ].join(' ').toLowerCase();
+                return haystack.includes(searchTerm);
+            });
+        }
+
+        function renderAlgorithmList() {
+            const listEl = document.getElementById('algorithm-list');
+            if (!listEl) {
+                console.error('algorithm-list element not found');
+                return;
+            }
+            const visible = getVisibleAlgorithms();
+            console.log('renderAlgorithmList: visible count', visible.length);
+            updateSidebarCounter(visible.length);
+            listEl.innerHTML = '';
+
+            if (!visible.length) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'p-6 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl';
+                emptyState.textContent = t('optimized.list.empty');
+                listEl.appendChild(emptyState);
+                return;
+            }
+
+            visible.forEach((algo, index) => {
+                listEl.appendChild(createAlgorithmCard(algo, index));
+            });
+        }
+
+        function createAlgorithmCard(algo, index) {
+            const copy = getAlgorithmCopy(algo);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `algo-card ${currentAlgorithmId === algo.id ? 'active' : ''}`;
+            button.dataset.id = algo.id;
+            const gradient = categoryGradients[algo.category] || categoryGradients.default;
+
+            button.innerHTML = `
+                <div class="flex gap-4 items-center">
+                    <div class="icon-pill bg-gradient-to-br ${gradient}">${algo.icon}</div>
+                    <div class="flex-1 space-y-1">
+                        <div class="flex justify-between text-xs text-slate-400 font-mono">
+                            <span>#${String(index + 1).padStart(2, '0')}</span>
+                            <span>${t('difficulty.' + algo.difficulty)}</span>
+                        </div>
+                        <p class="text-base font-semibold text-slate-900">${copy.name}</p>
+                        <p class="text-sm text-slate-500">${copy.summary}</p>
+                    </div>
+                </div>
+            `;
+
+            button.addEventListener('click', () => {
+                showAlgorithmDetail(algo.id);
+            });
+
+            return button;
+        }
+
+        function getAlgorithmCopy(algo) {
+            const locale = getLocale();
+            return algo.text[locale] || algo.text['en-US'];
+        }
+
+        function showAlgorithmDetail(algorithmId, preserveList = false) {
+            const algo = algorithmsMap[algorithmId];
+            if (!algo) {
+                console.error('Algorithm not found:', algorithmId);
+                return;
+            }
+
+            currentAlgorithmId = algorithmId;
+            const copy = getAlgorithmCopy(algo);
+
+            const detailContent = document.getElementById('detail-content');
+            const defaultPrompt = document.getElementById('default-prompt');
+            if (detailContent && defaultPrompt) {
+                defaultPrompt.classList.add('hidden');
+                detailContent.classList.remove('hidden');
+            }
+
+            document.getElementById('detail-icon').textContent = algo.icon;
+            document.getElementById('detail-name').textContent = copy.name;
+            document.getElementById('detail-summary').textContent = copy.summary;
+            document.getElementById('detail-description').textContent = copy.description;
+            document.getElementById('detail-category').textContent = t('category.' + algo.category);
+
+            const difficultyEl = document.getElementById('detail-difficulty');
+            if (difficultyEl) {
+                difficultyEl.className = difficultyBadges[algo.difficulty] || 'badge';
+                difficultyEl.textContent = t('difficulty.' + algo.difficulty);
+            }
+
+            renderUseCases(document.getElementById('detail-usecases-list'), copy.useCases);
+            renderTags(document.getElementById('detail-tags'), algo.tags);
+            renderComplexity(algo);
+
+            if (!preserveList) {
+                highlightActiveCard();
+            }
+        }
+
+        function renderUseCases(listEl, useCases = []) {
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            if (!useCases.length) {
+                const empty = document.createElement('li');
+                empty.className = 'text-slate-400 text-sm';
+                empty.textContent = t('optimized.detail.emptyUseCases');
+                listEl.appendChild(empty);
+                return;
+            }
+            useCases.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                listEl.appendChild(li);
+            });
+        }
+
+        function renderTags(container, tags = []) {
+            if (!container) return;
+            container.innerHTML = '';
+            if (!tags.length) {
+                container.textContent = '--';
+                return;
+            }
+            tags.forEach((tag) => {
+                const span = document.createElement('span');
+                span.className = 'px-3 py-1 rounded-full bg-slate-100 text-xs font-medium text-slate-600';
+                span.textContent = getTagLabel(tag);
+                container.appendChild(span);
+            });
+        }
+
+        function renderComplexity(algo) {
+            document.getElementById('complexity-best').textContent = algo.complexity.best;
+            document.getElementById('complexity-average').textContent = algo.complexity.average;
+            document.getElementById('complexity-worst').textContent = algo.complexity.worst;
+            document.getElementById('complexity-space').textContent = algo.complexity.space;
+        }
+
+        function highlightActiveCard() {
+            document.querySelectorAll('.algo-card').forEach((card) => {
+                card.classList.toggle('active', card.dataset.id === currentAlgorithmId);
+            });
+        }
+
+        function getTagLabel(tag) {
+            const locale = getLocale();
+            const dict = tagTranslations[tag];
+            if (dict) {
+                return dict[locale] || dict['en-US'];
+            }
+            return tag;
+        }
+
+        function updateSidebarCounter(count) {
+            const counterEl = document.getElementById('sidebar-counter');
+            if (counterEl) {
+                counterEl.textContent = t('optimized.sidebar.counter', { count });
+            }
+        }
+
+        function applyTranslations() {
+            translationBindings.forEach(({ selector, key }) => {
+                const node = document.querySelector(selector);
+                if (node) {
+                    node.textContent = t(key);
+                }
+            });
+
+            const searchInput = document.getElementById('algorithm-search');
+            if (searchInput) {
+                searchInput.placeholder = t('optimized.search.placeholder');
+            }
+
+            updateSidebarCounter(getVisibleAlgorithms().length);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach((content) => {
+                content.classList.toggle('active', content.id === 'content-' + tabName);
+            });
+            document.querySelectorAll('.tab-button').forEach((button) => {
+                button.classList.toggle('active', button.id === 'tab-' + tabName);
+            });
+        }
+
+        function handleLocaleUpdate(locale) {
+            console.log('handleLocaleUpdate called with:', locale);
+            activeLocale = locale || 'en-US';
+            document.documentElement.lang = activeLocale;
+            const selector = document.getElementById('language-selector');
+            if (selector && selector.value !== activeLocale) {
+                selector.value = activeLocale;
+            }
+            renderCategoryFilters();
+            applyTranslations();
+            renderAlgorithmList();
+        }
+
+        function renderAlgorithmList() {
+            const listEl = document.getElementById('algorithm-list');
+            if (!listEl) {
+                console.error('algorithm-list element not found');
+                return;
+            }
+            const visible = getVisibleAlgorithms();
+            console.log('renderAlgorithmList: visible count', visible.length);
+            updateSidebarCounter(visible.length);
+            listEl.innerHTML = '';
+
+            if (!visible.length) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'p-6 text-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-2xl';
+                emptyState.textContent = t('optimized.list.empty');
+                listEl.appendChild(emptyState);
+                return;
+            }
+
+            visible.forEach((algo, index) => {
+                listEl.appendChild(createAlgorithmCard(algo, index));
+            });
+        }
+
+        function createAlgorithmCard(algo, index) {
+            const copy = getAlgorithmCopy(algo);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `algo-card ${currentAlgorithmId === algo.id ? 'active' : ''}`;
+            button.dataset.id = algo.id;
+            const gradient = categoryGradients[algo.category] || categoryGradients.default;
+
+            button.innerHTML = `
+                <div class="flex gap-4 items-center">
+                    <div class="icon-pill bg-gradient-to-br ${gradient}">${algo.icon}</div>
+                    <div class="flex-1 space-y-1">
+                        <div class="flex justify-between text-xs text-slate-400 font-mono">
+                            <span>#${String(index + 1).padStart(2, '0')}</span>
+                            <span>${t('difficulty.' + algo.difficulty)}</span>
+                        </div>
+                        <p class="text-base font-semibold text-slate-900">${copy.name}</p>
+                        <p class="text-sm text-slate-500">${copy.summary}</p>
+                    </div>
+                </div>
+            `;
+
+            button.addEventListener('click', () => {
+                showAlgorithmDetail(algo.id);
+            });
+
+            return button;
+        }
+
+        function getAlgorithmCopy(algo) {
+            const locale = getLocale();
+            return algo.text[locale] || algo.text['en-US'];
+        }
+
+        function showAlgorithmDetail(algorithmId, preserveList = false) {
+            const algo = algorithmsMap[algorithmId];
+            if (!algo) {
+                console.error('Algorithm not found:', algorithmId);
+                return;
+            }
+
+            currentAlgorithmId = algorithmId;
+            const copy = getAlgorithmCopy(algo);
+
+            const detailContent = document.getElementById('detail-content');
+            const defaultPrompt = document.getElementById('default-prompt');
+            if (detailContent && defaultPrompt) {
+                defaultPrompt.classList.add('hidden');
+                detailContent.classList.remove('hidden');
+            }
+
+            document.getElementById('detail-icon').textContent = algo.icon;
+            document.getElementById('detail-name').textContent = copy.name;
+            document.getElementById('detail-summary').textContent = copy.summary;
+            document.getElementById('detail-description').textContent = copy.description;
+            document.getElementById('detail-category').textContent = t('category.' + algo.category);
+
+            const difficultyEl = document.getElementById('detail-difficulty');
+            if (difficultyEl) {
+                difficultyEl.className = difficultyBadges[algo.difficulty] || 'badge';
+                difficultyEl.textContent = t('difficulty.' + algo.difficulty);
+            }
+
+            renderUseCases(document.getElementById('detail-usecases-list'), copy.useCases);
+            renderTags(document.getElementById('detail-tags'), algo.tags);
+            renderComplexity(algo);
+
+            if (!preserveList) {
+                highlightActiveCard();
+            }
+        }
+
+        function renderUseCases(listEl, useCases = []) {
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            if (!useCases.length) {
+                const empty = document.createElement('li');
+                empty.className = 'text-slate-400 text-sm';
+                empty.textContent = t('optimized.detail.emptyUseCases');
+                listEl.appendChild(empty);
+                return;
+            }
+            useCases.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                listEl.appendChild(li);
+            });
+        }
+
+        function renderTags(container, tags = []) {
+            if (!container) return;
+            container.innerHTML = '';
+            if (!tags.length) {
+                container.textContent = '--';
+                return;
+            }
+            tags.forEach((tag) => {
+                const span = document.createElement('span');
+                span.className = 'px-3 py-1 rounded-full bg-slate-100 text-xs font-medium text-slate-600';
+                span.textContent = getTagLabel(tag);
+                container.appendChild(span);
+            });
+        }
+
+        function renderComplexity(algo) {
+            document.getElementById('complexity-best').textContent = algo.complexity.best;
+            document.getElementById('complexity-average').textContent = algo.complexity.average;
+            document.getElementById('complexity-worst').textContent = algo.complexity.worst;
+            document.getElementById('complexity-space').textContent = algo.complexity.space;
+        }
+
+        function highlightActiveCard() {
+            document.querySelectorAll('.algo-card').forEach((card) => {
+                card.classList.toggle('active', card.dataset.id === currentAlgorithmId);
+            });
+        }
+
+        function getTagLabel(tag) {
+            const locale = getLocale();
+            const dict = tagTranslations[tag];
+            if (dict) {
+                return dict[locale] || dict['en-US'];
+            }
+            return tag;
+        }
+
+        function updateSidebarCounter(count) {
+            const counterEl = document.getElementById('sidebar-counter');
+            if (counterEl) {
+                counterEl.textContent = t('optimized.sidebar.counter', { count });
+            }
+        }
+
+        function applyTranslations() {
+            translationBindings.forEach(({ selector, key }) => {
+                const node = document.querySelector(selector);
+                if (node) {
+                    node.textContent = t(key);
+                }
+            });
+
+            const searchInput = document.getElementById('algorithm-search');
+            if (searchInput) {
+                searchInput.placeholder = t('optimized.search.placeholder');
+            }
+
+            updateSidebarCounter(getVisibleAlgorithms().length);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach((content) => {
+                content.classList.toggle('active', content.id === 'content-' + tabName);
+            });
+            document.querySelectorAll('.tab-button').forEach((button) => {
+                button.classList.toggle('active', button.id === 'tab-' + tabName);
+            });
+        }
+
+        function handleLocaleUpdate(locale) {
+            console.log('handleLocaleUpdate called with:', locale);
+            activeLocale = locale || 'en-US';
+            document.documentElement.lang = activeLocale;
+            const selector = document.getElementById('language-selector');
+            if (selector && selector.value !== activeLocale) {
+                selector.value = activeLocale;
+            }
+            renderCategoryFilters();
+            applyTranslations();
+            renderAlgorithmList();
+            if (currentAlgorithmId) {
+                showAlgorithmDetail(currentAlgorithmId, true);
+            }
+        }
+
+        // Expose for debugging
+        window.handleLocaleUpdate = handleLocaleUpdate;
+        window.renderAlgorithmList = renderAlgorithmList;
+        window.algorithmsDatabase = algorithmsDatabase;
+        window.activeCategory = activeCategory;
+        window.getVisibleAlgorithms = getVisibleAlgorithms;
+    </script>
+</body> >
+
+</html>

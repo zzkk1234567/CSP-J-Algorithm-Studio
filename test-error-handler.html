@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误处理系统测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        button.success {
+            background: #10b981;
+        }
+        button.success:hover {
+            background: #059669;
+        }
+        .info {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        .log-display {
+            background: #1e293b;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 错误处理系统测试</h1>
+        
+        <div class="info">
+            <strong>📋 测试说明：</strong>
+            <p>本页面用于测试ErrorHandler错误处理系统的各项功能，包括错误捕获、日志记录、Toast提示和错误日志管理。</p>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">错误日志数量</div>
+                <div class="stat-value" id="error-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Toast显示次数</div>
+                <div class="stat-value" id="toast-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">全局错误捕获</div>
+                <div class="stat-value" id="global-errors">0</div>
+            </div>
+        </div>
+
+        <!-- 测试1: 基本错误处理 -->
+        <div class="test-section">
+            <h3>🧪 测试1: 基本错误类型</h3>
+            <p>测试不同类型的错误是否能正确捕获和显示用户友好的消息</p>
+            <button onclick="testTypeError()">触发 TypeError</button>
+            <button onclick="testReferenceError()">触发 ReferenceError</button>
+            <button onclick="testRangeError()">触发 RangeError</button>
+            <button onclick="testCustomError()">触发自定义错误</button>
+        </div>
+
+        <!-- 测试2: 全局错误捕获 -->
+        <div class="test-section">
+            <h3>🌐 测试2: 全局错误捕获</h3>
+            <p>测试window.onerror和unhandledrejection事件监听</p>
+            <button onclick="testGlobalError()">触发全局错误</button>
+            <button onclick="testPromiseRejection()">触发Promise拒绝</button>
+        </div>
+
+        <!-- 测试3: 错误日志管理 -->
+        <div class="test-section">
+            <h3>📝 测试3: 错误日志管理</h3>
+            <p>测试错误日志的记录、查看、导出和清空功能</p>
+            <button class="success" onclick="viewLogs()">查看错误日志</button>
+            <button class="success" onclick="exportLogs()">导出日志</button>
+            <button class="danger" onclick="clearLogs()">清空日志</button>
+            <button onclick="generateMultipleErrors()">生成10条测试错误</button>
+        </div>
+
+        <!-- 测试4: Toast UI -->
+        <div class="test-section">
+            <h3>🎨 测试4: Toast提示UI</h3>
+            <p>测试错误提示Toast的显示、自动关闭和手动关闭功能</p>
+            <button onclick="testToastDisplay()">显示Toast</button>
+            <button onclick="testMultipleToasts()">显示多个Toast</button>
+        </div>
+
+        <!-- 日志显示 -->
+        <div class="test-section">
+            <h3>📊 实时日志</h3>
+            <div class="log-display" id="console-log">
+                等待测试...
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入ErrorHandler -->
+    <script src="utils/ErrorHandler.js"></script>
+
+    <script>
+        let toastCount = 0;
+        let globalErrorCount = 0;
+
+        // 更新统计信息
+        function updateStats() {
+            const logs = ErrorHandler.getErrorLogs();
+            document.getElementById('error-count').textContent = logs.length;
+            document.getElementById('toast-count').textContent = toastCount;
+            document.getElementById('global-errors').textContent = globalErrorCount;
+        }
+
+        // 添加日志到显示区域
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logDiv.innerHTML += `[${timestamp}] ${icon} ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 测试1: TypeError
+        function testTypeError() {
+            try {
+                const obj = null;
+                obj.property = 'value'; // 会抛出TypeError
+            } catch (error) {
+                ErrorHandler.handle(error, 'testTypeError()');
+                toastCount++;
+                addLog('触发TypeError测试', 'error');
+                updateStats();
+            }
+        }
+
+        // 测试1: ReferenceError
+        function testReferenceError() {
+            try {
+                console.log(undefinedVariable); // 会抛出ReferenceError
+            } catch (error) {
+                ErrorHandler.handle(error, 'testReferenceError()');
+                toastCount++;
+                addLog('触发ReferenceError测试', 'error');
+                updateStats();
+            }
+        }
+
+        // 测试1: RangeError
+        function testRangeError() {
+            try {
+                const arr = new Array(-1); // 会抛出RangeError
+            } catch (error) {
+                ErrorHandler.handle(error, 'testRangeError()');
+                toastCount++;
+                addLog('触发RangeError测试', 'error');
+                updateStats();
+            }
+        }
+
+        // 测试1: 自定义错误
+        function testCustomError() {
+            const error = new Error('这是一个自定义错误消息');
+            error.name = 'CustomError';
+            ErrorHandler.handle(error, 'testCustomError()');
+            toastCount++;
+            addLog('触发自定义错误测试', 'error');
+            updateStats();
+        }
+
+        // 测试2: 全局错误
+        function testGlobalError() {
+            // 故意触发一个全局错误
+            setTimeout(() => {
+                throw new Error('这是一个全局错误');
+            }, 100);
+            addLog('已触发全局错误（100ms后）', 'info');
+        }
+
+        // 测试2: Promise拒绝
+        function testPromiseRejection() {
+            Promise.reject(new Error('这是一个未处理的Promise拒绝'));
+            addLog('已触发Promise拒绝', 'info');
+        }
+
+        // 测试3: 查看日志
+        function viewLogs() {
+            const logs = ErrorHandler.getErrorLogs();
+            addLog(`当前有 ${logs.length} 条错误日志`, 'info');
+            console.log('错误日志:', logs);
+        }
+
+        // 测试3: 导出日志
+        function exportLogs() {
+            const logText = ErrorHandler.exportErrorLogs();
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'error-log-test.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            addLog('日志已导出', 'success');
+        }
+
+        // 测试3: 清空日志
+        function clearLogs() {
+            if (confirm('确定要清空所有错误日志吗？')) {
+                ErrorHandler.clearErrorLogs();
+                addLog('日志已清空', 'success');
+                updateStats();
+            }
+        }
+
+        // 测试3: 生成多条错误
+        function generateMultipleErrors() {
+            for (let i = 1; i <= 10; i++) {
+                const error = new Error(`测试错误 #${i}`);
+                ErrorHandler.handle(error, `批量测试 ${i}/10`);
+            }
+            toastCount += 10;
+            addLog('已生成10条测试错误', 'success');
+            updateStats();
+        }
+
+        // 测试4: Toast显示
+        function testToastDisplay() {
+            const error = new Error('这是一个Toast测试消息');
+            ErrorHandler.handle(error, 'Toast测试');
+            toastCount++;
+            addLog('显示Toast提示', 'info');
+            updateStats();
+        }
+
+        // 测试4: 多个Toast
+        function testMultipleToasts() {
+            for (let i = 1; i <= 3; i++) {
+                setTimeout(() => {
+                    const error = new Error(`Toast消息 #${i}`);
+                    ErrorHandler.handle(error, `多Toast测试 ${i}/3`);
+                    toastCount++;
+                    updateStats();
+                }, i * 500);
+            }
+            addLog('将显示3个Toast（间隔500ms）', 'info');
+        }
+
+        // 全局错误监听
+        window.addEventListener('error', function(event) {
+            globalErrorCount++;
+            updateStats();
+            addLog('全局错误已捕获', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            globalErrorCount++;
+            updateStats();
+            addLog('Promise拒绝已捕获', 'error');
+        });
+
+        // 初始化
+        addLog('错误处理系统测试页面已加载', 'success');
+        updateStats();
+    </script>
+</body>
+</html>

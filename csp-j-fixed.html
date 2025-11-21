@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 CSP-J 备考学习助手</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css" rel="stylesheet">
+    <style>
+        .code-font { font-family: 'Fira Code', 'Consolas', monospace; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .detective { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        .detective::before {
+            content: "🕵️";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+        }
+        .speech-bubble {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-left: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 20px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid white;
+        }
+        .algorithm-viz {
+            min-height: 200px;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            font-family: monospace;
+        }
+        .array-bar {
+            display: inline-block;
+            width: 30px;
+            margin: 2px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.5s ease;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🏆</span>
+                    <h1 class="text-xl font-bold text-gray-800">CSP-J 备考学习助手</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-100 px-3 py-1 rounded-full">
+                        <span class="text-sm text-blue-800">学习进度: <span id="overall-progress">0%</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 学习伙伴欢迎区 -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center mb-6">
+            <div class="detective"></div>
+            <div class="speech-bubble flex-1">
+                <p id="detective-message" class="text-gray-700 font-medium">
+                    🎯 欢迎来到CSP-J学习世界！我是你的代码小侦探，让我们一起探索编程的奥秘吧！
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab导航 -->
+    <div class="container mx-auto px-4">
+        <div class="flex bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+            <button onclick="switchTab('knowledge')" id="tab-knowledge" class="tab-active px-6 py-3 font-medium flex-1 transition-all">
+                📚 知识讲解
+            </button>
+            <button onclick="switchTab('practice')" id="tab-practice" class="px-6 py-3 font-medium flex-1 transition-all hover:bg-gray-50">
+                💻 代码练习
+            </button>
+            <button onclick="switchTab('interactive')" id="tab-interactive" class="px-6 py-3 font-medium flex-1 transition-all hover:bg-gray-50">
+                🎮 互动练习
+            </button>
+            <button onclick="switchTab('test')" id="tab-test" class="px-6 py-3 font-medium flex-1 transition-all hover:bg-gray-50">
+                📝 模拟测试
+            </button>
+        </div>
+    </div>
+
+    <!-- 主学习区域 -->
+    <main class="container mx-auto px-4 pb-10">
+        <!-- 知识讲解区 -->
+        <div id="content-knowledge" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 知识点列表 -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">📋 知识点导航</h3>
+                        <div class="space-y-2" id="knowledge-nav">
+                            <!-- 动态生成知识点导航 -->
+                        </div>
+                    </div>
+                </div>
+                <!-- 知识点详情 -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div id="knowledge-content">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">选择左侧知识点开始学习</h2>
+                            <p class="text-gray-600">点击左侧知识点，查看详细讲解和代码示例。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 代码练习区 -->
+        <div id="content-practice" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">💻 代码编辑器</h3>
+                    <div class="mb-4">
+                        <select id="code-template" onchange="loadCodeTemplate()" class="w-full p-2 border rounded-md">
+                            <option value="">选择代码模板</option>
+                            <option value="hello">Hello World</option>
+                            <option value="input">输入输出示例</option>
+                        </select>
+                    </div>
+                    <textarea id="code-editor" class="w-full code-font h-64">#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, CSP-J!" << endl;
+    return 0;
+}</textarea>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="runCode()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                            ▶️ 运行代码
+                        </button>
+                        <button onclick="clearCode()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                            🗑️ 清空代码
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📤 运行结果</h3>
+                    <div id="code-output" class="bg-gray-900 text-green-400 p-4 rounded-md code-font min-h-[200px]">
+                        点击"运行代码"查看结果...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 互动练习区 -->
+        <div id="content-interactive" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🎯 算法可视化</h3>
+                    <div class="mb-4">
+                        <select id="algorithm-select" onchange="showAlgorithmViz()" class="w-full p-2 border rounded-md">
+                            <option value="">选择算法演示</option>
+                            <option value="bubble-sort">冒泡排序</option>
+                            <option value="binary-search">二分查找</option>
+                        </select>
+                    </div>
+                    <div id="algorithm-visualization" class="algorithm-viz">
+                        选择算法查看可视化演示...
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="startVisualization()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            ▶️ 开始演示
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🧩 代码块拼接</h3>
+                    <div id="drag-drop-area" class="border-2 border-dashed border-gray-300 p-4 rounded-md min-h-[200px] mb-4">
+                        <div class="text-center text-gray-500 py-8">
+                            将代码块拖拽到这里
+                        </div>
+                    </div>
+                    <div id="code-blocks" class="grid grid-cols-2 gap-2">
+                        <!-- 动态生成代码块 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模拟测试区 -->
+        <div id="content-test" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-gray-800">📝 CSP-J 模拟测试</h3>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-red-500" id="test-timer">15:00</div>
+                        <div class="text-sm text-gray-500">剩余时间</div>
+                    </div>
+                </div>
+                <div id="test-area">
+                    <div class="text-center py-8">
+                        <p class="text-gray-600 mb-4">准备好参加CSP-J模拟测试了吗？</p>
+                        <button onclick="startTest()" class="bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600">
+                            🚀 开始测试
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 统计面板 -->
+    <footer class="bg-white shadow-lg mt-10">
+        <div class="container mx-auto px-4 py-6">
+            <div class="grid grid-cols-4 gap-6 text-center">
+                <div>
+                    <div class="text-2xl font-bold text-blue-600" id="mastered-count">0</div>
+                    <div class="text-sm text-gray-600">已掌握知识点</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-green-600" id="practice-count">0</div>
+                    <div class="text-sm text-gray-600">完成练习题</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-purple-600" id="accuracy-rate">0%</div>
+                    <div class="text-sm text-gray-600">正确率</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-orange-600" id="study-time">0</div>
+                    <div class="text-sm text-gray-600">学习时长(分钟)</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+
+    <script>
+        // 全局状态
+        let gameState = {
+            currentTab: 'knowledge',
+            progress: {
+                masteredTopics: new Set(),
+                completedPractices: 0,
+                correctAnswers: 0,
+                totalAnswers: 0
+            }
+        };
+
+        // 知识点数据
+        const knowledgeData = {
+            'basics': {
+                title: '🏁 入门基础',
+                content: `
+                    <h3>计算机基础知识</h3>
+                    <p>了解计算机的基本组成和工作原理是学习编程的第一步。</p>
+                    <h4>🎯 重要知识点：</h4>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>CCF 简介</strong>：中国计算机学会成立于1962年</li>
+                        <li><strong>CSP-J/S</strong>：非专业级软件能力认证</li>
+                        <li><strong>考试规则</strong>：禁止携带电子设备，允许指定资料</li>
+                        <li><strong>历史人物</strong>：冯·诺依曼提出存储程序原理(1946)</li>
+                        <li><strong>图灵奖</strong>：计算机领域最高奖项</li>
+                    </ul>
+                `
+            },
+            'number-systems': {
+                title: '🔢 进制与数据表示',
+                content: `
+                    <h3>数制转换与数据表示</h3>
+                    <p>计算机使用二进制存储和处理所有数据。</p>
+                    <h4>🎯 重要概念：</h4>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>二进制</strong>：以0b开头，如0b1010</li>
+                        <li><strong>八进制</strong>：以0开头，如0123</li>
+                        <li><strong>十六进制</strong>：以0x开头，如0xFF</li>
+                        <li><strong>补码</strong>：表示有符号整数的方法</li>
+                    </ul>
+                `
+            }
+        };
+
+        // 代码模板
+        const codeTemplates = {
+            hello: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, CSP-J!" << endl;
+    return 0;
+}`,
+            input: `#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    cout << "请输入两个数：";
+    cin >> a >> b;
+    cout << "你输入的数是：" << a << " 和 " << b << endl;
+    return 0;
+}`
+        };
+
+        // 测试题目
+        const testQuestions = [
+            {
+                id: 1,
+                question: "CCF（中国计算机学会）成立于哪一年？",
+                options: ["A. 1960", "B. 1962", "C. 1965", "D. 1970"],
+                answer: 1,
+                explanation: "中国计算机学会成立于1962年。"
+            },
+            {
+                id: 2,
+                question: "以下哪个是C++程序的正确入口函数？",
+                options: ["A. void main()", "B. int main()", "C. main()", "D. start()"],
+                answer: 1,
+                explanation: "C++程序的标准入口函数是 int main()。"
+            }
+        ];
+
+        // Tab切换
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
+            // 更新tab样式
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.className = tab.className.replace('tab-active', '');
+                if (!tab.className.includes('hover:bg-gray-50')) {
+                    tab.className += ' hover:bg-gray-50';
+                }
+            });
+            
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            if (activeTab) {
+                activeTab.className = 'tab-active px-6 py-3 font-medium flex-1 transition-all';
+            }
+            
+            // 显示对应内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            const activeContent = document.getElementById(`content-${tabName}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+            
+            gameState.currentTab = tabName;
+            updateDetectiveMessage(`切换到${tabName}标签页`);
+        }
+
+        // 生成知识点导航
+        function generateKnowledgeNav() {
+            console.log('Generating knowledge navigation...');
+            const navContainer = document.getElementById('knowledge-nav');
+            
+            if (!navContainer) {
+                console.error('Knowledge nav container not found!');
+                return;
+            }
+            
+            navContainer.innerHTML = '';
+            
+            Object.keys(knowledgeData).forEach(key => {
+                const topic = knowledgeData[key];
+                const isCompleted = gameState.progress.masteredTopics.has(key);
+                
+                const navItem = document.createElement('div');
+                navItem.className = `p-3 rounded-md cursor-pointer transition-all ${isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 hover:bg-gray-200'}`;
+                navItem.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span>${topic.title}</span>
+                        ${isCompleted ? '<span class="text-green-600">✓</span>' : '<span class="text-gray-400">○</span>'}
+                    </div>
+                `;
+                navItem.onclick = () => showKnowledge(key);
+                navContainer.appendChild(navItem);
+            });
+            
+            console.log(`Generated ${Object.keys(knowledgeData).length} knowledge nav items`);
+        }
+
+        // 显示知识点内容
+        function showKnowledge(topicKey) {
+            console.log('Showing knowledge for:', topicKey);
+            const topic = knowledgeData[topicKey];
+            const contentContainer = document.getElementById('knowledge-content');
+            
+            if (!topic || !contentContainer) {
+                console.error('Topic or content container not found');
+                return;
+            }
+            
+            contentContainer.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">${topic.title}</h2>
+                <div class="prose max-w-none">${topic.content}</div>
+                <div class="mt-6">
+                    <button onclick="markTopicCompleted('${topicKey}')" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                        ✅ 标记为已掌握
+                    </button>
+                </div>
+            `;
+            
+            updateDetectiveMessage(`正在学习: ${topic.title}`);
+        }
+
+        // 标记知识点完成
+        function markTopicCompleted(topicKey) {
+            console.log('Marking topic completed:', topicKey);
+            gameState.progress.masteredTopics.add(topicKey);
+            generateKnowledgeNav();
+            updateStats();
+            updateDetectiveMessage("太棒了！又掌握了一个知识点！🏆");
+        }
+
+        // 加载代码模板
+        function loadCodeTemplate() {
+            console.log('Loading code template...');
+            const select = document.getElementById('code-template');
+            const textarea = document.getElementById('code-editor');
+            
+            if (!select || !textarea) {
+                console.error('Template select or editor not found');
+                return;
+            }
+            
+            const template = codeTemplates[select.value];
+            if (template) {
+                textarea.value = template;
+                updateDetectiveMessage("模板加载完成！试试运行这段代码吧！⚡");
+            }
+        }
+
+        // 运行代码
+        function runCode() {
+            console.log('Running code...');
+            const textarea = document.getElementById('code-editor');
+            const outputDiv = document.getElementById('code-output');
+            
+            if (!textarea || !outputDiv) {
+                console.error('Editor or output div not found');
+                return;
+            }
+            
+            const code = textarea.value.trim();
+            if (!code) {
+                outputDiv.textContent = '请输入代码后再运行！';
+                return;
+            }
+            
+            // 模拟代码执行
+            let output = '程序执行完成';
+            if (code.includes('cout') && code.includes('Hello')) {
+                output = 'Hello, CSP-J!';
+            } else if (code.includes('cout') && code.includes('cin')) {
+                output = '请输入两个数：\n你输入的数是：10 和 20';
+            }
+            
+            outputDiv.textContent = output;
+            gameState.progress.completedPractices++;
+            updateStats();
+            updateDetectiveMessage("代码运行成功！继续加油！🚀");
+        }
+
+        // 清空代码
+        function clearCode() {
+            console.log('Clearing code...');
+            const textarea = document.getElementById('code-editor');
+            const outputDiv = document.getElementById('code-output');
+            
+            if (textarea) textarea.value = '';
+            if (outputDiv) outputDiv.textContent = '点击"运行代码"查看结果...';
+            
+            updateDetectiveMessage("编辑器已清空，准备写新代码吧！✨");
+        }
+
+        // 显示算法可视化
+        function showAlgorithmViz() {
+            console.log('Showing algorithm visualization...');
+            const select = document.getElementById('algorithm-select');
+            const vizArea = document.getElementById('algorithm-visualization');
+            
+            if (!select || !vizArea) {
+                console.error('Algorithm select or viz area not found');
+                return;
+            }
+            
+            switch(select.value) {
+                case 'bubble-sort':
+                    vizArea.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h4 class="text-lg font-bold mb-2">冒泡排序可视化</h4>
+                            <p class="text-sm text-gray-300">比较相邻元素，大的向后"冒泡"</p>
+                        </div>
+                        <div id="sort-array" class="text-center">
+                            <div class="array-bar" style="height: 64px; background-color: #3b82f6;">64</div>
+                            <div class="array-bar" style="height: 34px; background-color: #3b82f6;">34</div>
+                            <div class="array-bar" style="height: 25px; background-color: #3b82f6;">25</div>
+                            <div class="array-bar" style="height: 12px; background-color: #3b82f6;">12</div>
+                        </div>
+                    `;
+                    break;
+                case 'binary-search':
+                    vizArea.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h4 class="text-lg font-bold mb-2">二分查找可视化</h4>
+                            <p class="text-sm text-gray-300">在有序数组中查找目标值</p>
+                        </div>
+                        <div id="search-array" class="text-center">
+                            <div class="array-bar" style="height: 40px; background-color: #10b981;">1</div>
+                            <div class="array-bar" style="height: 40px; background-color: #10b981;">3</div>
+                            <div class="array-bar" style="height: 40px; background-color: #10b981;">5</div>
+                            <div class="array-bar" style="height: 40px; background-color: #10b981;">7</div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm">查找目标：<span class="font-bold text-yellow-400">5</span></p>
+                        </div>
+                    `;
+                    break;
+                default:
+                    vizArea.innerHTML = '选择算法查看可视化演示...';
+            }
+        }
+
+        // 开始可视化演示
+        function startVisualization() {
+            console.log('Starting visualization...');
+            const select = document.getElementById('algorithm-select');
+            
+            if (!select || !select.value) {
+                updateDetectiveMessage("请先选择一个算法！🤔");
+                return;
+            }
+            
+            updateDetectiveMessage(`开始${select.options[select.selectedIndex].text}演示！🎯`);
+            // 这里可以添加实际的动画逻辑
+        }
+
+        // 初始化拖拽练习
+        function initDragDropPractice() {
+            console.log('Initializing drag drop practice...');
+            const codeBlocks = [
+                '#include <iostream>',
+                'using namespace std;',
+                'int main() {',
+                '    cout << "Hello World" << endl;',
+                '    return 0;',
+                '}'
+            ];
+            
+            const blocksContainer = document.getElementById('code-blocks');
+            if (!blocksContainer) {
+                console.error('Code blocks container not found');
+                return;
+            }
+            
+            blocksContainer.innerHTML = '';
+            
+            codeBlocks.forEach((block, index) => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'bg-blue-100 p-2 rounded cursor-move border border-blue-300 code-font text-sm';
+                blockDiv.textContent = block;
+                blockDiv.draggable = true;
+                blocksContainer.appendChild(blockDiv);
+            });
+        }
+
+        // 开始测试
+        function startTest() {
+            console.log('Starting test...');
+            gameState.currentTest = {
+                questions: [...testQuestions].slice(0, 2), // 简化为2题
+                currentQuestionIndex: 0,
+                answers: [],
+                startTime: Date.now()
+            };
+            
+            showTestQuestion();
+        }
+
+        // 显示测试题目
+        function showTestQuestion() {
+            console.log('Showing test question...');
+            const test = gameState.currentTest;
+            const question = test.questions[test.currentQuestionIndex];
+            const testArea = document.getElementById('test-area');
+            
+            if (!testArea || !question) {
+                console.error('Test area or question not found');
+                return;
+            }
+            
+            testArea.innerHTML = `
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-semibold">第 ${test.currentQuestionIndex + 1} 题 / 共 ${test.questions.length} 题</h4>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <p class="text-lg mb-4">${question.question}</p>
+                        <div class="space-y-2">
+                            ${question.options.map((option, index) => `
+                                <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 cursor-pointer">
+                                    <input type="radio" name="question-${question.id}" value="${index}" class="w-4 h-4">
+                                    <span>${option}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex justify-between">
+                        <button onclick="prevQuestion()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600" ${test.currentQuestionIndex === 0 ? 'disabled' : ''}>
+                            ← 上一题
+                        </button>
+                        <button onclick="nextQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            ${test.currentQuestionIndex === test.questions.length - 1 ? '提交答案' : '下一题 →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 下一题
+        function nextQuestion() {
+            console.log('Next question...');
+            const test = gameState.currentTest;
+            if (!test) return;
+            
+            if (test.currentQuestionIndex < test.questions.length - 1) {
+                test.currentQuestionIndex++;
+                showTestQuestion();
+            } else {
+                finishTest();
+            }
+        }
+
+        // 上一题
+        function prevQuestion() {
+            console.log('Previous question...');
+            const test = gameState.currentTest;
+            if (!test || test.currentQuestionIndex === 0) return;
+            
+            test.currentQuestionIndex--;
+            showTestQuestion();
+        }
+
+        // 完成测试
+        function finishTest() {
+            console.log('Finishing test...');
+            const testArea = document.getElementById('test-area');
+            if (!testArea) return;
+            
+            testArea.innerHTML = `
+                <div class="text-center py-8">
+                    <h3 class="text-xl font-bold mb-4">测试完成！</h3>
+                    <p class="text-gray-600 mb-4">感谢参加CSP-J模拟测试。</p>
+                    <button onclick="resetTest()" class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
+                        重新测试
+                    </button>
+                </div>
+            `;
+            
+            updateDetectiveMessage("测试完成！继续加油学习吧！📚");
+        }
+
+        // 重置测试
+        function resetTest() {
+            console.log('Resetting test...');
+            const testArea = document.getElementById('test-area');
+            if (!testArea) return;
+            
+            testArea.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-gray-600 mb-4">准备好参加CSP-J模拟测试了吗？</p>
+                    <button onclick="startTest()" class="bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600">
+                        🚀 开始测试
+                    </button>
+                </div>
+            `;
+            
+            gameState.currentTest = null;
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const masteredCount = document.getElementById('mastered-count');
+            const practiceCount = document.getElementById('practice-count');
+            const accuracyRate = document.getElementById('accuracy-rate');
+            
+            if (masteredCount) {
+                masteredCount.textContent = gameState.progress.masteredTopics.size;
+            }
+            if (practiceCount) {
+                practiceCount.textContent = gameState.progress.completedPractices;
+            }
+            if (accuracyRate) {
+                const rate = gameState.progress.totalAnswers > 0 ? 
+                    Math.round((gameState.progress.correctAnswers / gameState.progress.totalAnswers) * 100) : 0;
+                accuracyRate.textContent = rate + '%';
+            }
+        }
+
+        // 更新侦探消息
+        function updateDetectiveMessage(message) {
+            const messageElement = document.getElementById('detective-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+            console.log('Detective message:', message);
+        }
+
+        // 初始化应用
+        function initializeApp() {
+            console.log('Initializing CSP-J Learning Tool...');
+            
+            try {
+                // 生成知识点导航
+                generateKnowledgeNav();
+                console.log('✓ Knowledge navigation generated');
+                
+                // 初始化拖拽练习
+                initDragDropPractice();
+                console.log('✓ Drag drop practice initialized');
+                
+                // 更新统计
+                updateStats();
+                console.log('✓ Stats updated');
+                
+                // 显示欢迎消息
+                updateDetectiveMessage('🎯 欢迎来到CSP-J学习世界！我是你的代码小侦探，让我们一起探索编程的奥秘吧！');
+                console.log('✓ Welcome message displayed');
+                
+                console.log('🚀 CSP-J Learning Tool initialized successfully!');
+                
+            } catch (error) {
+                console.error('❌ Error initializing app:', error);
+                updateDetectiveMessage('初始化遇到问题，但别担心，主要功能仍可使用！');
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            initializeApp();
+        });
+
+        // 全局函数暴露
+        window.switchTab = switchTab;
+        window.generateKnowledgeNav = generateKnowledgeNav;
+        window.showKnowledge = showKnowledge;
+        window.markTopicCompleted = markTopicCompleted;
+        window.loadCodeTemplate = loadCodeTemplate;
+        window.runCode = runCode;
+        window.clearCode = clearCode;
+        window.showAlgorithmViz = showAlgorithmViz;
+        window.startVisualization = startVisualization;
+        window.startTest = startTest;
+        window.nextQuestion = nextQuestion;
+        window.prevQuestion = prevQuestion;
+        window.resetTest = resetTest;
+        
+        console.log('All functions exposed to global scope');
+
+    </script>
+</body>
+</html>

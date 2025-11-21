@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法动画演示测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">🧪 算法动画演示功能测试</h1>
+        
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <button onclick="testAlgorithm('bubble')" class="p-3 bg-blue-500 text-white rounded hover:bg-blue-600">
+                测试冒泡排序
+            </button>
+            <button onclick="testAlgorithm('selection')" class="p-3 bg-green-500 text-white rounded hover:bg-green-600">
+                测试选择排序
+            </button>
+            <button onclick="testAlgorithm('insertion')" class="p-3 bg-purple-500 text-white rounded hover:bg-purple-600">
+                测试插入排序
+            </button>
+            <button onclick="testAlgorithm('quick')" class="p-3 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                测试快速排序
+            </button>
+            <button onclick="testAlgorithm('merge')" class="p-3 bg-red-500 text-white rounded hover:bg-red-600">
+                测试归并排序
+            </button>
+            <button onclick="testAlgorithm('heap')" class="p-3 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+                测试堆排序
+            </button>
+            <button onclick="testAlgorithm('linear')" class="p-3 bg-cyan-500 text-white rounded hover:bg-cyan-600">
+                测试线性查找
+            </button>
+            <button onclick="testAlgorithm('binary')" class="p-3 bg-teal-500 text-white rounded hover:bg-teal-600">
+                测试二分查找
+            </button>
+            <button onclick="testAlgorithm('prime-sieve')" class="p-3 bg-orange-500 text-white rounded hover:bg-orange-600">
+                测试质数筛法
+            </button>
+            <button onclick="testAlgorithm('gcd-euclidean')" class="p-3 bg-pink-500 text-white rounded hover:bg-pink-600">
+                测试欧几里得算法
+            </button>
+            <button onclick="testAlgorithm('binary-conversion')" class="p-3 bg-lime-500 text-white rounded hover:bg-lime-600">
+                测试进制转换
+            </button>
+            <button onclick="testAlgorithm('factorial-recursive')" class="p-3 bg-violet-500 text-white rounded hover:bg-violet-600">
+                测试递归阶乘
+            </button>
+            <button onclick="testAlgorithm('fibonacci-dp')" class="p-3 bg-emerald-500 text-white rounded hover:bg-emerald-600">
+                测试斐波那契DP
+            </button>
+            <button onclick="testAlgorithm('stack-simulation')" class="p-3 bg-rose-500 text-white rounded hover:bg-rose-600">
+                测试栈操作
+            </button>
+            <button onclick="testAlgorithm('queue-simulation')" class="p-3 bg-sky-500 text-white rounded hover:bg-sky-600">
+                测试队列操作
+            </button>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">测试结果</h2>
+            <div id="test-container" class="min-h-[300px] border-2 border-dashed border-gray-300 p-4 rounded">
+                <p class="text-gray-500 text-center">点击上方按钮测试算法动画演示</p>
+            </div>
+        </div>
+        
+        <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 class="font-bold text-yellow-800 mb-2">📋 测试清单</h3>
+            <div class="grid grid-cols-3 gap-2 text-sm">
+                <div id="status-bubble" class="text-gray-500">❓ 冒泡排序</div>
+                <div id="status-selection" class="text-gray-500">❓ 选择排序</div>
+                <div id="status-insertion" class="text-gray-500">❓ 插入排序</div>
+                <div id="status-quick" class="text-gray-500">❓ 快速排序</div>
+                <div id="status-merge" class="text-gray-500">❓ 归并排序</div>
+                <div id="status-heap" class="text-gray-500">❓ 堆排序</div>
+                <div id="status-linear" class="text-gray-500">❓ 线性查找</div>
+                <div id="status-binary" class="text-gray-500">❓ 二分查找</div>
+                <div id="status-prime-sieve" class="text-gray-500">❓ 质数筛法</div>
+                <div id="status-gcd-euclidean" class="text-gray-500">❓ 欧几里得算法</div>
+                <div id="status-binary-conversion" class="text-gray-500">❓ 进制转换</div>
+                <div id="status-factorial-recursive" class="text-gray-500">❓ 递归阶乘</div>
+                <div id="status-fibonacci-dp" class="text-gray-500">❓ 斐波那契DP</div>
+                <div id="status-stack-simulation" class="text-gray-500">❓ 栈操作</div>
+                <div id="status-queue-simulation" class="text-gray-500">❓ 队列操作</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从主文件导入所有演示函数
+        function loadMainScript() {
+            fetch('final-complete-demo.html')
+                .then(response => response.text())
+                .then(html => {
+                    // 提取JavaScript部分
+                    const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
+                    if (scriptMatch) {
+                        const scriptContent = scriptMatch[1];
+                        eval(scriptContent);
+                        console.log('✅ 主脚本已加载');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ 加载主脚本失败:', error);
+                });
+        }
+
+        function testAlgorithm(algorithm) {
+            console.log(`🧪 测试算法: ${algorithm}`);
+            const container = document.getElementById('test-container');
+            
+            try {
+                // 创建algorithm-animation-container元素
+                container.innerHTML = '<div id="algorithm-animation-container"></div>';
+                const animContainer = document.getElementById('algorithm-animation-container');
+                
+                // 调用对应的演示函数
+                switch(algorithm) {
+                    case 'bubble':
+                        if (typeof bubbleSortDemo !== 'undefined') {
+                            bubbleSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('bubbleSortDemo函数未定义');
+                        }
+                        break;
+                    case 'selection':
+                        if (typeof selectionSortDemo !== 'undefined') {
+                            selectionSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('selectionSortDemo函数未定义');
+                        }
+                        break;
+                    case 'insertion':
+                        if (typeof insertionSortDemo !== 'undefined') {
+                            insertionSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('insertionSortDemo函数未定义');
+                        }
+                        break;
+                    case 'quick':
+                        if (typeof quickSortDemo !== 'undefined') {
+                            quickSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('quickSortDemo函数未定义');
+                        }
+                        break;
+                    case 'merge':
+                        if (typeof mergeSortDemo !== 'undefined') {
+                            mergeSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('mergeSortDemo函数未定义');
+                        }
+                        break;
+                    case 'heap':
+                        if (typeof heapSortDemo !== 'undefined') {
+                            heapSortDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('heapSortDemo函数未定义');
+                        }
+                        break;
+                    case 'linear':
+                        if (typeof linearSearchDemo !== 'undefined') {
+                            linearSearchDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('linearSearchDemo函数未定义');
+                        }
+                        break;
+                    case 'binary':
+                        if (typeof binarySearchDemo !== 'undefined') {
+                            binarySearchDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('binarySearchDemo函数未定义');
+                        }
+                        break;
+                    case 'prime-sieve':
+                        if (typeof primeSieveDemo !== 'undefined') {
+                            primeSieveDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('primeSieveDemo函数未定义');
+                        }
+                        break;
+                    case 'gcd-euclidean':
+                        if (typeof gcdDemo !== 'undefined') {
+                            gcdDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('gcdDemo函数未定义');
+                        }
+                        break;
+                    case 'binary-conversion':
+                        if (typeof binaryConversionDemo !== 'undefined') {
+                            binaryConversionDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('binaryConversionDemo函数未定义');
+                        }
+                        break;
+                    case 'factorial-recursive':
+                        if (typeof factorialDemo !== 'undefined') {
+                            factorialDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('factorialDemo函数未定义');
+                        }
+                        break;
+                    case 'fibonacci-dp':
+                        if (typeof fibonacciDemo !== 'undefined') {
+                            fibonacciDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('fibonacciDemo函数未定义');
+                        }
+                        break;
+                    case 'stack-simulation':
+                        if (typeof stackDemo !== 'undefined') {
+                            stackDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('stackDemo函数未定义');
+                        }
+                        break;
+                    case 'queue-simulation':
+                        if (typeof queueDemo !== 'undefined') {
+                            queueDemo(animContainer);
+                            updateStatus(algorithm, '✅');
+                        } else {
+                            throw new Error('queueDemo函数未定义');
+                        }
+                        break;
+                    default:
+                        throw new Error(`未知算法: ${algorithm}`);
+                }
+                
+                console.log(`✅ ${algorithm} 动画演示测试成功`);
+                
+            } catch (error) {
+                console.error(`❌ ${algorithm} 测试失败:`, error);
+                container.innerHTML = `
+                    <div class="text-red-600 text-center">
+                        <h3 class="font-bold">❌ ${algorithm} 测试失败</h3>
+                        <p class="text-sm">${error.message}</p>
+                    </div>
+                `;
+                updateStatus(algorithm, '❌');
+            }
+        }
+
+        function updateStatus(algorithm, status) {
+            const statusElement = document.getElementById(`status-${algorithm}`);
+            if (statusElement) {
+                statusElement.innerHTML = `${status} ${statusElement.textContent.replace(/^[❓✅❌] /, '')}`;
+                statusElement.className = status === '✅' ? 'text-green-600' : status === '❌' ? 'text-red-600' : 'text-gray-500';
+            }
+        }
+
+        // 页面加载时初始化
+        // loadMainScript();
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal CSP-J Test</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <h1 class="text-2xl font-bold mb-4">CSP-J 最小功能测试</h1>
+    
+    <!-- 知识点导航测试 -->
+    <div class="bg-white p-4 rounded mb-4">
+        <h2 class="text-lg font-bold mb-2">知识点导航测试</h2>
+        <div id="knowledge-nav" class="space-y-2">
+            <!-- 这里应该动态生成内容 -->
+        </div>
+        <button onclick="testKnowledgeNav()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">测试知识点导航</button>
+    </div>
+    
+    <!-- 代码编辑器测试 -->
+    <div class="bg-white p-4 rounded mb-4">
+        <h2 class="text-lg font-bold mb-2">代码编辑器测试</h2>
+        <select id="code-template" onchange="testLoadTemplate()" class="w-full p-2 border rounded mb-2">
+            <option value="">选择模板</option>
+            <option value="hello">Hello World</option>
+        </select>
+        <textarea id="code-editor" class="w-full p-2 border rounded" rows="5">// 代码将在这里显示</textarea>
+        <button onclick="testRunCode()" class="bg-green-500 text-white px-4 py-2 rounded mt-2">运行代码</button>
+        <div id="code-output" class="bg-gray-800 text-green-400 p-2 rounded mt-2">输出将显示在这里</div>
+    </div>
+    
+    <!-- 算法可视化测试 -->
+    <div class="bg-white p-4 rounded mb-4">
+        <h2 class="text-lg font-bold mb-2">算法可视化测试</h2>
+        <select id="algorithm-select" onchange="testShowViz()" class="w-full p-2 border rounded mb-2">
+            <option value="">选择算法</option>
+            <option value="bubble-sort">冒泡排序</option>
+        </select>
+        <div id="algorithm-visualization" class="bg-gray-800 text-white p-4 rounded">选择算法查看演示</div>
+        <button onclick="testStartViz()" class="bg-purple-500 text-white px-4 py-2 rounded mt-2">开始演示</button>
+    </div>
+    
+    <!-- 测试结果 -->
+    <div class="bg-white p-4 rounded">
+        <h2 class="text-lg font-bold mb-2">测试结果</h2>
+        <div id="test-results" class="space-y-1"></div>
+    </div>
+
+    <script>
+        // 简化的测试数据
+        const knowledgeData = {
+            'basics': {
+                title: '🏁 入门基础',
+                content: '<h3>测试内容</h3><p>这是一个测试内容。</p>'
+            }
+        };
+        
+        const codeTemplates = {
+            hello: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, CSP-J!" << endl;
+    return 0;
+}`
+        };
+        
+        // 测试结果记录
+        function logResult(message, success = true) {
+            console.log(message);
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `p-2 rounded ${success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            resultsDiv.appendChild(div);
+        }
+        
+        // 测试知识点导航
+        function testKnowledgeNav() {
+            try {
+                logResult('测试知识点导航功能...');
+                const navContainer = document.getElementById('knowledge-nav');
+                
+                if (!navContainer) {
+                    logResult('错误：找不到 knowledge-nav 元素', false);
+                    return;
+                }
+                
+                navContainer.innerHTML = '';
+                
+                Object.keys(knowledgeData).forEach(key => {
+                    const topic = knowledgeData[key];
+                    const navItem = document.createElement('div');
+                    navItem.className = 'p-2 bg-gray-100 rounded cursor-pointer hover:bg-gray-200';
+                    navItem.textContent = topic.title;
+                    navItem.onclick = () => {
+                        logResult(`点击了知识点: ${topic.title}`);
+                    };
+                    navContainer.appendChild(navItem);
+                });
+                
+                logResult('✓ 知识点导航生成成功');
+            } catch (error) {
+                logResult('✗ 知识点导航错误: ' + error.message, false);
+            }
+        }
+        
+        // 测试代码模板加载
+        function testLoadTemplate() {
+            try {
+                logResult('测试代码模板加载...');
+                const select = document.getElementById('code-template');
+                const textarea = document.getElementById('code-editor');
+                
+                if (!select || !textarea) {
+                    logResult('错误：找不到必要元素', false);
+                    return;
+                }
+                
+                const template = codeTemplates[select.value];
+                if (template) {
+                    textarea.value = template;
+                    logResult('✓ 代码模板加载成功');
+                } else {
+                    logResult('没有选择模板');
+                }
+            } catch (error) {
+                logResult('✗ 代码模板加载错误: ' + error.message, false);
+            }
+        }
+        
+        // 测试代码运行
+        function testRunCode() {
+            try {
+                logResult('测试代码运行...');
+                const textarea = document.getElementById('code-editor');
+                const outputDiv = document.getElementById('code-output');
+                
+                if (!textarea || !outputDiv) {
+                    logResult('错误：找不到必要元素', false);
+                    return;
+                }
+                
+                const code = textarea.value.trim();
+                if (!code) {
+                    outputDiv.textContent = '请先输入或选择代码模板';
+                    logResult('提示：需要输入代码');
+                    return;
+                }
+                
+                // 简单模拟运行结果
+                if (code.includes('Hello')) {
+                    outputDiv.textContent = 'Hello, CSP-J!';
+                    logResult('✓ 代码运行模拟成功');
+                } else {
+                    outputDiv.textContent = '程序执行完成';
+                    logResult('✓ 代码运行完成');
+                }
+                
+            } catch (error) {
+                logResult('✗ 代码运行错误: ' + error.message, false);
+            }
+        }
+        
+        // 测试算法可视化显示
+        function testShowViz() {
+            try {
+                logResult('测试算法可视化显示...');
+                const select = document.getElementById('algorithm-select');
+                const vizArea = document.getElementById('algorithm-visualization');
+                
+                if (!select || !vizArea) {
+                    logResult('错误：找不到必要元素', false);
+                    return;
+                }
+                
+                if (select.value === 'bubble-sort') {
+                    vizArea.innerHTML = `
+                        <div class="text-center mb-2">
+                            <h4 class="font-bold">冒泡排序演示</h4>
+                        </div>
+                        <div class="flex justify-center space-x-1">
+                            <div class="w-8 h-16 bg-blue-500 flex items-end justify-center text-xs text-white">64</div>
+                            <div class="w-8 h-8 bg-blue-500 flex items-end justify-center text-xs text-white">34</div>
+                            <div class="w-8 h-6 bg-blue-500 flex items-end justify-center text-xs text-white">25</div>
+                        </div>
+                    `;
+                    logResult('✓ 算法可视化内容显示成功');
+                } else {
+                    vizArea.textContent = '选择算法查看演示';
+                    logResult('没有选择算法');
+                }
+                
+            } catch (error) {
+                logResult('✗ 算法可视化显示错误: ' + error.message, false);
+            }
+        }
+        
+        // 测试算法可视化动画
+        function testStartViz() {
+            try {
+                logResult('测试算法可视化动画...');
+                const select = document.getElementById('algorithm-select');
+                
+                if (!select || !select.value) {
+                    logResult('请先选择算法', false);
+                    return;
+                }
+                
+                logResult('✓ 开始算法动画演示');
+                // 这里可以添加实际的动画逻辑
+                
+            } catch (error) {
+                logResult('✗ 算法可视化动画错误: ' + error.message, false);
+            }
+        }
+        
+        // 页面加载完成后自动运行测试
+        document.addEventListener('DOMContentLoaded', function() {
+            logResult('页面加载完成，开始自动测试...');
+            logResult('JavaScript 执行正常');
+            logResult('DOM 元素可访问');
+            
+            // 自动测试知识点导航
+            setTimeout(() => {
+                testKnowledgeNav();
+            }, 500);
+        });
+        
+        // 全局函数暴露（用于 HTML onclick）
+        window.testKnowledgeNav = testKnowledgeNav;
+        window.testLoadTemplate = testLoadTemplate;
+        window.testRunCode = testRunCode;
+        window.testShowViz = testShowViz;
+        window.testStartViz = testStartViz;
+        
+    </script>
+</body>
+</html>

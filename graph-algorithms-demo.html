@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 CSP-J 图算法可视化演示</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .algorithm-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .algorithm-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        #viz-content {
+            min-height: 500px;
+        }
+        
+        .info-panel {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .complexity-badge {
+            background: linear-gradient(45deg, #10b981, #22d3ee);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <!-- 标题区 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">
+                🌐 CSP-J 图算法可视化演示
+            </h1>
+            <p class="text-center text-gray-600">
+                深度优先搜索(DFS)、广度优先搜索(BFS)、Dijkstra最短路径算法完整演示
+            </p>
+        </div>
+
+        <!-- 算法选择区 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- DFS -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('dfs')" id="card-dfs">
+                <h3 class="text-xl font-bold mb-4">🔍 深度优先搜索</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>原理：</strong>沿着路径尽可能深入</p>
+                    <p><strong>数据结构：</strong>栈(Stack)</p>
+                    <p><strong>应用：</strong>路径查找、连通性检测</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O(V+E)</div>
+                </div>
+            </div>
+
+            <!-- BFS -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('bfs')" id="card-bfs">
+                <h3 class="text-xl font-bold mb-4">🌊 广度优先搜索</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>原理：</strong>逐层访问邻居节点</p>
+                    <p><strong>数据结构：</strong>队列(Queue)</p>
+                    <p><strong>应用：</strong>最短路径、层次遍历</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O(V+E)</div>
+                </div>
+            </div>
+
+            <!-- Dijkstra -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('dijkstra')" id="card-dijkstra">
+                <h3 class="text-xl font-bold mb-4">🎯 Dijkstra算法</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>原理：</strong>贪心策略求最短路径</p>
+                    <p><strong>数据结构：</strong>优先队列</p>
+                    <p><strong>应用：</strong>单源最短路径</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O((V+E)logV)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图结构选择 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-bold mb-4">📊 选择图结构</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="loadGraph('simple')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    简单图 (5节点)
+                </button>
+                <button onclick="loadGraph('complex')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    复杂图 (7节点)
+                </button>
+                <button onclick="loadGraph('weighted')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                    加权图 (6节点)
+                </button>
+            </div>
+        </div>
+
+        <!-- 可视化主区域 -->
+        <div id="visualization-container" class="glass-effect rounded-lg p-6 mb-6 hidden">
+            <!-- 这里将由JavaScript动态生成可视化内容 -->
+        </div>
+
+        <!-- 算法信息面板 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- 算法说明 -->
+            <div class="glass-effect rounded-lg p-6">
+                <h3 class="text-lg font-bold mb-4">📖 算法说明</h3>
+                <div id="algorithm-description" class="info-panel p-4 rounded">
+                    <p class="text-gray-600">请选择一个算法开始演示</p>
+                </div>
+            </div>
+
+            <!-- 执行统计 -->
+            <div class="glass-effect rounded-lg p-6">
+                <h3 class="text-lg font-bold mb-4">📊 执行统计</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-3 rounded">
+                        <p class="text-sm text-blue-700">访问节点数</p>
+                        <p class="text-2xl font-bold text-blue-900" id="visited-count">0</p>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded">
+                        <p class="text-sm text-green-700">检查边数</p>
+                        <p class="text-2xl font-bold text-green-900" id="edge-count">0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded">
+                        <p class="text-sm text-yellow-700">执行步数</p>
+                        <p class="text-2xl font-bold text-yellow-900" id="step-count">0</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded">
+                        <p class="text-sm text-purple-700">执行时间</p>
+                        <p class="text-2xl font-bold text-purple-900" id="execution-time">0ms</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入算法可视化系统 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="enhanced-graph-algorithms.js"></script>
+    
+    <script>
+        let currentVisualizer = null;
+        let currentAlgorithm = '';
+        let currentGraph = null;
+
+        // 预定义的图结构
+        const graphTemplates = {
+            simple: {
+                nodes: [
+                    { id: 'A', label: 'A', x: 150, y: 100 },
+                    { id: 'B', label: 'B', x: 300, y: 100 },
+                    { id: 'C', label: 'C', x: 450, y: 100 },
+                    { id: 'D', label: 'D', x: 225, y: 200 },
+                    { id: 'E', label: 'E', x: 375, y: 200 }
+                ],
+                edges: [
+                    { from: 'A', to: 'B', directed: false, weight: 4 },
+                    { from: 'B', to: 'C', directed: false, weight: 3 },
+                    { from: 'A', to: 'D', directed: false, weight: 2 },
+                    { from: 'B', to: 'E', directed: false, weight: 5 },
+                    { from: 'D', to: 'E', directed: false, weight: 1 },
+                    { from: 'C', to: 'E', directed: false, weight: 6 }
+                ]
+            },
+            complex: {
+                nodes: [
+                    { id: 'A', label: 'A', x: 100, y: 100 },
+                    { id: 'B', label: 'B', x: 250, y: 80 },
+                    { id: 'C', label: 'C', x: 400, y: 100 },
+                    { id: 'D', label: 'D', x: 150, y: 200 },
+                    { id: 'E', label: 'E', x: 300, y: 220 },
+                    { id: 'F', label: 'F', x: 450, y: 200 },
+                    { id: 'G', label: 'G', x: 275, y: 320 }
+                ],
+                edges: [
+                    { from: 'A', to: 'B', directed: false, weight: 7 },
+                    { from: 'A', to: 'D', directed: false, weight: 5 },
+                    { from: 'B', to: 'C', directed: false, weight: 8 },
+                    { from: 'B', to: 'E', directed: false, weight: 9 },
+                    { from: 'C', to: 'F', directed: false, weight: 5 },
+                    { from: 'D', to: 'E', directed: false, weight: 15 },
+                    { from: 'D', to: 'G', directed: false, weight: 6 },
+                    { from: 'E', to: 'F', directed: false, weight: 7 },
+                    { from: 'E', to: 'G', directed: false, weight: 8 },
+                    { from: 'F', to: 'G', directed: false, weight: 9 }
+                ]
+            },
+            weighted: {
+                nodes: [
+                    { id: 'S', label: 'S', x: 100, y: 150 },
+                    { id: 'A', label: 'A', x: 250, y: 100 },
+                    { id: 'B', label: 'B', x: 250, y: 200 },
+                    { id: 'C', label: 'C', x: 400, y: 100 },
+                    { id: 'D', label: 'D', x: 400, y: 200 },
+                    { id: 'T', label: 'T', x: 550, y: 150 }
+                ],
+                edges: [
+                    { from: 'S', to: 'A', directed: false, weight: 10 },
+                    { from: 'S', to: 'B', directed: false, weight: 8 },
+                    { from: 'A', to: 'C', directed: false, weight: 2 },
+                    { from: 'A', to: 'D', directed: false, weight: 5 },
+                    { from: 'B', to: 'D', directed: false, weight: 2 },
+                    { from: 'C', to: 'T', directed: false, weight: 6 },
+                    { from: 'D', to: 'T', directed: false, weight: 3 },
+                    { from: 'D', to: 'C', directed: false, weight: 1 }
+                ]
+            }
+        };
+
+        // 算法描述
+        const algorithmDescriptions = {
+            dfs: {
+                title: '深度优先搜索 (DFS)',
+                description: `
+                    <h4 class="font-bold mb-2">🔍 算法原理</h4>
+                    <p class="mb-3">深度优先搜索是一种用于遍历或搜索树或图的算法。它沿着树的深度遍历树的节点，尽可能深地搜索树的分支。</p>
+                    
+                    <h4 class="font-bold mb-2">📋 执行步骤</h4>
+                    <ol class="list-decimal list-inside space-y-1 mb-3">
+                        <li>从起始节点开始，标记为已访问</li>
+                        <li>将起始节点压入栈中</li>
+                        <li>当栈不为空时，弹出栈顶节点</li>
+                        <li>访问该节点的所有未访问邻居</li>
+                        <li>将未访问的邻居压入栈中</li>
+                        <li>重复步骤3-5直到栈为空</li>
+                    </ol>
+                    
+                    <h4 class="font-bold mb-2">🎯 应用场景</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>检测图中的连通分量</li>
+                        <li>拓扑排序</li>
+                        <li>检测图中的环</li>
+                        <li>路径查找问题</li>
+                    </ul>
+                `
+            },
+            bfs: {
+                title: '广度优先搜索 (BFS)',
+                description: `
+                    <h4 class="font-bold mb-2">🌊 算法原理</h4>
+                    <p class="mb-3">广度优先搜索是一种用于遍历或搜索树或图的算法。它从根节点开始，逐层访问节点，先访问距离根节点最近的节点。</p>
+                    
+                    <h4 class="font-bold mb-2">📋 执行步骤</h4>
+                    <ol class="list-decimal list-inside space-y-1 mb-3">
+                        <li>从起始节点开始，标记为已访问</li>
+                        <li>将起始节点加入队列</li>
+                        <li>当队列不为空时，取出队首节点</li>
+                        <li>访问该节点的所有未访问邻居</li>
+                        <li>将未访问的邻居加入队列并标记为已访问</li>
+                        <li>重复步骤3-5直到队列为空</li>
+                    </ol>
+                    
+                    <h4 class="font-bold mb-2">🎯 应用场景</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>无权图的最短路径</li>
+                        <li>层次遍历</li>
+                        <li>连通性检测</li>
+                        <li>社交网络分析</li>
+                    </ul>
+                `
+            },
+            dijkstra: {
+                title: 'Dijkstra最短路径算法',
+                description: `
+                    <h4 class="font-bold mb-2">🎯 算法原理</h4>
+                    <p class="mb-3">Dijkstra算法是一种用于计算加权图中单源最短路径的算法。它使用贪心策略，每次选择距离源点最近的未访问节点。</p>
+                    
+                    <h4 class="font-bold mb-2">📋 执行步骤</h4>
+                    <ol class="list-decimal list-inside space-y-1 mb-3">
+                        <li>初始化：源点距离为0，其他点距离为无穷大</li>
+                        <li>创建未访问节点集合</li>
+                        <li>选择距离最小的未访问节点作为当前节点</li>
+                        <li>更新当前节点所有邻居的距离</li>
+                        <li>标记当前节点为已访问</li>
+                        <li>重复步骤3-5直到所有节点都被访问</li>
+                    </ol>
+                    
+                    <h4 class="font-bold mb-2">🎯 应用场景</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>GPS导航系统</li>
+                        <li>网络路由协议</li>
+                        <li>社交网络分析</li>
+                        <li>游戏AI路径规划</li>
+                    </ul>
+                `
+            }
+        };
+
+        // 选择算法
+        function selectAlgorithm(algorithm) {
+            currentAlgorithm = algorithm;
+            
+            // 更新卡片样式
+            document.querySelectorAll('.algorithm-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`card-${algorithm}`).classList.add('active');
+            
+            // 更新算法描述
+            const description = algorithmDescriptions[algorithm];
+            document.getElementById('algorithm-description').innerHTML = `
+                <h4 class="font-bold text-lg mb-3">${description.title}</h4>
+                ${description.description}
+            `;
+            
+            // 如果已经加载了图，则重新初始化
+            if (currentGraph) {
+                initVisualization();
+            }
+        }
+
+        // 加载图结构
+        function loadGraph(graphType) {
+            currentGraph = graphTemplates[graphType];
+            
+            if (currentAlgorithm) {
+                initVisualization();
+            } else {
+                alert('请先选择一个算法！');
+            }
+        }
+
+        // 初始化可视化
+        function initVisualization() {
+            if (!currentAlgorithm || !currentGraph) return;
+            
+            const container = document.getElementById('visualization-container');
+            container.classList.remove('hidden');
+            
+            // 清理之前的可视化
+            if (currentVisualizer) {
+                currentVisualizer = null;
+            }
+            
+            // 创建新的可视化器
+            currentVisualizer = new EnhancedGraphVisualizer('visualization-container', currentAlgorithm);
+            currentVisualizer.setGraph(currentGraph.nodes, currentGraph.edges);
+            
+            // 重写统计更新方法
+            const originalUpdateStats = currentVisualizer.updateStats;
+            currentVisualizer.updateStats = function() {
+                originalUpdateStats.call(this);
+                
+                // 更新自定义统计信息
+                document.getElementById('visited-count').textContent = this.visited.size;
+                document.getElementById('step-count').textContent = this.state.currentStep;
+                
+                if (this.state.startTime) {
+                    const elapsed = (this.state.endTime || Date.now()) - this.state.startTime;
+                    document.getElementById('execution-time').textContent = `${elapsed}ms`;
+                }
+            };
+            
+            currentVisualizer.init();
+            currentVisualizer.initVisualization();
+            
+            // 将可视化器绑定到全局变量
+            window.visualizer = currentVisualizer;
+            
+            // 重置统计信息
+            document.getElementById('visited-count').textContent = '0';
+            document.getElementById('edge-count').textContent = '0';
+            document.getElementById('step-count').textContent = '0';
+            document.getElementById('execution-time').textContent = '0ms';
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('图算法可视化系统已就绪！');
+            
+            // 默认选择DFS算法
+            selectAlgorithm('dfs');
+            
+            // 默认加载简单图
+            setTimeout(() => {
+                loadGraph('simple');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

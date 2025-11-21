@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Algorithm Visualizer</title>
+</head>
+
+<body>
+    <h1>Algorithm Visualizer Class Test</h1>
+    <div id="test-output"></div>
+    <div id="viz-container"></div>
+
+    <script src="algorithm-visualizer.js"></script>
+    <script>
+        const output = document.getElementById('test-output');
+
+        function log(msg) {
+            output.innerHTML += '<p>' + msg + '</p>';
+            console.log(msg);
+        }
+
+        // Test after 500ms to ensure script is loaded
+        setTimeout(() => {
+            log('=== Starting Tests ===');
+
+            // Test 1: Check if classes exist
+            log('1. typeof window.SortingVisualizer: ' + typeof window.SortingVisualizer);
+            log('2. typeof window.SearchVisualizer: ' + typeof window.SearchVisualizer);
+            log('3. window.SortingVisualizer: ' + window.SortingVisualizer);
+
+            // Test 2: Try to create instance
+            try {
+                const container = document.getElementById('viz-container');
+                container.innerHTML = '<div id="test-viz"></div>';
+
+                log('4. Creating SortingVisualizer instance...');
+                const viz = new window.SortingVisualizer('test-viz', 'bubble');
+                log('5. ✅ Success! Instance created: ' + viz);
+
+                log('6. Calling init()...');
+                viz.init();
+                log('7. ✅ init() called successfully');
+
+                log('8. Setting data...');
+                viz.setData([5, 3, 8, 1, 9]);
+                log('9. ✅ Data set successfully');
+
+                log('=== ALL TESTS PASSED ===');
+            } catch (error) {
+                log('❌ ERROR: ' + error.message);
+                log('Error stack: ' + error.stack);
+            }
+        }, 500);
+    </script>
+</body>
+
+</html>

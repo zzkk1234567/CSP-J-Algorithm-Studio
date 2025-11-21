@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 CSP-J 图算法同步演示系统</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .algorithm-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .algorithm-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        #viz-content {
+            min-height: 500px;
+        }
+        
+        .explanation-panel {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            max-height: 500px;
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .step-explanation {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .step-explanation.current {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            transform: scale(1.02);
+        }
+        
+        .step-explanation.completed {
+            background: rgba(107, 114, 128, 0.1);
+            border-left: 3px solid #6b7280;
+            opacity: 0.7;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .complexity-badge {
+            background: linear-gradient(45deg, #10b981, #22d3ee);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .control-button {
+            transition: all 0.2s ease;
+        }
+        
+        .control-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .data-structure-display {
+            background: rgba(17, 24, 39, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 8px 0;
+            border: 2px solid #374151;
+        }
+        
+        .algorithm-status {
+            background: linear-gradient(45deg, #f59e0b, #f97316);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 12px 0;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <!-- 标题区 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">
+                🌐 CSP-J 图算法同步演示系统
+            </h1>
+            <p class="text-center text-gray-600 mb-2">
+                图形动画与步骤解释实时同步，深度理解算法执行过程
+            </p>
+        </div>
+
+        <!-- 算法选择区 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- DFS -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('dfs')" id="card-dfs">
+                <h3 class="text-xl font-bold mb-4">🔍 深度优先搜索</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>🎯 核心思想:</strong> 沿着路径尽可能深入探索</p>
+                    <p><strong>📚 数据结构:</strong> 栈(Stack) - 后进先出</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O(V+E)</div>
+                </div>
+            </div>
+
+            <!-- BFS -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('bfs')" id="card-bfs">
+                <h3 class="text-xl font-bold mb-4">🌊 广度优先搜索</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>🎯 核心思想:</strong> 逐层访问邻居节点</p>
+                    <p><strong>📚 数据结构:</strong> 队列(Queue) - 先进先出</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O(V+E)</div>
+                </div>
+            </div>
+
+            <!-- Dijkstra -->
+            <div class="glass-effect rounded-lg p-6 algorithm-card" onclick="selectAlgorithm('dijkstra')" id="card-dijkstra">
+                <h3 class="text-xl font-bold mb-4">🎯 Dijkstra算法</h3>
+                <div class="space-y-2 text-sm">
+                    <p><strong>🎯 核心思想:</strong> 贪心策略求最短路径</p>
+                    <p><strong>📚 数据结构:</strong> 优先队列、距离数组</p>
+                    <div class="complexity-badge mt-3">时间复杂度: O((V+E)logV)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="glass-effect rounded-lg p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 图结构选择 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">📊 选择图结构</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="loadGraph('simple')" class="control-button px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-left">
+                            <div class="font-bold">🔹 简单图 (5节点)</div>
+                            <div class="text-sm opacity-90">适合初学者理解基本概念</div>
+                        </button>
+                        <button onclick="loadGraph('complex')" class="control-button px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-left">
+                            <div class="font-bold">🔸 复杂图 (7节点)</div>
+                            <div class="text-sm opacity-90">展示算法在复杂结构中的表现</div>
+                        </button>
+                        <button onclick="loadGraph('weighted')" class="control-button px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-left">
+                            <div class="font-bold">⚖️ 加权图 (6节点)</div>
+                            <div class="text-sm opacity-90">专门用于Dijkstra算法演示</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 播放控制 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">🎮 播放控制</h3>
+                    <div class="space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="playAnimation()" class="control-button flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                ▶️ 播放
+                            </button>
+                            <button onclick="pauseAnimation()" class="control-button flex-1 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                                ⏸️ 暂停
+                            </button>
+                            <button onclick="stepAnimation()" class="control-button flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                ⏭️ 步进
+                            </button>
+                            <button onclick="resetAnimation()" class="control-button flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                🔄 重置
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-90 rounded-lg p-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">⚡ 播放速度</label>
+                            <input type="range" id="speed-slider" min="200" max="3000" value="1000" 
+                                   onchange="updateSpeed(this.value)" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>快速</span>
+                                <span id="speed-display">1000ms</span>
+                                <span>慢速</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 - 左右布局 -->
+        <div class="main-layout">
+            <!-- 左侧：可视化区域 -->
+            <div class="space-y-6">
+                <!-- 可视化主区域 -->
+                <div id="visualization-container" class="glass-effect rounded-lg p-6 hidden">
+                    <!-- 这里将由JavaScript动态生成可视化内容 -->
+                </div>
+
+                <!-- 执行统计 -->
+                <div class="glass-effect rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">📊 执行统计</h3>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-blue-50 p-3 rounded text-center">
+                            <p class="text-sm text-blue-700">访问节点</p>
+                            <p class="text-2xl font-bold text-blue-900" id="visited-count">0</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded text-center">
+                            <p class="text-sm text-green-700">执行步数</p>
+                            <p class="text-2xl font-bold text-green-900" id="step-count">0</p>
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded text-center">
+                            <p class="text-sm text-yellow-700">当前状态</p>
+                            <p class="text-lg font-bold text-yellow-900" id="current-status">待开始</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded text-center">
+                            <p class="text-sm text-purple-700">执行时间</p>
+                            <p class="text-2xl font-bold text-purple-900" id="execution-time">0ms</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：步骤解释面板 -->
+            <div class="glass-effect rounded-lg p-6">
+                <h3 class="text-lg font-bold mb-4">📖 算法步骤解释</h3>
+                
+                <!-- 算法状态显示 -->
+                <div class="algorithm-status" id="algorithm-status">
+                    请选择算法和图结构开始演示
+                </div>
+                
+                <!-- 数据结构状态显示 -->
+                <div id="data-structure-display" class="data-structure-display hidden">
+                    <div class="text-sm text-gray-300 mb-2">数据结构状态:</div>
+                    <div id="structure-content">等待初始化...</div>
+                </div>
+                
+                <!-- 步骤解释内容 -->
+                <div id="step-explanation" class="explanation-panel p-4 rounded">
+                    <div class="step-explanation">
+                        <p class="text-gray-600">🎯 选择算法和图结构后，这里将显示详细的执行步骤</p>
+                        <p class="text-sm text-gray-500 mt-2">
+                            💡 每个步骤都会与左侧的图形动画同步显示，帮助您理解算法的执行过程
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入算法可视化系统 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="enhanced-graph-algorithms-with-explanations.js"></script>
+    
+    <script>
+        let currentVisualizer = null;
+        let currentAlgorithm = '';
+        let currentGraph = null;
+        let stepElements = [];
+        let currentStepIndex = -1;
+
+        // 预定义的图结构
+        const graphTemplates = {
+            simple: {
+                nodes: [
+                    { id: 'A', label: 'A', x: 150, y: 100 },
+                    { id: 'B', label: 'B', x: 300, y: 100 },
+                    { id: 'C', label: 'C', x: 450, y: 100 },
+                    { id: 'D', label: 'D', x: 225, y: 200 },
+                    { id: 'E', label: 'E', x: 375, y: 200 }
+                ],
+                edges: [
+                    { from: 'A', to: 'B', directed: false, weight: 4 },
+                    { from: 'B', to: 'C', directed: false, weight: 3 },
+                    { from: 'A', to: 'D', directed: false, weight: 2 },
+                    { from: 'B', to: 'E', directed: false, weight: 5 },
+                    { from: 'D', to: 'E', directed: false, weight: 1 },
+                    { from: 'C', to: 'E', directed: false, weight: 6 }
+                ]
+            },
+            complex: {
+                nodes: [
+                    { id: 'A', label: 'A', x: 100, y: 100 },
+                    { id: 'B', label: 'B', x: 250, y: 80 },
+                    { id: 'C', label: 'C', x: 400, y: 100 },
+                    { id: 'D', label: 'D', x: 150, y: 200 },
+                    { id: 'E', label: 'E', x: 300, y: 220 },
+                    { id: 'F', label: 'F', x: 450, y: 200 },
+                    { id: 'G', label: 'G', x: 275, y: 320 }
+                ],
+                edges: [
+                    { from: 'A', to: 'B', directed: false, weight: 7 },
+                    { from: 'A', to: 'D', directed: false, weight: 5 },
+                    { from: 'B', to: 'C', directed: false, weight: 8 },
+                    { from: 'B', to: 'E', directed: false, weight: 9 },
+                    { from: 'C', to: 'F', directed: false, weight: 5 },
+                    { from: 'D', to: 'E', directed: false, weight: 15 },
+                    { from: 'D', to: 'G', directed: false, weight: 6 },
+                    { from: 'E', to: 'F', directed: false, weight: 7 },
+                    { from: 'E', to: 'G', directed: false, weight: 8 },
+                    { from: 'F', to: 'G', directed: false, weight: 9 }
+                ]
+            },
+            weighted: {
+                nodes: [
+                    { id: 'S', label: 'S', x: 100, y: 150 },
+                    { id: 'A', label: 'A', x: 250, y: 100 },
+                    { id: 'B', label: 'B', x: 250, y: 200 },
+                    { id: 'C', label: 'C', x: 400, y: 100 },
+                    { id: 'D', label: 'D', x: 400, y: 200 },
+                    { id: 'T', label: 'T', x: 550, y: 150 }
+                ],
+                edges: [
+                    { from: 'S', to: 'A', directed: false, weight: 10 },
+                    { from: 'S', to: 'B', directed: false, weight: 8 },
+                    { from: 'A', to: 'C', directed: false, weight: 2 },
+                    { from: 'A', to: 'D', directed: false, weight: 5 },
+                    { from: 'B', to: 'D', directed: false, weight: 2 },
+                    { from: 'C', to: 'T', directed: false, weight: 6 },
+                    { from: 'D', to: 'T', directed: false, weight: 3 },
+                    { from: 'D', to: 'C', directed: false, weight: 1 }
+                ]
+            }
+        };
+
+        // 选择算法
+        function selectAlgorithm(algorithm) {
+            currentAlgorithm = algorithm;
+            
+            // 更新卡片样式
+            document.querySelectorAll('.algorithm-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`card-${algorithm}`).classList.add('active');
+            
+            // 更新算法状态
+            const algorithmNames = {
+                'dfs': '深度优先搜索 (DFS)',
+                'bfs': '广度优先搜索 (BFS)',
+                'dijkstra': 'Dijkstra最短路径算法'
+            };
+            
+            document.getElementById('algorithm-status').textContent = 
+                `已选择: ${algorithmNames[algorithm]}`;
+            document.getElementById('current-status').textContent = '已选择算法';
+            
+            // 如果已经加载了图，则重新初始化
+            if (currentGraph) {
+                initVisualization();
+            }
+        }
+
+        // 加载图结构
+        function loadGraph(graphType) {
+            currentGraph = graphTemplates[graphType];
+            
+            if (currentAlgorithm) {
+                initVisualization();
+                document.getElementById('current-status').textContent = '准备就绪';
+            } else {
+                alert('请先选择一个算法！');
+            }
+        }
+
+        // 初始化可视化
+        function initVisualization() {
+            if (!currentAlgorithm || !currentGraph) return;
+            
+            const container = document.getElementById('visualization-container');
+            container.classList.remove('hidden');
+            
+            // 清理之前的可视化
+            if (currentVisualizer) {
+                currentVisualizer = null;
+            }
+            
+            // 重置步骤相关变量
+            stepElements = [];
+            currentStepIndex = -1;
+            
+            // 创建新的可视化器
+            currentVisualizer = new DetailedGraphVisualizer('visualization-container', currentAlgorithm);
+            currentVisualizer.setGraph(currentGraph.nodes, currentGraph.edges);
+            
+            // 重写解释更新方法 - 实现同步显示
+            const originalUpdateExplanation = currentVisualizer.updateExplanation;
+            currentVisualizer.updateExplanation = function(text) {
+                // 标记前一个步骤为完成
+                if (currentStepIndex >= 0 && stepElements[currentStepIndex]) {
+                    stepElements[currentStepIndex].classList.remove('current');
+                    stepElements[currentStepIndex].classList.add('completed');
+                }
+                
+                // 创建新的步骤元素
+                const explanationDiv = document.getElementById('step-explanation');
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step-explanation current';
+                stepDiv.innerHTML = text;
+                explanationDiv.appendChild(stepDiv);
+                
+                // 添加到步骤数组并更新当前索引
+                stepElements.push(stepDiv);
+                currentStepIndex++;
+                
+                // 自动滚动到当前步骤
+                stepDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // 更新数据结构显示
+                updateDataStructureDisplay(text);
+            };
+            
+            // 重写统计更新方法
+            const originalUpdateStats = currentVisualizer.updateStats;
+            currentVisualizer.updateStats = function() {
+                originalUpdateStats.call(this);
+                
+                // 更新自定义统计信息
+                document.getElementById('visited-count').textContent = this.visited.size;
+                document.getElementById('step-count').textContent = this.stepCounter || this.state.currentStep;
+                
+                if (this.state.isPlaying) {
+                    document.getElementById('current-status').textContent = '正在执行';
+                    document.getElementById('algorithm-status').textContent = '算法执行中...';
+                } else if (this.state.currentStep > 0) {
+                    document.getElementById('current-status').textContent = '已暂停';
+                    document.getElementById('algorithm-status').textContent = '算法已暂停';
+                }
+                
+                if (this.state.startTime) {
+                    const elapsed = (this.state.endTime || Date.now()) - this.state.startTime;
+                    document.getElementById('execution-time').textContent = `${elapsed}ms`;
+                }
+            };
+            
+            // 重写完成回调
+            const originalOnComplete = currentVisualizer.onComplete;
+            currentVisualizer.onComplete = function() {
+                originalOnComplete.call(this);
+                document.getElementById('current-status').textContent = '执行完成';
+                document.getElementById('algorithm-status').textContent = '✅ 算法执行完成！';
+                
+                // 标记最后一个步骤为完成
+                if (currentStepIndex >= 0 && stepElements[currentStepIndex]) {
+                    stepElements[currentStepIndex].classList.remove('current');
+                    stepElements[currentStepIndex].classList.add('completed');
+                }
+            };
+            
+            currentVisualizer.init();
+            currentVisualizer.initVisualization();
+            
+            // 清空解释面板
+            document.getElementById('step-explanation').innerHTML = '';
+            
+            // 显示数据结构面板
+            document.getElementById('data-structure-display').classList.remove('hidden');
+            
+            // 将可视化器绑定到全局变量
+            window.visualizer = currentVisualizer;
+            
+            // 重置统计信息
+            document.getElementById('visited-count').textContent = '0';
+            document.getElementById('step-count').textContent = '0';
+            document.getElementById('execution-time').textContent = '0ms';
+        }
+
+        // 更新数据结构显示
+        function updateDataStructureDisplay(text) {
+            const structureContent = document.getElementById('structure-content');
+            
+            // 提取数据结构信息
+            if (text.includes('栈状态:') || text.includes('栈 =')) {
+                const stackMatch = text.match(/栈.*?[\[【]([^\]】]*)[\]】]/);
+                if (stackMatch) {
+                    structureContent.innerHTML = `
+                        <div class="text-yellow-300">🥞 栈 (Stack - LIFO):</div>
+                        <div class="text-white text-lg">[${stackMatch[1]}]</div>
+                        <div class="text-gray-400 text-xs mt-1">栈顶 → 栈底</div>
+                    `;
+                }
+            } else if (text.includes('队列状态:') || text.includes('队列 =')) {
+                const queueMatch = text.match(/队列.*?[\[【]([^\]】]*)[\]】]/);
+                if (queueMatch) {
+                    structureContent.innerHTML = `
+                        <div class="text-blue-300">📋 队列 (Queue - FIFO):</div>
+                        <div class="text-white text-lg">[${queueMatch[1]}]</div>
+                        <div class="text-gray-400 text-xs mt-1">队头 → 队尾</div>
+                    `;
+                }
+            } else if (text.includes('距离') && text.includes('=')) {
+                // Dijkstra算法的距离信息
+                const distanceMatch = text.match(/距离.*?(\d+)/);
+                if (distanceMatch) {
+                    structureContent.innerHTML = `
+                        <div class="text-green-300">📏 距离数组:</div>
+                        <div class="text-white text-sm" id="distance-array">更新中...</div>
+                        <div class="text-gray-400 text-xs mt-1">当前最短距离</div>
+                    `;
+                }
+            } else if (text.includes('已访问')) {
+                const visitedMatch = text.match(/已访问.*?[\[【]([^\]】]*)[\]】]/);
+                if (visitedMatch) {
+                    structureContent.innerHTML = `
+                        <div class="text-purple-300">✅ 已访问节点:</div>
+                        <div class="text-white text-lg">[${visitedMatch[1]}]</div>
+                        <div class="text-gray-400 text-xs mt-1">访问顺序</div>
+                    `;
+                }
+            }
+        }
+
+        // 播放控制函数
+        function playAnimation() {
+            if (currentVisualizer) {
+                currentVisualizer.play();
+                document.getElementById('current-status').textContent = '正在执行';
+                document.getElementById('algorithm-status').textContent = '🎬 算法执行中...';
+            }
+        }
+
+        function pauseAnimation() {
+            if (currentVisualizer) {
+                currentVisualizer.pause();
+                document.getElementById('current-status').textContent = '已暂停';
+                document.getElementById('algorithm-status').textContent = '⏸️ 算法已暂停';
+            }
+        }
+
+        function stepAnimation() {
+            if (currentVisualizer) {
+                currentVisualizer.stepForward();
+                document.getElementById('current-status').textContent = '步进模式';
+                document.getElementById('algorithm-status').textContent = '⏭️ 步进执行中...';
+            }
+        }
+
+        function resetAnimation() {
+            if (currentVisualizer) {
+                currentVisualizer.reset();
+                document.getElementById('step-explanation').innerHTML = '';
+                document.getElementById('current-status').textContent = '已重置';
+                document.getElementById('algorithm-status').textContent = '🔄 算法已重置';
+                
+                // 重置步骤相关变量
+                stepElements = [];
+                currentStepIndex = -1;
+                
+                // 重置数据结构显示
+                document.getElementById('structure-content').textContent = '等待初始化...';
+            }
+        }
+
+        function updateSpeed(speed) {
+            if (currentVisualizer) {
+                currentVisualizer.setSpeed(speed);
+            }
+            document.getElementById('speed-display').textContent = `${speed}ms`;
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('图算法同步演示系统已就绪！');
+            
+            // 默认选择DFS算法
+            selectAlgorithm('dfs');
+            
+            // 默认加载简单图
+            setTimeout(() => {
+                loadGraph('simple');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

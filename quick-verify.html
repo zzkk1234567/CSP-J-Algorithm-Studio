@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速验证 - CSP-J Studio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status.pending {
+            background: #f59e0b;
+            color: white;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .link-button {
+            display: inline-block;
+            background: #8b5cf6;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            margin: 10px 5px;
+        }
+
+        .link-button:hover {
+            background: #7c3aed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 CSP-J Studio 快速验证工具</h1>
+
+    <div class="test-card">
+        <h3>📋 验证步骤</h3>
+        <p>这个页面将帮助您快速验证新创建的 <code>csp-j-studio-complete.html</code> 是否正常工作。</p>
+
+        <a href="csp-j-studio-complete.html" class="link-button" target="_blank">
+            🚀 打开 CSP-J Studio Complete
+        </a>
+
+        <a href="csp-j-optimized-fixed.html" class="link-button" target="_blank">
+            ⚠️ 打开损坏的版本（对比用）
+        </a>
+    </div>
+
+    <div class="test-card">
+        <h3>1️⃣ 检查依赖脚本 <span id="status-1" class="status pending">待检测</span></h3>
+        <button onclick="checkDependencies()">开始检测</button>
+        <div id="result-1" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>2️⃣ 检查可视化器类 <span id="status-2" class="status pending">待检测</span></h3>
+        <button onclick="checkVisualizers()">开始检测</button>
+        <div id="result-2" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>3️⃣ 检查页面元素 <span id="status-3" class="status pending">待检测</span></h3>
+        <button onclick="checkElements()">开始检测</button>
+        <div id="result-3" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>4️⃣ 测试基本功能 <span id="status-4" class="status pending">待检测</span></h3>
+        <p>手动测试步骤：</p>
+        <ol style="line-height: 1.8;">
+            <li>在新窗口中打开 CSP-J Studio Complete</li>
+            <li>点击"🔄 排序算法"卡片</li>
+            <li>从下拉框选择"冒泡排序"</li>
+            <li>查看可视化是否正常显示</li>
+            <li>测试播放/暂停按钮</li>
+        </ol>
+        <button onclick="markTestComplete()">✅ 手动测试通过</button>
+        <button onclick="markTestFailed()">❌ 测试失败</button>
+        <div id="result-4" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>📊 测试总结</h3>
+        <div id="summary">
+            <p>请先运行上面的测试...</p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            dependencies: null,
+            visualizers: null,
+            elements: null,
+            manual: null
+        };
+
+        function updateStatus(testNum, status, message) {
+            const statusEl = document.getElementById(`status-${testNum}`);
+            const resultEl = document.getElementById(`result-${testNum}`);
+
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = status === 'success' ? '通过' : status === 'error' ? '失败' : '待检测';
+
+            if (message) {
+                resultEl.style.display = 'block';
+                resultEl.innerHTML = message;
+            }
+
+            updateSummary();
+        }
+
+        function checkDependencies() {
+            const scripts = [
+                'algorithm-visualizer.js',
+                'algorithm-visualizer-enhanced.js',
+                'additional-algorithms.js',
+                'utils/VisualizerFactory.js'
+            ];
+
+            let results = [];
+            let allFound = true;
+
+            scripts.forEach(script => {
+                fetch(script, { method: 'HEAD' })
+                    .then(response => {
+                        const exists = response.ok;
+                        results.push(`${script}: ${exists ? '✅ 存在' : '❌ 缺失'}`);
+                        if (!exists) allFound = false;
+                    })
+                    .catch(() => {
+                        results.push(`${script}: ❌ 无法访问`);
+                        allFound = false;
+                    })
+                    .finally(() => {
+                        if (results.length === scripts.length) {
+                            testResults.dependencies = allFound;
+                            updateStatus(1, allFound ? 'success' : 'error', results.join('<br>'));
+                        }
+                    });
+            });
+        }
+
+        function checkVisualizers() {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'csp-j-studio-complete.html';
+
+            iframe.onload = function () {
+                try {
+                    const win = iframe.contentWindow;
+                    const checks = {
+                        'SortingVisualizer': typeof win.SortingVisualizer !== 'undefined',
+                        'SearchVisualizer': typeof win.SearchVisualizer !== 'undefined',
+                        'EnhancedSortingVisualizer': typeof win.EnhancedSortingVisualizer !== 'undefined',
+                        'EnhancedSearchVisualizer': typeof win.EnhancedSearchVisualizer !== 'undefined',
+                        'GraphVisualizer': typeof win.GraphVisualizer !== 'undefined',
+                        'DynamicProgrammingVisualizer': typeof win.DynamicProgrammingVisualizer !== 'undefined',
+                        'VisualizerFactory': typeof win.VisualizerFactory !== 'undefined'
+                    };
+
+                    const results = Object.entries(checks).map(([name, exists]) =>
+                        `${name}: ${exists ? '✅ 已定义' : '❌ 未定义'}`
+                    );
+
+                    const allDefined = Object.values(checks).every(v => v);
+                    testResults.visualizers = allDefined;
+
+                    updateStatus(2, allDefined ? 'success' : 'error', results.join('<br>'));
+
+                    document.body.removeChild(iframe);
+                } catch (e) {
+                    testResults.visualizers = false;
+                    updateStatus(2, 'error', `检测失败: ${e.message}`);
+                    document.body.removeChild(iframe);
+                }
+            };
+
+            document.body.appendChild(iframe);
+        }
+
+        function checkElements() {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'csp-j-studio-complete.html';
+
+            iframe.onload = function () {
+                try {
+                    const doc = iframe.contentDocument;
+                    const checks = {
+                        '标题元素': !!doc.querySelector('h1'),
+                        '算法选择器': !!doc.getElementById('algorithm-selector'),
+                        '具体算法下拉框': !!doc.getElementById('specific-algorithm'),
+                        '可视化容器': !!doc.getElementById('visualization-container'),
+                        'viz-content': !!doc.getElementById('viz-content'),
+                        '算法卡片': doc.querySelectorAll('.algorithm-card').length > 0
+                    };
+
+                    const results = Object.entries(checks).map(([name, exists]) =>
+                        `${name}: ${exists ? '✅ 存在' : '❌ 缺失'}`
+                    );
+
+                    const allFound = Object.values(checks).every(v => v);
+                    testResults.elements = allFound;
+
+                    updateStatus(3, allFound ? 'success' : 'error', results.join('<br>'));
+
+                    document.body.removeChild(iframe);
+                } catch (e) {
+                    testResults.elements = false;
+                    updateStatus(3, 'error', `检测失败: ${e.message}`);
+                    document.body.removeChild(iframe);
+                }
+            };
+
+            document.body.appendChild(iframe);
+        }
+
+        function markTestComplete() {
+            testResults.manual = true;
+            updateStatus(4, 'success', '✅ 手动测试已通过，功能正常');
+        }
+
+        function markTestFailed() {
+            const reason = prompt('请描述失败原因：');
+            testResults.manual = false;
+            updateStatus(4, 'error', `❌ 测试失败：${reason || '未提供原因'}`);
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            const completed = Object.values(testResults).filter(v => v !== null).length;
+            const passed = Object.values(testResults).filter(v => v === true).length;
+            const total = Object.keys(testResults).length;
+
+            let html = `<p><strong>进度：</strong>${completed}/${total} 项测试已完成</p>`;
+
+            if (completed === total) {
+                if (passed === total) {
+                    html += `<p style="color: #10b981; font-size: 18px; font-weight: bold;">✅ 所有测试通过！CSP-J Studio Complete 可以正常使用。</p>`;
+                    html += `<p>建议：将 <code>csp-j-studio-complete.html</code> 作为主要学习工具。</p>`;
+                } else {
+                    html += `<p style="color: #ef4444; font-size: 18px; font-weight: bold;">❌ ${total - passed} 项测试失败</p>`;
+                    html += `<p>请查看上面的测试结果，并检查相关文件和依赖。</p>`;
+                }
+            }
+
+            summary.innerHTML = html;
+        }
+
+        // 初始化
+        window.onload = function () {
+            console.log('验证工具已加载');
+        };
+    </script>
+</body>
+
+</html>

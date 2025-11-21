@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualizerFactory 测试</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .test-pass {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+        .test-fail {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+        .test-info {
+            background-color: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🧪 VisualizerFactory 功能测试</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">测试结果</h2>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">可视化演示</h2>
+            <div id="demo-container"></div>
+        </div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="algorithm-visualizer.js"></script>
+    <script src="utils/VisualizerFactory.js"></script>
+    
+    <script>
+        const testResults = document.getElementById('test-results');
+        let testCount = 0;
+        let passCount = 0;
+        let failCount = 0;
+
+        function logTest(name, passed, message = '') {
+            testCount++;
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`;
+            
+            const icon = passed ? '✅' : '❌';
+            const status = passed ? 'PASS' : 'FAIL';
+            
+            div.innerHTML = `
+                <strong>${icon} Test ${testCount}: ${name}</strong> - ${status}
+                ${message ? `<br><span class="text-sm text-gray-600">${message}</span>` : ''}
+            `;
+            
+            testResults.appendChild(div);
+            
+            if (passed) passCount++;
+            else failCount++;
+        }
+
+        function logInfo(message) {
+            const div = document.createElement('div');
+            div.className = 'test-result test-info';
+            div.innerHTML = `<strong>ℹ️ ${message}</strong>`;
+            testResults.appendChild(div);
+        }
+
+        function runTests() {
+            logInfo('开始测试 VisualizerFactory...');
+            
+            // Test 1: 工厂类存在
+            logTest(
+                '工厂类存在性检查',
+                typeof VisualizerFactory !== 'undefined',
+                'VisualizerFactory 类已正确加载'
+            );
+            
+            // Test 2: 注册方法存在
+            logTest(
+                '注册方法存在性检查',
+                typeof VisualizerFactory.register === 'function',
+                'register() 方法可用'
+            );
+            
+            // Test 3: 创建方法存在
+            logTest(
+                '创建方法存在性检查',
+                typeof VisualizerFactory.create === 'function',
+                'create() 方法可用'
+            );
+            
+            // Test 4: 获取类型方法存在
+            logTest(
+                '获取类型方法存在性检查',
+                typeof VisualizerFactory.getAvailableTypes === 'function',
+                'getAvailableTypes() 方法可用'
+            );
+            
+            // Test 5: 注册单个可视化器
+            try {
+                VisualizerFactory.register('test-bubble', SortingVisualizer);
+                const types = VisualizerFactory.getAvailableTypes();
+                logTest(
+                    '注册单个可视化器',
+                    types.includes('test-bubble'),
+                    `已注册类型: ${types.join(', ')}`
+                );
+            } catch (error) {
+                logTest('注册单个可视化器', false, error.message);
+            }
+            
+            // Test 6: 批量注册可视化器
+            try {
+                VisualizerFactory.registerBatch({
+                    'bubble': SortingVisualizer,
+                    'selection': SortingVisualizer,
+                    'linear': SearchVisualizer,
+                    'binary': SearchVisualizer,
+                    'dfs': GraphVisualizer,
+                    'bfs': GraphVisualizer
+                });
+                const count = VisualizerFactory.getRegisteredCount();
+                logTest(
+                    '批量注册可视化器',
+                    count >= 6,
+                    `已注册 ${count} 个可视化器类型`
+                );
+            } catch (error) {
+                logTest('批量注册可视化器', false, error.message);
+            }
+            
+            // Test 7: 检查类型是否已注册
+            logTest(
+                '检查类型注册状态',
+                VisualizerFactory.isRegistered('bubble'),
+                'bubble 类型已注册'
+            );
+            
+            // Test 8: 检查未注册的类型
+            logTest(
+                '检查未注册类型',
+                !VisualizerFactory.isRegistered('nonexistent'),
+                'nonexistent 类型未注册（符合预期）'
+            );
+            
+            // Test 9: 创建排序可视化器实例
+            try {
+                const sortViz = VisualizerFactory.create('bubble', 'demo-container', {
+                    algorithm: 'bubble',
+                    speed: 500
+                });
+                logTest(
+                    '创建排序可视化器实例',
+                    sortViz instanceof SortingVisualizer,
+                    '成功创建 BubbleSort 可视化器实例'
+                );
+                
+                // 清理
+                if (sortViz && typeof sortViz.destroy === 'function') {
+                    sortViz.destroy();
+                }
+            } catch (error) {
+                logTest('创建排序可视化器实例', false, error.message);
+            }
+            
+            // Test 10: 创建搜索可视化器实例
+            try {
+                const searchViz = VisualizerFactory.create('linear', 'demo-container', {
+                    algorithm: 'linear'
+                });
+                logTest(
+                    '创建搜索可视化器实例',
+                    searchViz instanceof SearchVisualizer,
+                    '成功创建 LinearSearch 可视化器实例'
+                );
+                
+                // 清理
+                if (searchViz && typeof searchViz.destroy === 'function') {
+                    searchViz.destroy();
+                }
+            } catch (error) {
+                logTest('创建搜索可视化器实例', false, error.message);
+            }
+            
+            // Test 11: 创建图可视化器实例
+            try {
+                const graphViz = VisualizerFactory.create('dfs', 'demo-container', {
+                    algorithm: 'dfs'
+                });
+                logTest(
+                    '创建图可视化器实例',
+                    graphViz instanceof GraphVisualizer,
+                    '成功创建 DFS 可视化器实例'
+                );
+                
+                // 清理
+                if (graphViz && typeof graphViz.destroy === 'function') {
+                    graphViz.destroy();
+                }
+            } catch (error) {
+                logTest('创建图可视化器实例', false, error.message);
+            }
+            
+            // Test 12: 尝试创建未注册的类型（应该失败）
+            try {
+                VisualizerFactory.create('nonexistent', 'demo-container');
+                logTest('错误处理 - 未注册类型', false, '应该抛出错误但没有');
+            } catch (error) {
+                logTest(
+                    '错误处理 - 未注册类型',
+                    error.message.includes('Unknown visualizer type'),
+                    '正确抛出错误: ' + error.message
+                );
+            }
+            
+            // Test 13: 无效参数处理
+            try {
+                VisualizerFactory.create('', 'demo-container');
+                logTest('错误处理 - 空类型', false, '应该抛出错误但没有');
+            } catch (error) {
+                logTest(
+                    '错误处理 - 空类型',
+                    error.message.includes('must be a non-empty string'),
+                    '正确抛出错误: ' + error.message
+                );
+            }
+            
+            // Test 14: 获取所有可用类型
+            const availableTypes = VisualizerFactory.getAvailableTypes();
+            logTest(
+                '获取所有可用类型',
+                Array.isArray(availableTypes) && availableTypes.length > 0,
+                `可用类型: ${availableTypes.join(', ')}`
+            );
+            
+            // Test 15: 取消注册
+            try {
+                const unregistered = VisualizerFactory.unregister('test-bubble');
+                logTest(
+                    '取消注册可视化器',
+                    unregistered && !VisualizerFactory.isRegistered('test-bubble'),
+                    'test-bubble 已成功取消注册'
+                );
+            } catch (error) {
+                logTest('取消注册可视化器', false, error.message);
+            }
+            
+            // 显示测试总结
+            logInfo(`测试完成: 总计 ${testCount} 个测试，通过 ${passCount} 个，失败 ${failCount} 个`);
+            
+            // 创建一个实际的可视化演示
+            createDemo();
+        }
+
+        function createDemo() {
+            const demoContainer = document.getElementById('demo-container');
+            demoContainer.innerHTML = `
+                <h3 class="text-lg font-bold mb-4">🎯 实际演示：使用工厂创建冒泡排序可视化</h3>
+                <div id="viz-demo"></div>
+            `;
+            
+            try {
+                // 使用工厂创建可视化器
+                const visualizer = VisualizerFactory.create('bubble', 'viz-demo', {
+                    algorithm: 'bubble',
+                    speed: 800
+                });
+                
+                visualizer.setData([64, 34, 25, 12, 22, 11, 90]);
+                visualizer.init();
+                visualizer.initVisualization();
+                
+                // 绑定到全局以便控制
+                window.demoVisualizer = visualizer;
+                
+                demoContainer.innerHTML += `
+                    <div class="mt-4 text-center">
+                        <p class="text-green-600 font-bold">✅ 可视化器创建成功！</p>
+                        <p class="text-sm text-gray-600 mt-2">使用控制面板中的按钮来控制动画</p>
+                    </div>
+                `;
+            } catch (error) {
+                demoContainer.innerHTML += `
+                    <div class="mt-4 text-center">
+                        <p class="text-red-600 font-bold">❌ 创建失败: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载完成后运行测试
+        document.addEventListener('DOMContentLoaded', () => {
+            runTests();
+        });
+    </script>
+</body>
+</html>

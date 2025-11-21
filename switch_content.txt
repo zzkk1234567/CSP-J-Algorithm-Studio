@@ -1,0 +1,841 @@
+                case 'lis':
+                    animateLIS();
+                    break;
+                default:
+                    showSimulatedAnimation(algorithm);
+            }
+        }
+        
+        // 冒泡排序动画
+        function animateBubbleSort() {
+            const bars = document.querySelectorAll('.array-bar');
+            let i = 0;
+            
+            const animate = () => {
+                if (i >= bars.length - 1) {
+                    updateDetectiveMessage('冒泡排序完成！最小的元素已经"冒泡"到最前面了！🎉');
+                    return;
+                }
+                
+                // 高亮当前比较的元�?
+                bars[i].style.backgroundColor = '#ef4444'; // red
+                bars[i + 1].style.backgroundColor = '#ef4444';
+                
+                setTimeout(() => {
+                    // 获取数值并比较
+                    const val1 = parseInt(bars[i].textContent);
+                    const val2 = parseInt(bars[i + 1].textContent);
+                    
+                    if (val1 > val2) {
+                        // 交换元素
+                        const tempContent = bars[i].textContent;
+                        const tempHeight = bars[i].style.height;
+                        const tempLineHeight = bars[i].style.lineHeight;
+                        
+                        bars[i].textContent = bars[i + 1].textContent;
+                        bars[i].style.height = bars[i + 1].style.height;
+                        bars[i].style.lineHeight = bars[i + 1].style.lineHeight;
+                        
+                        bars[i + 1].textContent = tempContent;
+                        bars[i + 1].style.height = tempHeight;
+                        bars[i + 1].style.lineHeight = tempLineHeight;
+                    }
+                    
+                    // 恢复颜色
+                    bars[i].style.backgroundColor = '#3b82f6'; // blue
+                    bars[i + 1].style.backgroundColor = '#3b82f6';
+                    
+                    i++;
+                    if (i < bars.length - 1) {
+                        setTimeout(animate, 300);
+                    } else {
+                        updateDetectiveMessage('冒泡排序完成！最小的元素已经"冒泡"到最前面了！🎉');
+                    }
+                }, 1000);
+            };
+            
+            animate();
+        }
+        
+        // 二分查找动画
+        function animateBinarySearch() {
+            const elements = document.querySelectorAll('#algorithm-visualization span');
+            let left = 0, right = elements.length - 1;
+            let target = 7;
+            
+            const search = () => {
+                if (left > right) {
+                    updateDetectiveMessage('二分查找完成！目标值已找到！�?);
+                    return;
+                }
+                
+                const mid = Math.floor((left + right) / 2);
+                
+                // 重置所有颜�?
+                elements.forEach(el => {
+                    el.className = 'px-2 py-1 bg-gray-600 text-white mr-1';
+                });
+                
+                // 高亮当前范围
+                for (let i = left; i <= right; i++) {
+                    elements[i].className = 'px-2 py-1 bg-blue-500 text-white mr-1';
+                }
+                
+                // 高亮中间元素
+                elements[mid].className = 'px-2 py-1 bg-yellow-500 text-black mr-1';
+                
+                setTimeout(() => {
+                    const midValue = parseInt(elements[mid].textContent);
+                    
+                    if (midValue === target) {
+                        elements[mid].className = 'px-2 py-1 bg-green-500 text-white mr-1';
+                        updateDetectiveMessage('找到目标值！二分查找完成！�?);
+                    } else if (midValue < target) {
+                        left = mid + 1;
+                        setTimeout(search, 1000);
+                    } else {
+                        right = mid - 1;
+                        setTimeout(search, 1000);
+                    }
+                }, 1500);
+            };
+            
+            search();
+        }
+        
+        // DFS动画
+        function animateDFS() {
+            const nodes = document.querySelectorAll('[id^="node-"]');
+            const visitOrder = [0, 1, 3, 2]; // 节点访问顺序
+            let currentIndex = 0;
+            
+            const visit = () => {
+                if (currentIndex >= visitOrder.length) {
+                    updateDetectiveMessage('DFS遍历完成！深度优先，一条路走到底！🔍');
+                    return;
+                }
+                
+                const nodeIndex = visitOrder[currentIndex];
+                nodes[nodeIndex].className = 'bg-green-500 text-white text-center p-2 rounded animate-pulse';
+                
+                currentIndex++;
+                setTimeout(visit, 1000);
+            };
+            
+            visit();
+        }
+        
+        // BFS动画
+        function animateBFS() {
+            const nodes = document.querySelectorAll('[id^="node-"]');
+            const visitOrder = [0, 1, 2, 3]; // 节点访问顺序
+            let currentIndex = 0;
+            
+            const visit = () => {
+                if (currentIndex >= visitOrder.length) {
+                    updateDetectiveMessage('BFS遍历完成！广度优先，层层推进！�?);
+                    return;
+                }
+                
+                const nodeIndex = visitOrder[currentIndex];
+                nodes[nodeIndex].className = 'bg-orange-500 text-white text-center p-2 rounded animate-bounce';
+                
+                currentIndex++;
+                setTimeout(visit, 800);
+            };
+            
+            visit();
+        }
+        
+        // 树遍历动�?
+        function animateTreeTraversal() {
+            const nodes = document.querySelectorAll('#algorithm-visualization .rounded-full');
+            const visitOrder = [0, 1, 2]; // A, B, C
+            let currentIndex = 0;
+            
+            const visit = () => {
+                if (currentIndex >= visitOrder.length) {
+                    updateDetectiveMessage('前序遍历完成！根→左→右的顺序！🌳');
+                    return;
+                }
+                
+                const nodeIndex = visitOrder[currentIndex];
+                nodes[nodeIndex].className = 'bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center animate-ping';
+                
+                currentIndex++;
+                setTimeout(visit, 1200);
+            };
+            
+            visit();
+        }
+        
+        // 通用模拟动画
+        // 选择排序动画
+        function animateSelectionSort() {
+            const bars = document.querySelectorAll('.array-bar');
+            let i = 0;
+            
+            const animate = () => {
+                if (i >= bars.length) {
+                    updateDetectiveMessage('选择排序完成！每次选择最小值放到正确位置！🎯');
+                    bars.forEach(bar => bar.style.backgroundColor = '#10b981');
+                    return;
+                }
+                
+                // 高亮当前位置
+                bars[i].style.backgroundColor = '#f59e0b';
+                let minIndex = i;
+                let j = i + 1;
+                
+                const compareStep = () => {
+                    if (j >= bars.length) {
+                        // 找到最小值，进行交换
+                        if (minIndex !== i) {
+                            bars[minIndex].style.backgroundColor = '#ef4444';
+                            setTimeout(() => {
+                                const temp = bars[i].innerHTML;
+                                const tempHeight = bars[i].style.height;
+                                bars[i].innerHTML = bars[minIndex].innerHTML;
+                                bars[i].style.height = bars[minIndex].style.height;
+                                bars[i].style.lineHeight = bars[minIndex].style.height;
+                                bars[minIndex].innerHTML = temp;
+                                bars[minIndex].style.height = tempHeight;
+                                bars[minIndex].style.lineHeight = tempHeight;
+                                
+                                bars[i].style.backgroundColor = '#10b981';
+                                bars[minIndex].style.backgroundColor = '#3b82f6';
+                                i++;
+                                setTimeout(animate, 800);
+                            }, 800);
+                        } else {
+                            bars[i].style.backgroundColor = '#10b981';
+                            i++;
+                            setTimeout(animate, 500);
+                        }
+                        return;
+                    }
+                    
+                    bars[j].style.backgroundColor = '#8b5cf6';
+                    setTimeout(() => {
+                        if (parseInt(bars[j].innerHTML) < parseInt(bars[minIndex].innerHTML)) {
+                            if (minIndex !== i) bars[minIndex].style.backgroundColor = '#3b82f6';
+                            minIndex = j;
+                            bars[j].style.backgroundColor = '#ef4444';
+                        } else {
+                            bars[j].style.backgroundColor = '#3b82f6';
+                        }
+                        j++;
+                        setTimeout(compareStep, 600);
+                    }, 600);
+                };
+                
+                compareStep();
+            };
+            
+            animate();
+        }
+        
+        // 插入排序动画
+        function animateInsertionSort() {
+            const bars = document.querySelectorAll('.array-bar');
+            let i = 1;
+            
+            // 第一个元素默认已排序
+            bars[0].style.backgroundColor = '#10b981';
+            
+            const animate = () => {
+                if (i >= bars.length) {
+                    updateDetectiveMessage('插入排序完成！每个元素都插入到了正确的位置！📍');
+                    return;
+                }
+                
+                const current = parseInt(bars[i].innerHTML);
+                bars[i].style.backgroundColor = '#f59e0b';
+                
+                let j = i - 1;
+                const insertStep = () => {
+                    if (j < 0 || parseInt(bars[j].innerHTML) <= current) {
+                        // 找到插入位置
+                        bars[i].style.backgroundColor = '#10b981';
+                        i++;
+                        setTimeout(animate, 800);
+                        return;
+                    }
+                    
+                    bars[j].style.backgroundColor = '#8b5cf6';
+                    setTimeout(() => {
+                        // 向右移动元素
+                        bars[j + 1].innerHTML = bars[j].innerHTML;
+                        bars[j + 1].style.height = bars[j].style.height;
+                        bars[j + 1].style.lineHeight = bars[j].style.height;
+                        bars[j].style.backgroundColor = '#3b82f6';
+                        j--;
+                        setTimeout(insertStep, 600);
+                    }, 600);
+                };
+                
+                setTimeout(() => {
+                    bars[j + 1].innerHTML = current;
+                    bars[j + 1].style.height = current + 'px';
+                    bars[j + 1].style.lineHeight = current + 'px';
+                    insertStep();
+                }, 800);
+            };
+            
+            animate();
+        }
+        
+        // 线性查找动�?
+        function animateLinearSearch() {
+            const bars = document.querySelectorAll('.array-bar');
+            const target = parseInt(bars[3].innerHTML); // 查找�?个元�?
+            let i = 0;
+            
+            const animate = () => {
+                if (i >= bars.length) {
+                    updateDetectiveMessage('线性查找完成！未找到目标值！�?);
+                    return;
+                }
+                
+                bars[i].style.backgroundColor = '#f59e0b';
+                setTimeout(() => {
+                    if (parseInt(bars[i].innerHTML) === target) {
+                        bars[i].style.backgroundColor = '#10b981';
+                        updateDetectiveMessage(`线性查找成功！在位�?{i}找到目标�?{target}！✅`);
+                        return;
+                    } else {
+                        bars[i].style.backgroundColor = '#ef4444';
+                        setTimeout(() => {
+                            bars[i].style.backgroundColor = '#3b82f6';
+                            i++;
+                            setTimeout(animate, 500);
+                        }, 400);
+                    }
+                }, 800);
+            };
+            
+            updateDetectiveMessage(`开始线性查找，目标值：${target}`);
+            animate();
+        }
+        
+        // 快速排序动画（简化版�?
+        function animateQuickSort() {
+            const bars = document.querySelectorAll('.array-bar');
+            
+            const partition = (arr, low, high) => {
+                return new Promise(resolve => {
+                    const pivot = parseInt(arr[high].innerHTML);
+                    arr[high].style.backgroundColor = '#f59e0b'; // 基准元素
+                    
+                    let i = low - 1;
+                    let j = low;
+                    
+                    const partitionStep = () => {
+                        if (j >= high) {
+                            // 交换基准元素到正确位�?
+                            setTimeout(() => {
+                                if (i + 1 !== high) {
+                                    const temp = arr[i + 1].innerHTML;
+                                    const tempHeight = arr[i + 1].style.height;
+                                    arr[i + 1].innerHTML = arr[high].innerHTML;
+                                    arr[i + 1].style.height = arr[high].style.height;
+                                    arr[i + 1].style.lineHeight = arr[high].style.height;
+                                    arr[high].innerHTML = temp;
+                                    arr[high].style.height = tempHeight;
+                                    arr[high].style.lineHeight = tempHeight;
+                                }
+                                arr[i + 1].style.backgroundColor = '#10b981';
+                                arr[high].style.backgroundColor = '#3b82f6';
+                                resolve(i + 1);
+                            }, 800);
+                            return;
+                        }
+                        
+                        arr[j].style.backgroundColor = '#8b5cf6';
+                        setTimeout(() => {
+                            if (parseInt(arr[j].innerHTML) < pivot) {
+                                i++;
+                                if (i !== j) {
+                                    const temp = arr[i].innerHTML;
+                                    const tempHeight = arr[i].style.height;
+                                    arr[i].innerHTML = arr[j].innerHTML;
+                                    arr[i].style.height = arr[j].style.height;
+                                    arr[i].style.lineHeight = arr[j].style.height;
+                                    arr[j].innerHTML = temp;
+                                    arr[j].style.height = tempHeight;
+                                    arr[j].style.lineHeight = tempHeight;
+                                }
+                            }
+                            arr[j].style.backgroundColor = '#3b82f6';
+                            j++;
+                            setTimeout(partitionStep, 600);
+                        }, 600);
+                    };
+                    
+                    partitionStep();
+                });
+            };
+            
+            const quickSort = async (arr, low, high) => {
+                if (low < high) {
+                    const pi = await partition(arr, low, high);
+                    await quickSort(arr, low, pi - 1);
+                    await quickSort(arr, pi + 1, high);
+                }
+            };
+            
+            quickSort(Array.from(bars), 0, bars.length - 1).then(() => {
+                updateDetectiveMessage('快速排序完成！分治策略的威力！�?);
+                bars.forEach(bar => bar.style.backgroundColor = '#10b981');
+            });
+        }
+        
+        // 归并排序动画（简化版�?
+        function animateMergeSort() {
+            const bars = document.querySelectorAll('.array-bar');
+            updateDetectiveMessage('归并排序演示：分而治之！');
+            
+            // 简化的归并排序可视�?
+            let step = 0;
+            const steps = [
+                () => {
+                    bars.forEach((bar, i) => {
+                        bar.style.backgroundColor = i < bars.length/2 ? '#ef4444' : '#3b82f6';
+                    });
+                },
+                () => {
+                    bars.forEach((bar, i) => {
+                        bar.style.backgroundColor = i < bars.length/4 || (i >= bars.length/2 && i < 3*bars.length/4) ? '#f59e0b' : '#8b5cf6';
+                    });
+                },
+                () => {
+                    bars.forEach(bar => bar.style.backgroundColor = '#10b981');
+                    updateDetectiveMessage('归并排序完成！递归分解再合并！🔄');
+                }
+            ];
+            
+            const animate = () => {
+                if (step < steps.length) {
+                    steps[step]();
+                    step++;
+                    setTimeout(animate, 1500);
+                }
+            };
+            
+            animate();
+        }
+        
+        // 阶乘动画
+        function animateFactorial() {
+            const viz = document.getElementById('algorithm-visualization');
+            viz.innerHTML = '<div id="factorial-demo" class="text-center"></div>';
+            
+            const demo = document.getElementById('factorial-demo');
+            const n = 5;
+            let current = n;
+            let result = 1;
+            
+            const animate = () => {
+                if (current === 0) {
+                    demo.innerHTML += `<div class="text-green-400 text-xl mt-4">结果�?{n}! = ${result}</div>`;
+                    updateDetectiveMessage('阶乘计算完成！递归的力量！💪');
+                    return;
+                }
+                
+                demo.innerHTML += `<div class="text-blue-400 mb-2">${current}! = ${current} × ${current-1}!</div>`;
+                result *= current;
+                current--;
+                setTimeout(animate, 1000);
+            };
+            
+            demo.innerHTML = `<div class="text-yellow-400 text-lg mb-4">计算 ${n}! 的过程：</div>`;
+            animate();
+        }
+        
+        // 背包问题动画
+        function animateKnapsack() {
+            const viz = document.getElementById('algorithm-visualization');
+            viz.innerHTML = `
+                <div class="text-center">
+                    <div class="text-yellow-400 text-lg mb-4">0-1背包问题演示</div>
+                    <div class="grid grid-cols-4 gap-2 mb-4">
+                        <div class="bg-blue-600 p-2 rounded">物品1: v=60, w=10</div>
+                        <div class="bg-blue-600 p-2 rounded">物品2: v=100, w=20</div>
+                        <div class="bg-blue-600 p-2 rounded">物品3: v=120, w=30</div>
+                        <div class="bg-gray-600 p-2 rounded">容量: 50</div>
+                    </div>
+                    <div id="knapsack-steps"></div>
+                </div>
+            `;
+            
+            const steps = document.getElementById('knapsack-steps');
+            const messages = [
+                '步骤1: 初始化DP表格...',
+                '步骤2: 考虑物品1 (v=60, w=10)...',
+                '步骤3: 考虑物品2 (v=100, w=20)...',
+                '步骤4: 考虑物品3 (v=120, w=30)...',
+                '最优解: 选择物品2和物�?，总价�?220'
+            ];
+            
+            let step = 0;
+            const animate = () => {
+                if (step < messages.length) {
+                    steps.innerHTML += `<div class="text-green-400 mb-2">${messages[step]}</div>`;
+                    step++;
+                    setTimeout(animate, 1200);
+                } else {
+                    updateDetectiveMessage('背包问题求解完成！动态规划的应用！�?);
+                }
+            };
+            
+            animate();
+        }
+        
+        // 最长递增子序列动�?
+        function animateLIS() {
+            const viz = document.getElementById('algorithm-visualization');
+            const sequence = [10, 9, 2, 5, 3, 7, 101, 18];
+            
+            viz.innerHTML = `
+                <div class="text-center">
+                    <div class="text-yellow-400 text-lg mb-4">最长递增子序�?(LIS)</div>
+                    <div class="flex justify-center mb-4">
+                        ${sequence.map((num, i) => `<div id="lis-${i}" class="w-12 h-12 bg-blue-600 text-white flex items-center justify-center mx-1 rounded">${num}</div>`).join('')}
+                    </div>
+                    <div id="lis-info" class="text-green-400"></div>
+                </div>
+            `;
+            
+            const info = document.getElementById('lis-info');
+            const lis = [2, 3, 7, 18]; // 一个可能的LIS
+            let step = 0;
+            
+            const animate = () => {
+                if (step < lis.length) {
+                    const index = sequence.indexOf(lis[step]);
+                    document.getElementById(`lis-${index}`).style.backgroundColor = '#10b981';
+                    info.innerHTML = `找到递增元素: ${lis.slice(0, step + 1).join(' �?')}`;
+                    step++;
+                    setTimeout(animate, 1000);
+                } else {
+                    info.innerHTML = `最长递增子序�? [${lis.join(', ')}]，长�? ${lis.length}`;
+                    updateDetectiveMessage('LIS计算完成！动态规划解决子序列问题！�?);
+                }
+            };
+            
+            animate();
+        }
+
+        function showSimulatedAnimation(algorithm) {
+            const viz = document.getElementById('algorithm-visualization');
+            const originalContent = viz.innerHTML;
+            
+            viz.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">正在演示${algorithm}算法...</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                viz.innerHTML = originalContent;
+                updateDetectiveMessage(`${algorithm}算法演示完成！理解算法原理是关键！💡`);
+            }, 3000);
+        }
+
+        // 生成代码�?
+        function generateCodeBlocks() {
+            const container = document.getElementById('code-blocks');
+            const blocks = [
+                { text: '#include <iostream>', type: 'header' },
+                { text: 'using namespace std;', type: 'namespace' },
+                { text: 'int main() {', type: 'function' },
+                { text: 'cout << "Hello" << endl;', type: 'statement' },
+                { text: 'return 0;', type: 'return' },
+                { text: '}', type: 'bracket' }
+            ];
+            
+            container.innerHTML = blocks.map(block => 
+                `<div class="code-block p-2 bg-blue-100 rounded cursor-move text-sm code-font" draggable="true">
+                    ${block.text}
+                </div>`
+            ).join('');
+        }
+
+        // 开始测�?
+        function startTest() {
+            const testArea = document.getElementById('test-area');
+            gameState.currentTest = {
+                questions: examQuestions.slice(0, 10), // 随机选择10道题
+                currentQuestion: 0,
+                score: 0,
+                startTime: Date.now(),
+                timeLeft: 15 * 60 // 15分钟
+            };
+            
+            showCurrentQuestion();
+            startTimer();
+            updateDetectiveMessage('测试开始！认真答题，相信你一定能取得好成绩！💪');
+        }
+
+        // 显示当前问题
+        function showCurrentQuestion() {
+            if (!gameState.currentTest) return;
+            
+            const test = gameState.currentTest;
+            const question = test.questions[test.currentQuestion];
+            const testArea = document.getElementById('test-area');
+            
+            testArea.innerHTML = `
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-500">�?${test.currentQuestion + 1} �?/ �?${test.questions.length} �?/span>
+                        <span class="text-sm text-blue-600">${question.year} ${question.type}</span>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-4">${question.question}</h4>
+                    <div class="space-y-2">
+                        ${question.options.map((option, index) => `
+                            <div class="quiz-option p-3 border rounded-md cursor-pointer" onclick="selectAnswer(${index})">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-6 flex justify-between">
+                        <button onclick="previousQuestion()" ${test.currentQuestion === 0 ? 'disabled' : ''} 
+                                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50">
+                            上一�?
+                        </button>
+                        <button onclick="nextQuestion()" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            ${test.currentQuestion === test.questions.length - 1 ? '提交答案' : '下一�?}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 选择答案
+        function selectAnswer(answerIndex) {
+            if (!gameState.currentTest) return;
+            
+            const question = gameState.currentTest.questions[gameState.currentTest.currentQuestion];
+            question.userAnswer = answerIndex;
+            
+            // 更新UI显示选中状�?
+            document.querySelectorAll('.quiz-option').forEach((option, index) => {
+                option.classList.remove('quiz-correct', 'quiz-incorrect');
+                if (index === answerIndex) {
+                    option.classList.add('border-blue-500', 'bg-blue-50');
+                } else {
+                    option.classList.remove('border-blue-500', 'bg-blue-50');
+                }
+            });
+        }
+
+        // 下一�?
+        function nextQuestion() {
+            if (!gameState.currentTest) return;
+            
+            const test = gameState.currentTest;
+            if (test.currentQuestion < test.questions.length - 1) {
+                test.currentQuestion++;
+                showCurrentQuestion();
+            } else {
+                finishTest();
+            }
+        }
+
+        // 上一�?
+        function previousQuestion() {
+            if (!gameState.currentTest) return;
+            
+            const test = gameState.currentTest;
+            if (test.currentQuestion > 0) {
+                test.currentQuestion--;
+                showCurrentQuestion();
+            }
+        }
+
+        // 完成测试
+        function finishTest() {
+            if (!gameState.currentTest) return;
+            
+            const test = gameState.currentTest;
+            let score = 0;
+            
+            // 计算分数
+            test.questions.forEach(question => {
+                if (question.userAnswer === question.answer) {
+                    score++;
+                }
+            });
+            
+            // 更新统计
+            gameState.progress.totalAnswers += test.questions.length;
+            gameState.progress.correctAnswers += score;
+            
+            // 显示结果
+            const testArea = document.getElementById('test-area');
+            testArea.innerHTML = `
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-green-600 mb-4">测试完成�?/h3>
+                    <div class="text-6xl mb-4">${score >= 8 ? '🎉' : score >= 6 ? '😊' : '😐'}</div>
+                    <p class="text-xl mb-4">得分�?{score} / ${test.questions.length}</p>
+                    <p class="text-lg text-gray-600 mb-6">正确率：${Math.round(score / test.questions.length * 100)}%</p>
+                    <button onclick="reviewAnswers()" class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 mr-4">
+                        查看答案解析
+                    </button>
+                    <button onclick="startTest()" class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600">
+                        重新测试
+                    </button>
+                </div>
+            `;
+            
+            updateProgress();
+            updateDetectiveMessage(`测试完成！得�?${score}/${test.questions.length}�?{score >= 8 ? '表现优秀' : '继续加油'}！🎯`);
+        }
+
+        // 查看答案解析
+        function reviewAnswers() {
+            if (!gameState.currentTest) return;
+            
+            const test = gameState.currentTest;
+            const testArea = document.getElementById('test-area');
+            
+            testArea.innerHTML = `
+                <h3 class="text-xl font-bold mb-4">答案解析</h3>
+                <div class="space-y-6">
+                    ${test.questions.map((question, index) => {
+                        const isCorrect = question.userAnswer === question.answer;
+                        return `
+                            <div class="border rounded-lg p-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}">
+                                <div class="flex items-center mb-2">
+                                    <span class="font-bold">�?{index + 1}�?/span>
+                                    <span class="ml-2 px-2 py-1 rounded text-sm ${isCorrect ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}">
+                                        ${isCorrect ? '�?正确' : '�?错误'}
+                                    </span>
+                                </div>
+                                <p class="mb-3">${question.question}</p>
+                                <p class="mb-2"><strong>正确答案�?/strong>${question.options[question.answer]}</p>
+                                ${question.userAnswer !== undefined ? `<p class="mb-2"><strong>你的答案�?/strong>${question.options[question.userAnswer]}</p>` : ''}
+                                <p class="text-sm text-gray-600"><strong>解析�?/strong>${question.explanation}</p>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="text-center mt-6">
+                    <button onclick="startTest()" class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600">
+                        再次测试
+                    </button>
+                </div>
+            `;
+        }
+
+        // 开始计时器
+        function startTimer() {
+            if (!gameState.currentTest) return;
+            
+            const timer = setInterval(() => {
+                if (!gameState.currentTest) {
+                    clearInterval(timer);
+                    return;
+                }
+                
+                gameState.currentTest.timeLeft--;
+                updateTimerDisplay();
+                
+                if (gameState.currentTest.timeLeft <= 0) {
+                    clearInterval(timer);
+                    finishTest();
+                }
+            }, 1000);
+        }
+
+        // 更新计时器显�?
+        function updateTimerDisplay() {
+            if (!gameState.currentTest) return;
+            
+            const minutes = Math.floor(gameState.currentTest.timeLeft / 60);
+            const seconds = gameState.currentTest.timeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('test-timer').textContent = display;
+            
+            // 时间不足时改变颜�?
+            if (gameState.currentTest.timeLeft <= 300) { // 5分钟
+                document.getElementById('test-timer').className = 'text-2xl font-bold text-red-600';
+            }
+        }
+
+        // 更新侦探消息
+        function updateDetectiveMessage(message) {
+            document.getElementById('detective-message').textContent = message;
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const masteredCount = gameState.progress.masteredTopics.size;
+            const totalTopics = Object.keys(knowledgeData).length;
+            const overallProgress = Math.round((masteredCount / totalTopics) * 100);
+            
+            document.getElementById('overall-progress').textContent = overallProgress + '%';
+            document.getElementById('mastered-count').textContent = masteredCount;
+            document.getElementById('practice-count').textContent = gameState.progress.completedPractices;
+            
+            const accuracy = gameState.progress.totalAnswers > 0 ? 
+                Math.round((gameState.progress.correctAnswers / gameState.progress.totalAnswers) * 100) : 0;
+            document.getElementById('accuracy-rate').textContent = accuracy + '%';
+        }
+
+        // 更新学习时长
+        function updateStudyTime() {
+            const studyTimeMinutes = Math.floor((Date.now() - gameState.progress.studyStartTime) / 60000);
+            document.getElementById('study-time').textContent = studyTimeMinutes;
+        }
+
+        // 保存进度
+        function saveProgress() {
+            const progressData = {
+                masteredTopics: Array.from(gameState.progress.masteredTopics),
+                completedPractices: gameState.progress.completedPractices,
+                correctAnswers: gameState.progress.correctAnswers,
+                totalAnswers: gameState.progress.totalAnswers,
+                studyStartTime: gameState.progress.studyStartTime
+            };
+            localStorage.setItem('cspj-progress', JSON.stringify(progressData));
+        }
+
+        // 加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('cspj-progress');
+            if (saved) {
+                const progressData = JSON.parse(saved);
+                gameState.progress.masteredTopics = new Set(progressData.masteredTopics || []);
+                gameState.progress.completedPractices = progressData.completedPractices || 0;
+                gameState.progress.correctAnswers = progressData.correctAnswers || 0;
+                gameState.progress.totalAnswers = progressData.totalAnswers || 0;
+                gameState.progress.studyStartTime = progressData.studyStartTime || Date.now();
+            }
+            updateProgress();
+        }
+
+        // 暴露全局函数
+        window.switchTab = switchTab;
+        window.showKnowledgeTopic = showKnowledgeTopic;
+        window.markTopicCompleted = markTopicCompleted;
+        window.loadCodeTemplate = loadCodeTemplate;
+        window.runCode = runCode;
+        window.clearCode = clearCode;
+        window.showAlgorithmViz = showAlgorithmViz;
+        window.startVisualization = startVisualization;
+        window.startTest = startTest;
+        window.selectAnswer = selectAnswer;
+        window.nextQuestion = nextQuestion;
+        window.previousQuestion = previousQuestion;
+        window.reviewAnswers = reviewAnswers;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

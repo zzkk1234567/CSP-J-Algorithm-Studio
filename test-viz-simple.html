@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单可视化测试</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">算法可视化测试</h1>
+        
+        <div class="mb-4 flex gap-2">
+            <button onclick="testBubbleSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                测试冒泡排序
+            </button>
+            <button onclick="testQuickSort()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                测试快速排序
+            </button>
+            <button onclick="testBinarySearch()" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                测试二分查找
+            </button>
+        </div>
+        
+        <div id="test-container" class="bg-white rounded-lg shadow-lg p-4"></div>
+        
+        <div id="debug-info" class="mt-4 p-4 bg-yellow-50 rounded-lg">
+            <h3 class="font-bold mb-2">调试信息：</h3>
+            <pre id="debug-output" class="text-sm"></pre>
+        </div>
+    </div>
+
+    <script src="algorithm-visualizer.js"></script>
+    <script>
+        let currentVisualizer = null;
+        
+        function log(message) {
+            const output = document.getElementById('debug-output');
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+        
+        function testBubbleSort() {
+            log('\n=== 测试冒泡排序 ===');
+            try {
+                log('1. 创建SortingVisualizer实例...');
+                currentVisualizer = new SortingVisualizer('test-container', 'bubble');
+                window.visualizer = currentVisualizer;
+                
+                log('2. 调用init()...');
+                currentVisualizer.init();
+                
+                log('3. 设置数据...');
+                currentVisualizer.setData([5, 3, 8, 2, 7, 1, 9, 4, 6]);
+                
+                log('4. 调用reset()生成动画队列...');
+                currentVisualizer.reset();
+                
+                log(`5. 动画队列长度: ${currentVisualizer.animationQueue.length}`);
+                log(`6. 总步数: ${currentVisualizer.state.totalSteps}`);
+                
+                if (currentVisualizer.animationQueue.length > 0) {
+                    log('✅ 可视化器初始化成功！');
+                    log('7. 可以点击"播放"按钮开始演示');
+                } else {
+                    log('❌ 错误：动画队列为空');
+                }
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`);
+                console.error(error);
+            }
+        }
+        
+        function testQuickSort() {
+            log('\n=== 测试快速排序 ===');
+            try {
+                log('1. 创建SortingVisualizer实例...');
+                currentVisualizer = new SortingVisualizer('test-container', 'quick');
+                window.visualizer = currentVisualizer;
+                
+                log('2. 调用init()...');
+                currentVisualizer.init();
+                
+                log('3. 设置数据...');
+                currentVisualizer.setData([5, 3, 8, 2, 7, 1, 9, 4, 6]);
+                
+                log('4. 调用reset()生成动画队列...');
+                currentVisualizer.reset();
+                
+                log(`5. 动画队列长度: ${currentVisualizer.animationQueue.length}`);
+                log(`6. 总步数: ${currentVisualizer.state.totalSteps}`);
+                
+                if (currentVisualizer.animationQueue.length > 0) {
+                    log('✅ 可视化器初始化成功！');
+                } else {
+                    log('❌ 错误：动画队列为空');
+                }
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`);
+                console.error(error);
+            }
+        }
+        
+        function testBinarySearch() {
+            log('\n=== 测试二分查找 ===');
+            try {
+                log('1. 创建SearchVisualizer实例...');
+                currentVisualizer = new SearchVisualizer('test-container', 'binary');
+                window.visualizer = currentVisualizer;
+                
+                log('2. 调用init()...');
+                currentVisualizer.init();
+                
+                log('3. 设置数据...');
+                currentVisualizer.setData([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                
+                log('4. 设置搜索目标...');
+                currentVisualizer.setTarget(7);
+                
+                log('5. 调用reset()生成动画队列...');
+                currentVisualizer.reset();
+                
+                log(`6. 动画队列长度: ${currentVisualizer.animationQueue.length}`);
+                log(`7. 总步数: ${currentVisualizer.state.totalSteps}`);
+                
+                if (currentVisualizer.animationQueue.length > 0) {
+                    log('✅ 可视化器初始化成功！');
+                } else {
+                    log('❌ 错误：动画队列为空');
+                }
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`);
+                console.error(error);
+            }
+        }
+        
+        log('页面加载完成，请点击按钮测试');
+    </script>
+</body>
+</html>

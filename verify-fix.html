@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="algorithm-visualizer.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .failure {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Algorithm Visualizer Verification Test</h1>
+    <div id="test-results"></div>
+    <div id="viz-container" style="margin-top: 20px;"></div>
+
+    <script>
+        const results = [];
+
+        function addResult(test, passed, message) {
+            results.push({ test, passed, message });
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = results.map(r => `
+                <div class="test-result ${r.passed ? 'success' : 'failure'}">
+                    <strong>${r.passed ? '✅' : '❌'} ${r.test}</strong><br>
+                    ${r.message}
+                </div>
+            `).join('');
+        }
+
+        // Test 1: Check if classes are defined
+        addResult(
+            'Classes Loaded',
+            typeof SortingVisualizer === 'function' && typeof SearchVisualizer === 'function',
+            `SortingVisualizer: ${typeof SortingVisualizer}, SearchVisualizer: ${typeof SearchVisualizer}`
+        );
+
+        // Test 2: Create SortingVisualizer instance
+        try {
+            const vizContainer = document.getElementById('viz-container');
+            vizContainer.innerHTML = '<div id="sort-viz"></div>';
+
+            const sortViz = new SortingVisualizer('sort-viz', 'bubble');
+            sortViz.init();
+            sortViz.setData([64, 34, 25, 12, 22, 11, 90]);
+
+            addResult(
+                'SortingVisualizer Creation',
+                true,
+                'Successfully created and initialized SortingVisualizer with bubble sort'
+            );
+
+            // Check if visualization elements exist
+            const vizContent = document.getElementById('sort-viz').querySelector('#viz-content');
+            const controlPanel = document.querySelector('.control-panel');
+            const playButton = document.querySelector('button');
+
+            addResult(
+                'Visualization Elements',
+                !!(vizContent && controlPanel && playButton),
+                `viz-content: ${!!vizContent}, control-panel: ${!!controlPanel}, buttons: ${!!playButton}`
+            );
+
+        } catch (error) {
+            addResult(
+                'SortingVisualizer Creation',
+                false,
+                `Error: ${error.message}`
+            );
+        }
+
+        // Test 3: Create SearchVisualizer instance
+        try {
+            const vizContainer = document.getElementById('viz-container');
+            vizContainer.innerHTML += '<div id="search-viz" style="margin-top: 20px;"></div>';
+
+            const searchViz = new SearchVisualizer('search-viz', 'binary');
+            searchViz.init();
+            searchViz.setData([3, 7, 14, 19, 25, 31, 38, 42, 55]);
+            searchViz.setTarget(25);
+
+            addResult(
+                'SearchVisualizer Creation',
+                true,
+                'Successfully created and initialized SearchVisualizer with binary search'
+            );
+        } catch (error) {
+            addResult(
+                'SearchVisualizer Creation',
+                false,
+                `Error: ${error.message}`
+            );
+        }
+
+        // Summary
+        const total = results.length;
+        const passed = results.filter(r => r.passed).length;
+        const summary = document.createElement('div');
+        summary.style.cssText = 'margin: 20px 0; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 18px;';
+        summary.innerHTML = `<strong>📊 Test Summary: ${passed}/${total} tests passed</strong>`;
+        document.getElementById('test-results').insertBefore(summary, document.getElementById('test-results').firstChild);
+    </script>
+</body>
+
+</html>

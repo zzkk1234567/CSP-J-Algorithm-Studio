@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法页面功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #4f46e5;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 算法页面功能测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 检查必需文件</h2>
+        <button class="test-button" onclick="testFiles()">测试文件加载</button>
+        <div id="file-result" class="result" style="display:none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 检查类定义</h2>
+        <button class="test-button" onclick="testClasses()">测试类定义</button>
+        <div id="class-result" class="result" style="display:none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 测试可视化器</h2>
+        <button class="test-button" onclick="testVisualizer()">测试排序可视化器</button>
+        <button class="test-button" onclick="testSearchVisualizer()">测试搜索可视化器</button>
+        <div id="viz-result" class="result" style="display:none;"></div>
+        <div id="test-container" style="margin-top: 20px;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 打开主页面</h2>
+        <p>如果上述测试都通过，可以打开主页面：</p>
+        <a href="csp-j-optimized.html" class="test-button" style="display:inline-block; text-decoration:none;">
+            打开算法学习页面
+        </a>
+    </div>
+
+    <!-- 加载必需的脚本 -->
+    <script src="version.js"></script>
+    <script src="utils/ConfigManager.js"></script>
+    <script src="utils/ErrorHandler.js"></script>
+    <script src="utils/VisualizerFactory.js"></script>
+    <script src="utils/ProgressTracker.js"></script>
+    <script src="algorithm-visualizer.js"></script>
+    
+    <script>
+        function showResult(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'result ' + type;
+            el.style.display = 'block';
+        }
+        
+        function testFiles() {
+            const files = [
+                'version.js',
+                'utils/ConfigManager.js',
+                'utils/ErrorHandler.js',
+                'utils/VisualizerFactory.js',
+                'utils/ProgressTracker.js',
+                'algorithm-visualizer.js'
+            ];
+            
+            let result = '文件加载检查:\n';
+            let allLoaded = true;
+            
+            files.forEach(file => {
+                // 简单检查：如果脚本标签存在，认为已加载
+                const loaded = document.querySelector(`script[src="${file}"]`) !== null;
+                result += `${loaded ? '✅' : '❌'} ${file}\n`;
+                if (!loaded) allLoaded = false;
+            });
+            
+            showResult('file-result', result, allLoaded ? 'success' : 'error');
+        }
+        
+        function testClasses() {
+            const classes = [
+                'SortingVisualizer',
+                'SearchVisualizer',
+                'GraphVisualizer',
+                'ProgressTracker',
+                'ConfigManager',
+                'ErrorHandler',
+                'VisualizerFactory'
+            ];
+            
+            let result = '类定义检查:\n';
+            let allDefined = true;
+            
+            classes.forEach(className => {
+                const defined = typeof window[className] !== 'undefined';
+                result += `${defined ? '✅' : '❌'} ${className}: ${typeof window[className]}\n`;
+                if (!defined) allDefined = false;
+            });
+            
+            showResult('class-result', result, allDefined ? 'success' : 'error');
+        }
+        
+        function testVisualizer() {
+            try {
+                const container = document.getElementById('test-container');
+                container.innerHTML = '<div id="test-viz" style="min-height:300px;"></div>';
+                
+                setTimeout(() => {
+                    try {
+                        const viz = new SortingVisualizer('test-viz', 'bubble');
+                        viz.init();
+                        viz.setData([5, 3, 8, 2, 7]);
+                        
+                        showResult('viz-result', 
+                            '✅ 排序可视化器创建成功！\n可以在下方看到可视化界面。', 
+                            'success');
+                    } catch (error) {
+                        showResult('viz-result', 
+                            '❌ 创建可视化器失败:\n' + error.message, 
+                            'error');
+                    }
+                }, 100);
+            } catch (error) {
+                showResult('viz-result', 
+                    '❌ 测试失败:\n' + error.message, 
+                    'error');
+            }
+        }
+        
+        function testSearchVisualizer() {
+            try {
+                const container = document.getElementById('test-container');
+                container.innerHTML = '<div id="test-search" style="min-height:300px;"></div>';
+                
+                setTimeout(() => {
+                    try {
+                        const viz = new SearchVisualizer('test-search', 'binary');
+                        viz.init();
+                        viz.setData([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                        viz.setTarget(7);
+                        
+                        showResult('viz-result', 
+                            '✅ 搜索可视化器创建成功！\n可以在下方看到可视化界面。', 
+                            'success');
+                    } catch (error) {
+                        showResult('viz-result', 
+                            '❌ 创建可视化器失败:\n' + error.message, 
+                            'error');
+                    }
+                }, 100);
+            } catch (error) {
+                showResult('viz-result', 
+                    '❌ 测试失败:\n' + error.message, 
+                    'error');
+            }
+        }
+        
+        // 页面加载时自动运行基本测试
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('测试页面加载完成');
+            setTimeout(() => {
+                testFiles();
+                setTimeout(() => {
+                    testClasses();
+                }, 500);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
