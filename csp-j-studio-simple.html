@@ -148,7 +148,11 @@
                                 class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-bold transition flex items-center gap-2">
                                 <span>↺</span> 重置
                             </button>
-                            <div class="h-8 w-px bg-gray-300 mx-2"></div>
+                            <button onclick="toggleVoiceControl(this)" id="btn-voice"
+                                class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg font-bold transition flex items-center gap-2 border border-purple-200">
+                                <span>🔇</span> 语音
+                            </button>
+<div class="h-8 w-px bg-gray-300 mx-2"></div>
                             <div id="viz-status" class="text-gray-700 font-mono text-sm flex-1 font-semibold">
                                 准备就绪...
                             </div>
@@ -206,10 +210,40 @@
                 this.delay = 800; // Slower for better visibility
                 this.isRunning = false;
                 this.abortController = null;
+                this.voiceEnabled = false;
+                this.synth = window.speechSynthesis;
             }
 
             log(msg) {
                 this.status.innerHTML = msg;
+                if (this.voiceEnabled) {
+                    this.speak(msg);
+                }
+            }
+
+            toggleVoice() {
+                this.voiceEnabled = !this.voiceEnabled;
+                return this.voiceEnabled;
+            }
+
+            speak(text, shouldCancel = true) {
+                if (!this.synth || !this.voiceEnabled) return;
+                if (shouldCancel) this.synth.cancel();
+                const cleanText = text
+                    .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/gu, '')
+                    .replace(/[\[\]]/g, ' ')
+                    .replace(/arr/g, '数组')
+                    .replace(/idx/g, '索引')
+                    .replace(/min_idx/g, '最小索引')
+                    .replace(/=/g, '等于')
+                    .replace(/>/g, '大于')
+                    .replace(/</g, '小于')
+                    .replace(/\+/g, '加')
+                    .replace(/-/g, '减');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 1.1;
+                this.synth.speak(utterance);
             }
 
             async wait() {
@@ -335,6 +369,10 @@
                     type: 'sort',
                     difficulty: '⭐⭐',
                     desc: '💡 像气泡上浮一样,每次将最大元素"冒泡"到末尾 | ⏱️ O(n²) 💾 O(1) | 🏷️ 稳定排序、入门级',
+                    voice: {
+                        intro: '冒泡排序是一种简单的排序算法。它重复地走访过要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。',
+                        codeExplanation: '代码主要包含两个循环。外层循环控制排序的轮数，内层循环负责比较相邻元素并进行交换。'
+                    },
                     code: `void bubbleSort(int arr[], int n) {
     // 外层循环控制排序轮数
     for (int i = 0; i < n - 1; i++) {
@@ -356,6 +394,10 @@
                     type: 'sort',
                     difficulty: '⭐⭐',
                     desc: '🎯 每轮选出最小值放到已排序区域末尾 | ⏱️ O(n²) 💾 O(1) | 🏷️ 不稳定、交换次数少',
+                    voice: {
+                        intro: '选择排序是一种简单直观的排序算法。它的工作原理是每一次从待排序的数据元素中选出最小的一个元素，存放在序列的起始位置。',
+                        codeExplanation: '代码首先假设当前位置是最小值，然后遍历剩余未排序部分寻找真正的最小值，最后将其与当前位置交换。'
+                    },
                     code: `void selectionSort(int arr[], int n) {
     for (int i = 0; i < n - 1; i++) {
         // 假设当前位置 i 是最小值索引
@@ -379,6 +421,10 @@
                     type: 'sort',
                     difficulty: '⭐⭐',
                     desc: '🃏 像整理扑克牌一样,将元素插入到已排序序列的正确位置 | ⏱️ O(n²) 💾 O(1) | 🏷️ 稳定排序',
+                    voice: {
+                        intro: '插入排序是一种简单直观的排序算法。它的工作原理是通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。',
+                        codeExplanation: '代码从第二个元素开始，将其作为待插入元素，与前面的有序序列进行比较，将大于它的元素后移，直到找到合适的位置插入。'
+                    },
                     code: `void insertionSort(int arr[], int n) {
     for (int i = 1; i < n; i++) {
         int key = arr[i]; // 待插入元素
@@ -400,6 +446,10 @@
                     type: 'sort',
                     difficulty: '⭐⭐⭐⭐',
                     desc: '🚀 分治策略经典应用,选基准分区递归排序 | ⏱️ O(n log n) 💾 O(log n) | 🏷️ 不稳定、平均最优',
+                    voice: {
+                        intro: '快速排序使用分治法策略来把一个串行分为两个子串行。本质上看，快速排序应该算是在冒泡排序基础上的递归分治法。',
+                        codeExplanation: '代码首先选择一个基准元素，然后通过分区操作将小于基准的元素移到左边，大于基准的移到右边，最后递归地对左右两部分进行排序。'
+                    },
                     code: `void quickSort(int arr[], int low, int high) {
     if (low < high) {
         int pivot = arr[high];
@@ -423,6 +473,10 @@
                     type: 'sort',
                     difficulty: '⭐⭐⭐⭐',
                     desc: '🔀 分治策略,分解递归合并 | ⏱️ O(n log n) 💾 O(n) | 🏷️ 稳定排序、性能稳定',
+                    voice: {
+                        intro: '归并排序是建立在归并操作上的一种有效的排序算法。该算法是采用分治法的一个非常典型的应用。',
+                        codeExplanation: '代码首先将数组递归地分成两半，直到每个子数组只有一个元素，然后将这些有序的子数组两两合并，最终得到有序数组。'
+                    },
                     code: `void mergeSort(int arr[], int l, int r) {
     if (l < r) {
         int m = l + (r - l) / 2;
@@ -438,6 +492,10 @@
                     type: 'search',
                     difficulty: '⭐',
                     desc: '🔍 从头到尾逐个检查,最简单直接的查找方法 | ⏱️ O(n) 💾 O(1) | 🏷️ 无序数据适用',
+                    voice: {
+                        intro: '线性查找是最简单的查找算法。它从数组的第一个元素开始，逐个检查每个元素，直到找到目标值或遍历完整个数组。',
+                        codeExplanation: '代码使用一个循环遍历数组，如果当前元素等于目标值，则返回其索引；如果循环结束仍未找到，则返回负一。'
+                    },
                     code: `int linearSearch(int arr[], int n, int x) {
     for (int i = 0; i < n; i++) {
         if (arr[i] == x) {
@@ -453,6 +511,10 @@
                     type: 'search',
                     difficulty: '⭐⭐⭐',
                     desc: '⚡ 在有序数组中每次排除一半元素,快速定位目标 | ⏱️ O(log n) 💾 O(1) | 🏷️ 有序数据、效率极高',
+                    voice: {
+                        intro: '二分查找也称折半查找，是一种在有序数组中查找特定元素的搜索算法。每次比较都使搜索范围缩小一半。',
+                        codeExplanation: '代码使用while循环，每次计算中间位置。如果中间元素是目标值则返回；如果目标值较小，则在左半部分继续查找；否则在右半部分查找。'
+                    },
                     code: `int binarySearch(int arr[], int l, int r, int x) {
     while (l <= r) {
         int m = l + (r - l) / 2;
@@ -469,6 +531,10 @@
                     type: 'basic',
                     difficulty: '⭐⭐',
                     desc: '🔄 函数调用自身解决问题,计算阶乘 | ⏱️ O(n) 💾 O(n) | 🏷️ 递归基础、数学计算',
+                    voice: {
+                        intro: '递归算法通过函数调用自身来解决问题。这里演示计算阶乘。',
+                        codeExplanation: '代码处理基准情况n小于等于1时返回1，否则返回n乘以n减1的阶乘。'
+                    },
                     code: `int factorial(int n) {
     if (n <= 1) return 1;
     return n * factorial(n - 1);
@@ -480,6 +546,10 @@
                     type: 'basic',
                     difficulty: '⭐⭐⭐',
                     desc: '➡️ 从已知推导未知,F(n) = F(n-1) + F(n-2) | ⏱️ O(n) 💾 O(1) | 🏷️ DP基础',
+                    voice: {
+                        intro: '递推算法是从已知的初始条件出发，逐次推出所求计算结果。这里演示斐波那契数列。',
+                        codeExplanation: '代码使用循环，利用前两项的和计算当前项，直到计算出第n项。'
+                    },
                     code: `int fibonacci(int n) {
     if (n <= 1) return n;
     int prev2 = 0, prev1 = 1, current;
@@ -497,6 +567,10 @@
                     type: 'basic',
                     difficulty: '⭐⭐⭐',
                     desc: '💰 每步选择当前最优解,用最少硬币数找零 | ⏱️ O(n) 💾 O(1) | 🏷️ 局部最优',
+                    voice: {
+                        intro: '贪心算法是一种在每一步选择中都采取在当前状态下最好或最优的选择，从而希望导致结果是全局最好或最优的算法。',
+                        codeExplanation: '代码优先选择面额最大的硬币，只要当前金额大于等于硬币面额就使用该硬币，直到找零完成。'
+                    },
                     code: `int coinChange(int coins[], int n, int amount) {
     int count = 0;
     for (int i = n - 1; i >= 0; i--) {
@@ -514,6 +588,10 @@
                     type: 'basic',
                     difficulty: '⭐⭐⭐',
                     desc: '⚡ 预处理前缀和,快速计算任意区间和 | ⏱️ O(1)查询 💾 O(n) | 🏷️ 区间查询优化',
+                    voice: {
+                        intro: '前缀和是一种预处理算法。通过计算数组的前缀和，可以快速求出数组中任意连续子数组的和。',
+                        codeExplanation: '代码首先构建前缀和数组，其中第i个元素存储原数组前i个元素的和。之后可以通过两个前缀和相减快速计算区间和。'
+                    },
                     code: `void buildPrefixSum(int arr[], int prefix[], int n) {
     prefix[0] = arr[0];
     for (int i = 1; i < n; i++) {
@@ -532,6 +610,10 @@ int rangeSum(int prefix[], int l, int r) {
                     type: 'dp',
                     difficulty: '⭐⭐⭐',
                     desc: '🪜 爬楼梯问题,dp[i] = dp[i-1] + dp[i-2] | ⏱️ O(n) 💾 O(1) | 🏷️ DP入门',
+                    voice: {
+                        intro: '动态规划是一种通过把原问题分解为相对简单的子问题的方式求解复杂问题的方法。这里演示爬楼梯问题。',
+                        codeExplanation: '代码定义状态dp[i]表示到达第i级台阶的方法数。状态转移方程为dp[i]等于dp[i-1]加上dp[i-2]。'
+                    },
                     code: `int climbStairs(int n) {
     if (n <= 2) return n;
     int prev2 = 1, prev1 = 2, current;
@@ -595,6 +677,11 @@ int rangeSum(int prefix[], int l, int r) {
                     viz.mode = 'search';
                 }
                 viz.log(`已加载 ${this.currentAlgo.name}，点击运行开始演示`);
+                if (viz.voiceEnabled && this.currentAlgo.voice) {
+                    window.speechSynthesis.cancel();
+                    viz.speak(this.currentAlgo.voice.intro, false);
+                    viz.speak(this.currentAlgo.voice.codeExplanation, false);
+                }
 
                 // Attach specific start function
                 viz.start = async () => {
@@ -1203,6 +1290,25 @@ int rangeSum(int prefix[], int l, int r) {
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
+    </script>
+
+    <script>
+        function toggleVoiceControl(btn) {
+            if (!window.viz) return;
+            const enabled = viz.toggleVoice();
+            const span = btn.querySelector('span');
+            if (enabled) {
+                span.innerText = '🔊';
+                btn.classList.remove('bg-purple-100', 'text-purple-700', 'hover:bg-purple-200');
+                btn.classList.add('bg-purple-600', 'text-white', 'hover:bg-purple-700');
+                viz.speak("语音解说已开启");
+            } else {
+                span.innerText = '🔇';
+                btn.classList.remove('bg-purple-600', 'text-white', 'hover:bg-purple-700');
+                btn.classList.add('bg-purple-100', 'text-purple-700', 'hover:bg-purple-200');
+                window.speechSynthesis.cancel();
+            }
+        }
     </script>
 </body>
 
