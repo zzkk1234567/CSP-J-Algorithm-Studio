@@ -8,10 +8,12 @@
 # Temporary Scripts
 temp-*
 *.ps1
+!start_auto_backup.ps1
 *.py
 *.bat
 !setup_github.bat
 !sync_github.bat
+!auto_save.bat
 
 # Logs
 *.log
